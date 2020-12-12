@@ -1,32 +1,39 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <title>My resume Website</title>
+        <link rel = "stylesheet" href = "style.css">
     </head>
     <body>
-        <header>
-            <h1>Yunkun(Ricky) Lu</h1>
-        </header>
-        <section><p> <a href= "https://github.com/PaperbagLife"><img src = "images/github.png" width = "40" height = "40"></a></p></section>
-        <section>
-            <p>Carnegie Mellon University (2018 - 2022)</p>
-            <img src="images/dp.jpg" width = "200" height = "200" alt = "Me irl jk xd">
-            <p><b>Contact: </b>rickylu1108@gmail.com</p>
-            <p>I am a Junior studying Compter Science. My CV can be found <a href="docs/Lu-Yunkun.pdf">here</a></p>
-            
-        </section>
-        <hr>
-        <section>
-            <p><b>Research:</b></p>
-            <p>I am broadly interested in computer vision and speech recognition.</p>
-            <ul>
-                <li><b>Evaluating the Validity of Automatic Speech Recognition
-                    Technologies for Online Medical Counseling</b></li>
-            </ul>
-        </section>
-
-        <section>
-            <a HREF="pages/coursework.html">Coursework</a>
-        </section>
-
+        <div class = "container">
+            <div class = "menu">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="pages/coursework.html">Coursework</a></li>
+                    <li><a href="docs/Lu-Yunkun.pdf">Resume</a></li>
+                </ul>
+            </div>
+            <div class = "banner">
+                <div class = "description">
+                    <h1>Yunkun (Ricky) Lu</h1>
+                    <hr>
+                    <p>I am a third year undergraduate student in the Computer Science Department at Carnegie Mellon University. 
+                        I am broadly interested in computer vision applications and speech recognition.
+                        I have attended many hackathons and developed a handful of games. <br>
+                        You can see my resume <a href="docs/Lu-Yunkun.pdf">here</a>.<br>
+                        <b>Contact:</b> yunkunL@andrew.cmu.edu
+                    </p>
+                    <p>
+                        Research:
+                    </p>
+                    <ul>
+                        <li>Evaluating the Validity of Automatic Speech Recognition Technologies for Online Medical Counseling</li>
+                    </ul>
+                </div>
+                <div class = "profile-pic">
+                    <img src = "images/dp.jpg" >
+                </div>
+            </div>
+        </div>
     </body>
 </html>
