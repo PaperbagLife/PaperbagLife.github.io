@@ -100,7 +100,6 @@
 }
 
 #home .content{
-  margin-top: 10%;
   width: 100%;
   color: #000;
 }
@@ -133,6 +132,9 @@
     margin-top: 100px;
     margin-left: 5%;
     margin-right: 5%;
+  }
+  #home .content{
+    margin-top: 10%;
   }
 }
 
