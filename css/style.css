@@ -118,11 +118,22 @@
 .projects{
   margin-top: 100px;
   line-height: 150%;
-  margin-left: 30%;
-  margin-right: 30%;
+  margin-left: 100px;
+  margin-right: 100px;
+}
+.projects:after{
+  content: "";
+  display: table;
+  clear: both;
 }
 
-@media screen and (max-width: 800px) {
+.column {
+  float: left;
+  width: 45%;
+  margin-right:5%;
+}
+
+@media screen and (max-width: 1000px) {
   .courses {
     margin-top: 100px;
     margin-left: 10%;
@@ -135,6 +146,9 @@
   }
   #home .content{
     margin-top: 20%;
+  }
+  .column {
+    width: 100%;
   }
 }
 
