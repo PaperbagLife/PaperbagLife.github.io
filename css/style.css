@@ -151,6 +151,9 @@
     width: 100%;
   }
 }
+.sm {
+  margin-top: 20px;
+}
 
 .sm a{
   color: #6cf;
@@ -164,7 +167,7 @@
 }
 
 #home .buttons{
-  margin-top: 60px;
+  margin-top: 10px;
 }
 
 #home .buttons a{
