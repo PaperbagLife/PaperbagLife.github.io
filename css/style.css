@@ -170,6 +170,12 @@
   margin-top: 10px;
 }
 
+.title {
+  margin-top: -30px;
+}
+
+
+
 #home .buttons a{
   display: inline-block;
   margin: 15px 30px;
