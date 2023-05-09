@@ -4,7 +4,7 @@ import coupletroubleUrl from '../assets/img/couple_trouble.png'
 import cvshooterUrl from '../assets/img/cv_shooter.png'
 import mobaUrl from '../assets/img/moba.png'
 import shopsimUrl from '../assets/img/Shopsim.png'
-const { type } = useBreakpoints()
+const { width, type } = useBreakpoints()
 </script>
 
 <template>

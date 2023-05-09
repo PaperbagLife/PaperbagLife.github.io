@@ -12,7 +12,7 @@ export const useBreakpoints = () => {
   onUnmounted(() => window.removeEventListener('resize', onWidthChange))
 
   const type = computed(() => {
-    if (windowWidth.value > windowHeight.value) return 'xs'
+    if (windowWidth.value < windowHeight.value) return 'xs'
     return 'md'
   })
 

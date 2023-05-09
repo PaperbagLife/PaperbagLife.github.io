@@ -12,10 +12,10 @@ const { type } = useBreakpoints()
         <div class="col-auto">
           <img :src="dpUrl" width="250" height="250" />
         </div>
-        <div class="col-auto">
+        <div class="col-auto mw-90">
           <div :class="type === 'xs' ? 'col text-center' : ''">
-            <h1 :class="type === 'xs' ? '' : ''">Yunkun (Ricky) Lu</h1>
-            <h2 :class="type === 'xs' ? '' : ''">Software Engineer</h2>
+            <h1>Yunkun (Ricky) Lu</h1>
+            <h2>Software Engineer</h2>
             <a class="btn button px-4 mr-3" :class="type === 'xs' ? '' : ''" :href="resumeUrl">
               Resume </a
             ><a href="https://www.linkedin.com/in/yunkun-lu/"
@@ -42,8 +42,10 @@ const { type } = useBreakpoints()
 </template>
 
 <style>
+.mw-90 {
+  max-width: 90%;
+}
 .bio-xs {
-  max-width: 64%;
   margin-left: auto;
   margin-right: auto;
 }
