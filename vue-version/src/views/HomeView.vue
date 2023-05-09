@@ -16,10 +16,19 @@ const { type } = useBreakpoints()
           <div :class="type === 'xs' ? 'col text-center' : ''">
             <h1 :class="type === 'xs' ? '' : ''">Yunkun (Ricky) Lu</h1>
             <h2 :class="type === 'xs' ? '' : ''">Software Engineer</h2>
-            <div class="btn button px-4" :class="type === 'xs' ? '' : ''">
-              <div :href="resumeUrl">Resume</div>
-            </div>
+            <a class="btn button px-4 mr-3" :class="type === 'xs' ? '' : ''" :href="resumeUrl">
+              Resume </a
+            ><a href="https://www.linkedin.com/in/yunkun-lu/"
+              ><i class="mx-1 fa-icon fa fa-linkedin fa-lg"></i
+            ></a>
+            <a href="https://github.com/PaperbagLife"
+              ><i class="mx-1 fa-icon fa fa-github fa-lg"></i
+            ></a>
+            <a href="https://www.youtube.com/c/PaperbagLife"
+              ><i class="mx-1 fa-icon fa fa-youtube fa-lg"></i
+            ></a>
           </div>
+
           <div :class="type === 'xs' ? 'bio-xs' : ''">
             I obtained an undergraduate degree from Carnegie Mellon University. <br />
             I have attended many hackathons and developed a handful of games.<br />
@@ -40,6 +49,9 @@ const { type } = useBreakpoints()
 }
 .button {
   border: 2px solid #66ccff;
+  color: #66ccff;
+}
+.fa-icon {
   color: #66ccff;
 }
 </style>
