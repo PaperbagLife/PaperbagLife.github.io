@@ -1,14 +1,18 @@
-import { computed, onMounted, onUnmounted, ref } from "vue"
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 
 export const useBreakpoints = () => {
   const windowWidth = ref(window.innerWidth)
+  const windowHeight = ref(window.innerHeight)
 
-  const onWidthChange = () => windowWidth.value = window.innerWidth
+  const onWidthChange = () => {
+    windowWidth.value = window.innerWidth
+    windowHeight.value = window.innerHeight
+  }
   onMounted(() => window.addEventListener('resize', onWidthChange))
   onUnmounted(() => window.removeEventListener('resize', onWidthChange))
-  
+
   const type = computed(() => {
-    if (windowWidth.value < 550) return 'xs'
+    if (windowWidth.value > windowHeight.value) return 'xs'
     return 'md'
   })
 
