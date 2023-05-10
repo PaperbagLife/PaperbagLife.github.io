@@ -14,7 +14,7 @@ const playerBulletSpeed = 1.3
 const playerInvulInterval = 80
 let playerAttackCounter = 0
 
-const enemySpawnInterval = 300
+let enemySpawnInterval = 300
 let enemySpawnTimer = 0
 type Player = {
   x: number
@@ -167,13 +167,14 @@ function handleEnemy() {
       width: randomWidth,
       height: 20 + Math.random() * 10,
       ySpeed: 0.5 + Math.random() * 0.6,
-      hp: 3,
+      hp: 3 + Math.floor(Math.random() * 2),
       color: Math.random() > 0.5 ? '#a0d8b3' : '#9384d1',
       attackCounter: 0,
-      attackInterval: 50 + Math.random() * 30
+      attackInterval: 60 + Math.random() * 30
     }
     liveEnemies.value.push(randomEnemy)
     enemySpawnTimer = 0
+    enemySpawnInterval = 250 + 200 * Math.random()
   }
   // Move enemy
   liveEnemies.value.forEach((enemy, i) => {
