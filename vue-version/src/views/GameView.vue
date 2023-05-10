@@ -3,13 +3,24 @@ import { useBreakpoints } from '../util/dimensions'
 import { onMounted, ref, onUnmounted, watch } from 'vue'
 const { type } = useBreakpoints()
 
+const live = ref(true)
+const gameOver = ref(false)
+
 const playerWidth = 20
 const playerHeight = 30
 const playerSpeed = 1
+const playerAttackInterval = 40
+const playerBulletSpeed = 1.3
+const playerInvulInterval = 80
+let playerAttackCounter = 0
+
+const enemySpawnInterval = 300
+let enemySpawnTimer = 0
 type Player = {
   x: number
   y: number
   hp: number
+  invulTimer: number
 }
 
 type Canvas = {
@@ -17,15 +28,43 @@ type Canvas = {
   height: number
 }
 
+type Enemy = {
+  x: number
+  y: number
+  ySpeed: number
+  hp: number
+  width: number
+  height: number
+  color: string
+  attackInterval: number
+  attackCounter: number
+}
+
+type Bullet = {
+  x: number
+  y: number
+  xVel: number
+  yVel: number
+  color: string
+  timestamp: number
+}
+
+// Objects in game
+const liveEnemies = ref<Enemy[]>([])
+const playerBullets = ref<Bullet[]>([])
+const enemyBullets = ref<Bullet[]>([])
+
+let playerScore = 0
+
 const canvas: Canvas = { width: 300, height: 400 }
 
 const player = ref<Player>({
   x: (canvas.width - playerWidth) / 2,
   y: canvas.height - playerHeight - 10,
-  hp: 5
+  hp: 5,
+  invulTimer: 0
 })
 
-const live = ref(true)
 type ControlsPressed = {
   up: boolean
   down: boolean
@@ -36,8 +75,10 @@ const controlsPressed = ref<ControlsPressed>({ up: false, down: false, left: fal
 const controlKeys = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd'])
 
 function onKeyDown(event: KeyboardEvent) {
-  console.log('event ahppening', event)
-  if (event.key in controlKeys) {
+  if (event.key === ' ') {
+    live.value = !live.value
+  }
+  if (controlKeys.has(event.key)) {
     event.preventDefault()
   }
   if (event.key === 'ArrowUp' || event.key === 'w') {
@@ -55,7 +96,7 @@ function onKeyDown(event: KeyboardEvent) {
 }
 
 function onKeyUp(event: KeyboardEvent) {
-  if (event.key in controlKeys) {
+  if (controlKeys.has(event.key)) {
     event.preventDefault()
   }
   if (event.key === 'ArrowUp' || event.key === 'w') {
@@ -72,7 +113,7 @@ function onKeyUp(event: KeyboardEvent) {
   }
 }
 
-function update() {
+function handlePlayerMove() {
   if (controlsPressed.value.up && player.value.y - playerSpeed > 0) {
     player.value.y -= playerSpeed
   }
@@ -87,6 +128,152 @@ function update() {
   }
 }
 
+function takeDamage() {
+  if (player.value.invulTimer > 0) {
+    return
+  }
+  player.value.hp -= 1
+  player.value.invulTimer = playerInvulInterval
+}
+
+function handlePlayerUpdate() {
+  //Attack
+  playerAttackCounter += 1
+  if (playerAttackCounter > playerAttackInterval) {
+    playerAttackCounter = 0
+    playerBullets.value.push({
+      x: player.value.x + playerWidth / 2,
+      y: player.value.y,
+      xVel: 0,
+      yVel: -playerBulletSpeed,
+      color: 'blue',
+      timestamp: Date.now()
+    })
+  }
+  if (player.value.invulTimer > 0) {
+    player.value.invulTimer -= 1
+  }
+}
+
+function handleEnemy() {
+  // Spawn enemy?
+  enemySpawnTimer += 1
+  if (enemySpawnTimer >= enemySpawnInterval) {
+    console.log('spawning enemy')
+    const randomWidth = 20 + Math.random() * 10
+    const randomEnemy: Enemy = {
+      x: Math.max(randomWidth, Math.min(Math.random() * canvas.width, canvas.width - randomWidth)),
+      y: -20,
+      width: randomWidth,
+      height: 20 + Math.random() * 10,
+      ySpeed: 0.5 + Math.random() * 0.6,
+      hp: 3,
+      color: Math.random() > 0.5 ? 'green' : 'purple',
+      attackCounter: 0,
+      attackInterval: 50 + Math.random() * 30
+    }
+    liveEnemies.value.push(randomEnemy)
+    enemySpawnTimer = 0
+  }
+  // Move enemy
+  liveEnemies.value.forEach((enemy, i) => {
+    const deadEnemy = new Set<number>()
+    enemy.y += enemy.ySpeed
+    enemy.attackCounter += 1
+    if (enemy.attackCounter >= enemy.attackInterval) {
+      const deltaX = player.value.x + playerWidth / 2 - (enemy.x + enemy.width / 2)
+      const deltaY = player.value.y - (enemy.y + enemy.height)
+      const hypo = Math.hypot(deltaX, deltaY)
+      enemyBullets.value.push({
+        x: enemy.x + enemy.width / 2,
+        y: enemy.y + enemy.height,
+        xVel: (deltaX / hypo) * playerBulletSpeed,
+        yVel: (deltaY / hypo) * playerBulletSpeed,
+        timestamp: Date.now(),
+        color: 'red'
+      })
+      enemy.attackCounter = 0
+    }
+    if (enemy.hp <= 0) {
+      deadEnemy.add(i)
+      playerScore += 1
+    }
+    if (enemy.y > canvas.height) {
+      deadEnemy.add(i)
+    }
+    liveEnemies.value = liveEnemies.value.filter((_, i) => !deadEnemy.has(i))
+  })
+}
+
+function collides(x: number, y: number, width: number, height: number, bullet: Bullet) {
+  if (y + height > bullet.y - 1 && y < bullet.y + 1) {
+    // check for x:
+    if (x + width > bullet.x - 1 && x < bullet.x + 1) {
+      return true
+    }
+  }
+  return false
+}
+
+function handlePlayerBullets() {
+  const deadBulletIdx = new Set<number>()
+  playerBullets.value.forEach((bullet, i) => {
+    bullet.x += bullet.xVel
+    bullet.y += bullet.yVel
+    if (bullet.x < 0 || bullet.x > canvas.width || bullet.y < 0 || bullet.y > canvas.height) {
+      deadBulletIdx.add(i)
+      return
+    }
+    // Also handle collision
+    liveEnemies.value.forEach((enemy) => {
+      if (collides(enemy.x, enemy.y, enemy.width, enemy.height, bullet)) {
+        deadBulletIdx.add(i)
+        enemy.hp -= 1
+      }
+    })
+  })
+  playerBullets.value = playerBullets.value.filter((_, i) => !deadBulletIdx.has(i))
+}
+
+function handleEnemyBullets() {
+  const deadBulletIdx = new Set()
+  enemyBullets.value.forEach((bullet, i) => {
+    bullet.x += bullet.xVel
+    bullet.y += bullet.yVel
+    if (bullet.x < 0 || bullet.x > canvas.width || bullet.y < 0 || bullet.y > canvas.height) {
+      deadBulletIdx.add(i)
+    }
+    if (collides(player.value.x, player.value.y, playerWidth, playerHeight, bullet)) {
+      takeDamage()
+      deadBulletIdx.add(i)
+    }
+  })
+  enemyBullets.value = enemyBullets.value.filter((_, i) => !deadBulletIdx.has(i))
+}
+
+function update() {
+  handlePlayerMove()
+  handlePlayerUpdate()
+  handleEnemy()
+  handlePlayerBullets()
+  handleEnemyBullets()
+}
+
+function resetGame() {
+  player.value = {
+    x: (canvas.width - playerWidth) / 2,
+    y: canvas.height - playerHeight - 10,
+    hp: 5,
+    invulTimer: 0
+  }
+  playerScore = 0
+  live.value = true
+  gameOver.value = false
+  liveEnemies.value = []
+  playerBullets.value = []
+  enemyBullets.value = []
+}
+
 let updateHandler = ref<number | null>(null)
 watch(live, () => {
   if (!live.value) {
@@ -96,6 +283,16 @@ watch(live, () => {
     updateHandler.value = setInterval(update, 10)
   }
 })
+
+watch(
+  () => player.value.hp,
+  (hp) => {
+    if (hp <= 0) {
+      live.value = false
+      gameOver.value = true
+    }
+  }
+)
 
 onMounted(() => {
   window.addEventListener('keydown', onKeyDown)
@@ -112,20 +309,60 @@ onUnmounted(() => {
 
 <template>
   <main :class="type">
+    <div class="col d-flex justify-content-center player-score">
+      Player Score: {{ playerScore }} Player HP: {{ player.hp }}
+    </div>
+    <div class="col d-flex justify-content-center">
+      <button v-if="gameOver" @click="resetGame" @touchend="resetGame" class="btn btn-dark">
+        Game Over! Start again?
+      </button>
+    </div>
+
     <div class="col d-flex justify-content-center">
       <div class="game-viewport">
         <svg :height="canvas.height" :width="canvas.width">
+          <!--Player related-->
           <rect
             class="player"
+            :class="player.invulTimer > 0 ? 'invulnerable' : ''"
             :x="player.x"
             :y="player.y"
             :width="playerWidth"
             :height="playerHeight"
           ></rect>
+          <circle
+            class="player-bullets"
+            v-for="bullet in playerBullets"
+            :key="`${bullet.timestamp}+${bullet.color}`"
+            :style="{ '--color': bullet.color }"
+            :cx="bullet.x"
+            :cy="bullet.y"
+            :r="2"
+          ></circle>
+          <!--Enemy Related-->
+          <rect
+            v-for="enemy in liveEnemies"
+            :key="`${enemy.height} + ${enemy.width}`"
+            :style="{ '--color': enemy.color }"
+            class="enemy"
+            :x="enemy.x"
+            :y="enemy.y"
+            :width="enemy.width"
+            :height="enemy.height"
+          ></rect>
+          <circle
+            class="player-bullets"
+            v-for="bullet in enemyBullets"
+            :key="`${bullet.timestamp}+${bullet.color}`"
+            :style="{ '--color': bullet.color }"
+            :cx="bullet.x"
+            :cy="bullet.y"
+            :r="2"
+          ></circle>
         </svg>
       </div>
     </div>
-    <div class="col controls">
+    <div class="col mt-2 controls">
       <div class="row d-flex justify-content-center">
         <div
           @mousedown="controlsPressed.up = true"
@@ -143,7 +380,7 @@ onUnmounted(() => {
           @mouseup="controlsPressed.left = false"
           @touchstart.prevent="controlsPressed.left = true"
           @touchend.prevent="controlsPressed.left = false"
-          class="mx-3 justify-content-center align-items-center d-flex material-icons-outlined"
+          class="mx-5 justify-content-center align-items-center d-flex material-icons-outlined"
         >
           chevron_left
         </div>
@@ -152,7 +389,7 @@ onUnmounted(() => {
           @mouseup="controlsPressed.right = false"
           @touchstart.prevent="controlsPressed.right = true"
           @touchend.prevent="controlsPressed.right = false"
-          class="mx-3 justify-content-center align-items-center d-flex material-icons-outlined"
+          class="mx-5 justify-content-center align-items-center d-flex material-icons-outlined"
         >
           chevron_right
         </div>
@@ -173,14 +410,20 @@ onUnmounted(() => {
 </template>
 
 <style>
+.player-bullets {
+  fill: var(--color);
+}
+.enemy {
+  fill: var(--color);
+}
 .controls .material-icons-outlined {
   cursor: pointer;
   user-select: none;
   border: 1px solid #66ccff;
   border-radius: 50%;
-  width: 30px;
-  font-size: 30px;
-  height: 30px;
+  width: 50px;
+  height: 50px;
+  font-size: 50px;
 }
 .game-viewport {
   background-color: black;
@@ -191,5 +434,9 @@ onUnmounted(() => {
 }
 .player {
   fill: white;
+}
+.player.invulnerable {
+  stroke: gold;
+  stroke-width: 3px;
 }
 </style>
