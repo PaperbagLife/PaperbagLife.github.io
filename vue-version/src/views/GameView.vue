@@ -346,16 +346,30 @@ onUnmounted(() => {
             :r="2"
           ></circle>
           <!--Enemy Related-->
-          <rect
+          <text x="10" y="10">hi</text>
+          <g
             v-for="enemy in liveEnemies"
             :key="`${enemy.height} + ${enemy.width}`"
-            :style="{ '--color': enemy.color }"
-            class="enemy"
             :x="enemy.x"
             :y="enemy.y"
-            :width="enemy.width"
-            :height="enemy.height"
-          ></rect>
+          >
+            <rect
+              :style="{ '--color': enemy.color }"
+              class="enemy"
+              :width="enemy.width"
+              :height="enemy.height"
+              :x="enemy.x"
+              :y="enemy.y"
+            ></rect>
+            <text
+              :x="enemy.x + enemy.width / 2"
+              :y="enemy.y + enemy.height / 2"
+              class="small hp-display"
+            >
+              {{ enemy.hp }}
+            </text>
+          </g>
+
           <circle
             class="player-bullets"
             v-for="bullet in enemyBullets"
@@ -369,7 +383,7 @@ onUnmounted(() => {
       </div>
     </div>
     <div class="col controls" :class="type === 'xs' ? 'mt-2' : ''">
-      <div v-if="type !== 'xs'" class="row d-flex justify-content-center">
+      <div v-if="type !== 'xs'" class="row d-flex justify-content-center hint">
         You can use WASD/Arrow Keys too
       </div>
       <div class="row d-flex justify-content-center">
@@ -419,6 +433,10 @@ onUnmounted(() => {
 </template>
 
 <style>
+.hp-display {
+  dominant-baseline: middle;
+  text-anchor: middle;
+}
 .restart-button-wrapper {
   display: flex;
   height: 0px;
@@ -436,9 +454,15 @@ onUnmounted(() => {
 .enemy {
   fill: var(--color);
 }
+.player-score,
+.hint {
+  user-select: none;
+}
+.controls div {
+  user-select: none;
+}
 .controls .material-icons-outlined {
   cursor: pointer;
-  user-select: none;
   border: 1px solid #66ccff;
   border-radius: 50%;
   width: 50px;
