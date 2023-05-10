@@ -146,7 +146,7 @@ function handlePlayerUpdate() {
       y: player.value.y,
       xVel: 0,
       yVel: -playerBulletSpeed,
-      color: 'blue',
+      color: '#66ccff',
       timestamp: Date.now()
     })
   }
@@ -168,7 +168,7 @@ function handleEnemy() {
       height: 20 + Math.random() * 10,
       ySpeed: 0.5 + Math.random() * 0.6,
       hp: 3,
-      color: Math.random() > 0.5 ? 'green' : 'purple',
+      color: Math.random() > 0.5 ? '#a0d8b3' : '#9384d1',
       attackCounter: 0,
       attackInterval: 50 + Math.random() * 30
     }
@@ -190,7 +190,7 @@ function handleEnemy() {
         xVel: (deltaX / hypo) * playerBulletSpeed,
         yVel: (deltaY / hypo) * playerBulletSpeed,
         timestamp: Date.now(),
-        color: 'red'
+        color: '#ed2b2a'
       })
       enemy.attackCounter = 0
     }
@@ -312,8 +312,13 @@ onUnmounted(() => {
     <div class="col d-flex justify-content-center player-score">
       Player Score: {{ playerScore }} Player HP: {{ player.hp }}
     </div>
-    <div class="col d-flex justify-content-center">
-      <button v-if="gameOver" @click="resetGame" @touchend="resetGame" class="btn btn-dark">
+    <div class="col justify-content-center restart-button-wrapper">
+      <button
+        v-if="gameOver"
+        @click="resetGame"
+        @touchend="resetGame"
+        class="restart-button btn btn-dark"
+      >
         Game Over! Start again?
       </button>
     </div>
@@ -362,7 +367,10 @@ onUnmounted(() => {
         </svg>
       </div>
     </div>
-    <div class="col mt-2 controls">
+    <div class="col controls" :class="type === 'xs' ? 'mt-2' : ''">
+      <div v-if="type !== 'xs'" class="row d-flex justify-content-center">
+        You can use WASD/Arrow Keys too
+      </div>
       <div class="row d-flex justify-content-center">
         <div
           @mousedown="controlsPressed.up = true"
@@ -410,6 +418,17 @@ onUnmounted(() => {
 </template>
 
 <style>
+.restart-button-wrapper {
+  display: flex;
+  height: 0px;
+}
+
+.restart-button {
+  z-index: 1;
+  height: 40px;
+  margin-top: 100px;
+}
+
 .player-bullets {
   fill: var(--color);
 }
