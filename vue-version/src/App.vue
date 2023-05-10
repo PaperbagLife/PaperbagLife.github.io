@@ -15,13 +15,14 @@ const pages: Page[] = [
   { name: 'Home', icon: 'home', route: '/' },
   { name: 'Coursework', icon: 'book', route: '/coursework' },
   { name: 'Projects', icon: 'collections', route: '/projects' },
-  { name: 'Interests', icon: 'interests', route: '/interests' }
+  { name: 'Interests', icon: 'interests', route: '/interests' },
+  { name: 'Games', icon: 'videogame_asset', route: '/games' }
 ]
 </script>
 
 <template>
-  <header>
-    <div v-if="type !== 'xs'" class="my-3 mx-2 nav-bar d-flex justify-content-start">
+  <header :class="{ header: showSideNav }">
+    <div v-if="type !== 'xs'" class="mt-3 mx-2 nav-bar d-flex justify-content-start">
       <template v-for="page in pages" :key="page.name">
         <router-link class="router-link mx-2" :to="page.route">
           <label class="d-flex">
@@ -36,43 +37,33 @@ const pages: Page[] = [
         {{ showSideNav ? 'close' : 'menu' }}
       </div>
       <div v-if="showSideNav" class="col nav-menu">
-        <div></div>
-        <div class="xs-nav row mx-2">
-          <span class="material-icons-outlined md-24">home</span>
-          <router-link @click="showSideNav = false" to="/" class="xs-nav row mx-2"
-            >Home</router-link
-          >
-        </div>
-        <div class="xs-nav row mx-2">
-          <span class="material-icons-outlined md-24">book</span>
-          <router-link @click="showSideNav = false" to="/coursework" class="xs-nav row mx-2"
-            >Coursework</router-link
-          >
-        </div>
-
-        <div class="xs-nav row mx-2">
-          <span class="material-icons-outlined md-24">collections</span>
-          <router-link @click="showSideNav = false" to="/projects" class="xs-nav row mx-2"
-            >Projects</router-link
-          >
-        </div>
-
-        <div class="xs-nav row mx-2">
-          <span class="material-icons-outlined md-24">interests</span>
-          <router-link @click="showSideNav = false" to="/interests" class="xs-nav row mx-2"
-            >Interests</router-link
-          >
-        </div>
+        <template v-for="page in pages" :key="page.name">
+          <div class="xs-nav row mx-2">
+            <span class="material-icons-outlined md-24">{{ page.icon }}</span>
+            <router-link @click="showSideNav = false" :to="page.route" class="xs-nav row mx-2">{{
+              page.name
+            }}</router-link>
+          </div>
+        </template>
       </div>
     </div>
   </header>
-  <div class="mt-4 h-100">
+  <div class="mt-4 viewport">
     <RouterView />
   </div>
 </template>
 
 <style scoped>
+.viewport {
+  max-height: 85vh;
+  overflow: auto;
+}
+.header {
+  max-height: 15vh;
+  background-color: #66ccff;
+}
 .nav-menu {
+  margin-top: -1px;
   background: #66ccff;
   position: fixed;
   z-index: 1;

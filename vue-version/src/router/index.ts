@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import CourseWorkView from '../views/CourseworkView.vue'
 import ProjectsView from '../views/ProjectsView.vue'
 import InterestsView from '../views/InterestsView.vue'
+import GameView from '../views/GameView.vue'
 
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
@@ -26,6 +27,11 @@ const router = createRouter({
       path: '/interests',
       name: 'interests',
       component: InterestsView
+    },
+    {
+      path: '/games',
+      name: 'games',
+      component: GameView
     }
   ]
 })
