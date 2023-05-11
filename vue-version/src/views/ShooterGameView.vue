@@ -432,7 +432,7 @@ onUnmounted(() => {
   </main>
 </template>
 
-<style>
+<style scoped>
 .hp-display {
   dominant-baseline: middle;
   text-anchor: middle;

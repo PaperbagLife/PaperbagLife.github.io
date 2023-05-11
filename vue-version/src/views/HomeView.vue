@@ -7,7 +7,7 @@ const { type } = useBreakpoints()
 
 <template>
   <main>
-    <div class="col">
+    <div class="col mt-4">
       <div class="row d-flex align-items-center justify-content-center">
         <div class="col-auto">
           <img :src="dpUrl" width="250" height="250" />

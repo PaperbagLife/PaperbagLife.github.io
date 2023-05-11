@@ -9,7 +9,7 @@ const { width, type } = useBreakpoints()
 
 <template>
   <main>
-    <div class="col">
+    <div class="col mt-2">
       <h1 class="ml-2">Projects</h1>
       <div class="row mx-0">
         <div class="border-top" :class="type === 'xs' ? 'col-12' : 'col-6'">

@@ -3,7 +3,8 @@ import HomeView from '../views/HomeView.vue'
 import CourseWorkView from '../views/CourseworkView.vue'
 import ProjectsView from '../views/ProjectsView.vue'
 import InterestsView from '../views/InterestsView.vue'
-import GameView from '../views/GameView.vue'
+import TurnBasedGameView from '../views/TurnBasedGameView.vue'
+import ShooterGameView from '../views/ShooterGameView.vue'
 
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
@@ -29,9 +30,14 @@ const router = createRouter({
       component: InterestsView
     },
     {
-      path: '/games',
-      name: 'games',
-      component: GameView
+      path: '/games/shooter',
+      name: 'shooter',
+      component: ShooterGameView
+    },
+    {
+      path: '/games/turnbased',
+      name: 'turnbased',
+      component: TurnBasedGameView
     }
   ]
 })

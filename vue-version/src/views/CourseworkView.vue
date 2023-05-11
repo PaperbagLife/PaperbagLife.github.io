@@ -100,7 +100,7 @@ const semesters: Semester[] = [
 
 <template>
   <main>
-    <div class="col">
+    <div class="col mt-2">
       <h1 class="ml-2">Coursework</h1>
       <div class="row mx-0">
         <template v-for="semester in semesters" :key="semester.name">
