@@ -2,6 +2,7 @@
 import { useBreakpoints } from '../util/dimensions'
 import { onMounted, ref, reactive, onUnmounted, computed, watch, initCustomFormatter } from 'vue'
 import mainCharacterImage from '../assets/game/img/mc.png'
+import frostSpawnImage from '../assets/game/img/frostspawn.png'
 const { type } = useBreakpoints()
 
 const ATTACK_TIMEOUT = 1000
@@ -160,7 +161,6 @@ function update() {
     clearInterval(updateIntervalCode)
     return
   }
-  console.log('update here', game.team1[0], game.team2[0])
   game.timeline.forEach((ev, i) => console.log('event:', i, ev.character.name, ev.timeUntil))
   const currentActor = game.getNextCharacter()
   if (!currentActor) return
@@ -214,7 +214,7 @@ const focusedEnemyCharcter = ref(0) // Index of enemy, i guess
 const focusedAllyCharcter = ref(0) // Index of ally, i guess
 
 const playerTeam: Character[] = [new Character('mc', mainCharacterImage, true, 30, 150, 10)]
-const enemyTeam: Character[] = [new Character('enemy', mainCharacterImage, false, 40, 100, 10)]
+const enemyTeam: Character[] = [new Character('enemy', frostSpawnImage, false, 40, 100, 10)]
 const game = reactive(new GameState(playerTeam, enemyTeam))
 
 onMounted(() => {
