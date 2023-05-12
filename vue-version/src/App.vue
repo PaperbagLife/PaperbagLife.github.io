@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useBreakpoints } from './util/dimensions'
 import { RouterLink, RouterView } from 'vue-router'
 const { type } = useBreakpoints()
@@ -30,12 +30,12 @@ const games: GamePage[] = [
 </script>
 
 <template>
-  <header :class="{ header: showSideNav }">
+  <header :class="{ header: showSideNav && type === 'xs' }">
     <div v-if="type !== 'xs'" class="mt-3 mx-2 nav-bar d-flex justify-content-start">
       <template v-for="page in pages" :key="page.name">
         <router-link class="router-link mx-2" :to="page.route">
           <label class="d-flex">
-            <span class="material-icons-outlined md-24">{{ page.icon }}</span>
+            <span class="material-icons-outlined">{{ page.icon }}</span>
             <span class="page-name">{{ page.name }}</span>
           </label>
         </router-link>
@@ -49,7 +49,7 @@ const games: GamePage[] = [
           aria-haspopup="true"
           aria-expanded="false"
         >
-          <span class="material-icons-outlined md-24">gamepad</span>
+          <span class="material-icons-outlined">gamepad</span>
           Games
         </button>
         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
@@ -67,18 +67,43 @@ const games: GamePage[] = [
       </div>
     </div>
     <div v-else>
-      <div @click="showSideNav = !showSideNav" class="ml-3 mt-3 material-icons-outlined md-24">
+      <div @click="showSideNav = !showSideNav" class="ml-3 mt-3 material-icons-outlined">
         {{ showSideNav ? 'close' : 'menu' }}
       </div>
-      <div v-if="showSideNav" class="col nav-menu">
+      <div v-if="showSideNav && type === 'xs'" class="col nav-menu">
         <template v-for="page in pages" :key="page.name">
           <div class="xs-nav row mx-2">
-            <span class="material-icons-outlined md-24">{{ page.icon }}</span>
+            <span class="material-icons-outlined">{{ page.icon }}</span>
             <router-link @click="showSideNav = false" :to="page.route" class="xs-nav row mx-2">{{
               page.name
             }}</router-link>
           </div>
         </template>
+        <div class="dropdown xs-nav mx-2">
+          <button
+            class="btn btn-sm d-flex dropdown-toggle p-0 align-items-center"
+            type="button"
+            id="dropdownMenuButton"
+            data-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+            <span class="material-icons-outlined mr-2">gamepad</span>
+            Games
+          </button>
+          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <router-link
+              v-for="game in games"
+              :key="game.name"
+              class="dropdown-item px-2 d-inline-block router-link"
+              :to="game.route"
+            >
+              <label class="d-flex">
+                <span class="page-name">{{ game.name }}</span>
+              </label>
+            </router-link>
+          </div>
+        </div>
       </div>
     </div>
   </header>
@@ -145,9 +170,14 @@ span.material-icons-outlined {
   text-decoration: none;
   filter: brightness(80%);
 }
-
 .xs-nav span.material-icons-outlined {
   align-self: center;
   color: white;
+}
+
+.xs-nav .btn.dropdown-toggle {
+  font-size: larger;
+  color: white;
+  background: transparent;
 }
 </style>

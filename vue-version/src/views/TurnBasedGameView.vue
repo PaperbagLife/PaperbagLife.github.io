@@ -228,6 +228,7 @@ const canvas = { width: 740, height: 360 }
   <main :class="type">
     <div class="col mt-2 d-flex justify-content-center">
       <div class="game-viewport">
+        <div class="gameover-message" v-if="game.gameOver && game.playerWon">You Win</div>
         <div
           class="attack-button d-flex justify-content-center align-items-center"
           @click="actionResolve({ type: PlayerActionType.ATTACK, target: focusedEnemyCharcter })"
@@ -284,6 +285,15 @@ const canvas = { width: 740, height: 360 }
 </template>
 
 <style scoped>
+.gameover-message {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  text-anchor: middle;
+  background-color: white;
+  border: 2px solid #66ccff;
+  border-radius: 4px;
+}
 .health-bar {
   fill: white;
   stroke: black;
