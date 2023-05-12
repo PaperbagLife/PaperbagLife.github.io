@@ -97,6 +97,7 @@ const games: GamePage[] = [
               :key="game.name"
               class="dropdown-item px-2 d-inline-block router-link"
               :to="game.route"
+              @click="showSideNav = false"
             >
               <label class="d-flex">
                 <span class="page-name">{{ game.name }}</span>
