@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useBreakpoints } from '../util/dimensions'
-import { onMounted, ref, reactive, onUnmounted, computed, watch, initCustomFormatter } from 'vue'
+import { onMounted, ref, reactive } from 'vue'
 import mainCharacterImage from '../assets/game/img/mc.png'
 import bailuImage from '../assets/game/img/bailu.png'
 import frostSpawnImage from '../assets/game/img/frostspawn.png'
@@ -48,6 +48,7 @@ class Character {
   speed: number
   attack: number
   skill?: Skill
+  skillIcon: string | undefined
   ultimate?: Skill
   energy: number
   maxEnergy?: number
@@ -95,7 +96,7 @@ class GameState {
   inAnimation: boolean
   lapLength = 10000
   timeline: Event[] = []
-  skillPoints: number
+  skillPoints = 0
   constructor(team1: Character[], team2: Character[]) {
     this.team1 = team1
     this.team2 = team2
@@ -213,25 +214,32 @@ function update() {
             break
           }
           case PlayerActionType.SKILL: {
-            if (currentActor.skill.target === SkillTarget.ALLY) {
-              if (currentActor.skill.aoe) {
-                game.team1.forEach((character) => {
-                  character.hp = Math.min(currentActor.skill.heal + character.hp, character.maxHp)
-                })
-              } else {
-                const target = game.team1[action.target]
-                target.hp = Math.min(currentActor.skill.heal + target.hp, target.maxHp)
+            if (!currentActor.skill) return
+            switch (currentActor.skill.target) {
+              case SkillTarget.ALLY: {
+                const healAmount = currentActor.skill.heal
+                if (currentActor.skill.aoe) {
+                  game.team1.forEach((character) => {
+                    character.hp = Math.min(healAmount + character.hp, character.maxHp)
+                  })
+                } else {
+                  const target = game.team1[action.target]
+                  target.hp = Math.min(healAmount + target.hp, target.maxHp)
+                }
+                break
               }
-            } else {
-              if (currentActor.skill.aoe) {
-                game.team1.forEach((character) => {
-                  character.hp -= currentActor.skill.damage
-                })
-              } else {
-                console.log('here')
-                const target = game.team2[action.target]
-                console.log('target hp', target.hp, 'skilldamage', currentActor.skill.damage)
-                target.hp -= currentActor.skill.damage
+              case SkillTarget.ENEMY: {
+                const damage = currentActor.skill.damage
+                if (currentActor.skill.aoe) {
+                  game.team1.forEach((character) => {
+                    character.hp -= damage
+                  })
+                } else {
+                  console.log('here')
+                  const target = game.team2[action.target]
+                  console.log('target hp', target.hp, 'skilldamage', currentActor.skill?.damage)
+                  target.hp -= damage
+                }
               }
             }
             game.timeline.push({
