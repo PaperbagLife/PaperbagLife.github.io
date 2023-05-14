@@ -147,7 +147,7 @@ const games: GamePage[] = [
   margin-top: -1px;
   background: #66ccff;
   position: fixed;
-  z-index: 1;
+  z-index: 999;
 }
 .xs-nav {
   font-size: larger;
