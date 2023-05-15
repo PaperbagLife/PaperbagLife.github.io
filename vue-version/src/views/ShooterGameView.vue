@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useBreakpoints } from '../util/dimensions'
-import { onMounted, ref, onUnmounted, watch } from 'vue'
+import { onMounted, ref, onUnmounted, watch, computed } from 'vue'
 const { type } = useBreakpoints()
 
 const live = ref(true)
@@ -15,6 +15,7 @@ const playerInvulInterval = 80
 let playerAttackCounter = 0
 
 let enemySpawnInterval = 300
+let bossRequiredScore = 10
 let enemySpawnTimer = 0
 type Player = {
   x: number
@@ -54,7 +55,7 @@ const liveEnemies = ref<Enemy[]>([])
 const playerBullets = ref<Bullet[]>([])
 const enemyBullets = ref<Bullet[]>([])
 
-let playerScore = 0
+const playerScore = ref(0)
 
 const canvas: Canvas = { width: 300, height: 400 }
 
@@ -155,6 +156,12 @@ function handlePlayerUpdate() {
   }
 }
 
+let bossSpawned = false
+
+function spawnBoss() {
+  liveEnemies.value.push()
+}
+
 function handleEnemy() {
   // Spawn enemy?
   enemySpawnTimer += 1
@@ -176,6 +183,7 @@ function handleEnemy() {
     enemySpawnTimer = 0
     enemySpawnInterval = 250 + 200 * Math.random()
   }
+
   // Move enemy
   liveEnemies.value.forEach((enemy, i) => {
     const deadEnemy = new Set<number>()
@@ -197,7 +205,7 @@ function handleEnemy() {
     }
     if (enemy.hp <= 0) {
       deadEnemy.add(i)
-      playerScore += 1
+      playerScore.value += 1
     }
     if (enemy.y > canvas.height) {
       deadEnemy.add(i)
@@ -267,7 +275,7 @@ function resetGame() {
     hp: 5,
     invulTimer: 0
   }
-  playerScore = 0
+  playerScore.value = 0
   live.value = true
   gameOver.value = false
   liveEnemies.value = []
@@ -310,9 +318,7 @@ onUnmounted(() => {
 
 <template>
   <main :class="type">
-    <div class="col d-flex justify-content-center player-score">
-      Player Score: {{ playerScore }} Player HP: {{ player.hp }}
-    </div>
+    <div class="col d-flex justify-content-center player-score">Score: {{ playerScore }}</div>
     <div class="col justify-content-center restart-button-wrapper">
       <button
         v-if="gameOver"
@@ -326,18 +332,47 @@ onUnmounted(() => {
 
     <div class="col d-flex justify-content-center">
       <div class="game-viewport">
+        <div class="hp-container">
+          <span v-for="i in [...Array(5).keys()]" :key="i" class="material-icons-outlined">{{
+            i < player.hp ? 'favorite' : 'favorite_border'
+          }}</span>
+        </div>
+        <!--<div v-if="!bossFightMode" class="map-container">
+          <div class="map-content">
+            <span class="end-flag material-icons-outlined">sports_score</span>
+            <div class="map-line"></div>
+            <span
+              class="player-map-icon material-icons-outlined"
+              :style="{ left: `${(110 * playerScore) / bossRequiredScore}px` }"
+              >navigation</span
+            >
+          </div>
+        </div>-->
+
         <svg :height="canvas.height" :width="canvas.width">
           <!--Player related-->
-          <rect
-            class="player"
-            :class="player.invulTimer > 0 ? 'invulnerable' : ''"
-            :x="player.x"
-            :y="player.y"
-            :width="playerWidth"
-            :height="playerHeight"
-          ></rect>
+          <g :x="player.x" :y="player.y">
+            <rect
+              class="player"
+              :class="player.invulTimer > 0 ? 'invulnerable' : ''"
+              :x="player.x"
+              :y="player.y"
+              :width="playerWidth"
+              :height="playerHeight"
+              rx="3"
+            ></rect>
+            <foreignObject
+              :x="player.x"
+              :y="player.y + playerHeight / 3"
+              :width="playerWidth"
+              :height="playerHeight"
+            >
+              <span class="material-icons-outlined player-icon"> navigation </span>
+            </foreignObject>
+          </g>
+
           <circle
-            class="player-bullets"
+            class="bullets"
             v-for="bullet in playerBullets"
             :key="`${bullet.timestamp}+${bullet.color}`"
             :style="{ '--color': bullet.color }"
@@ -346,7 +381,6 @@ onUnmounted(() => {
             :r="2"
           ></circle>
           <!--Enemy Related-->
-          <text x="10" y="10">hi</text>
           <g
             v-for="enemy in liveEnemies"
             :key="`${enemy.height} + ${enemy.width}`"
@@ -371,7 +405,7 @@ onUnmounted(() => {
           </g>
 
           <circle
-            class="player-bullets"
+            class="bullets"
             v-for="bullet in enemyBullets"
             :key="`${bullet.timestamp}+${bullet.color}`"
             :style="{ '--color': bullet.color }"
@@ -433,10 +467,46 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+.player-icon {
+  font-size: 20px;
+  color: #66ccff;
+}
+.hp-container {
+  color: #ff5050;
+  position: absolute;
+}
+.map-container {
+  position: absolute;
+  margin-top: 50px;
+  width: inherit;
+  opacity: 70%;
+}
+.map-container .map-content {
+  margin-left: auto;
+  margin-right: auto;
+  width: 120px;
+}
+
+.map-content .map-line {
+  border-top: 2px solid white;
+}
 .hp-display {
   dominant-baseline: middle;
   text-anchor: middle;
 }
+.map-content .end-flag {
+  position: absolute;
+  color: white;
+  right: -17px;
+  top: -20px;
+}
+.map-content .player-map-icon {
+  position: absolute;
+  color: white;
+  transform: rotate(90deg);
+  top: -20px;
+}
+
 .restart-button-wrapper {
   display: flex;
   height: 0px;
@@ -448,7 +518,7 @@ onUnmounted(() => {
   margin-top: 100px;
 }
 
-.player-bullets {
+.bullets {
   fill: var(--color);
 }
 .enemy {
@@ -478,6 +548,8 @@ onUnmounted(() => {
 }
 .player {
   fill: white;
+  stroke: #66ccff;
+  stroke-width: 1.5px;
 }
 .player.invulnerable {
   stroke: gold;
