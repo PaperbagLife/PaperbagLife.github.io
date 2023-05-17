@@ -70,7 +70,7 @@ const liveBoss = ref<Boss | null>(null)
 const playerBullets = ref<Bullet[]>([])
 const enemyBullets = ref<Bullet[]>([])
 
-const playerScore = ref(10)
+const playerScore = ref(0)
 
 const canvas: Canvas = { width: 300, height: 400 }
 
