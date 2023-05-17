@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useBreakpoints } from '../util/dimensions'
 import { onMounted, ref, onUnmounted, watch, computed } from 'vue'
+import bossImage from '../assets/game/img/boss.png'
 const { type } = useBreakpoints()
 
 const live = ref(true)
@@ -50,12 +51,26 @@ type Bullet = {
   timestamp: number
 }
 
+type Boss = {
+  x: number
+  hp: number
+  y: number
+  movingRight: boolean
+  width: number
+  height: number
+  xVel: (boss: Boss) => number
+  yVel: (boss: Boss) => number
+  image: string
+  attack: (boss: Boss) => void
+}
+
 // Objects in game
 const liveEnemies = ref<Enemy[]>([])
+const liveBoss = ref<Boss | null>(null)
 const playerBullets = ref<Bullet[]>([])
 const enemyBullets = ref<Bullet[]>([])
 
-const playerScore = ref(0)
+const playerScore = ref(10)
 
 const canvas: Canvas = { width: 300, height: 400 }
 
@@ -157,15 +172,84 @@ function handlePlayerUpdate() {
 }
 
 let bossSpawned = false
+const PADDING = 10
+
+const boss1XVel = (boss: Boss) => {
+  if (boss.y <= PADDING * 2) {
+    return 0
+  }
+  if (boss.x + boss.width + PADDING > canvas.width) {
+    boss.movingRight = false
+  }
+  if (boss.x < 0 + PADDING) {
+    boss.movingRight = true
+  }
+  return boss.movingRight ? 0.4 : -0.4
+}
+
+let boss1BaseAttackTimer = 0
+const boss1BaseAttackInterval = 90
+let boss1BaseLeft = true
+function boss1Attack(boss: Boss) {
+  // I know im writing absolutely shitty code but you know it is what it is
+  if (boss.y < PADDING * 2) return
+  boss1BaseAttackTimer += 1
+  if (boss1BaseAttackTimer > boss1BaseAttackInterval) {
+    boss1BaseAttackTimer = 0
+    //fan bullets, alternate between pipes
+    let xPos = boss.x + 15
+    if (boss1BaseLeft) {
+      xPos = boss.x + 85
+    }
+    for (let i = 0; i < 8; i++) {
+      const xVel =
+        -Math.sqrt(3) * Math.cos(((Math.PI * 2) / 3 / 8) * i) -
+        -Math.sin(((Math.PI * 2) / 3 / 8) * i)
+      const yVel =
+        Math.sqrt(3) * Math.sin(((Math.PI * 2) / 3 / 8) * i) + Math.cos(((Math.PI * 2) / 3 / 8) * i)
+
+      const bullet = {
+        x: xPos,
+        y: boss.y + boss.height,
+        xVel,
+        yVel,
+        timestamp: Date.now(),
+        color: '#ed2b2a'
+      }
+      enemyBullets.value.push(bullet)
+    }
+    boss1BaseLeft = !boss1BaseLeft
+  }
+}
 
 function spawnBoss() {
-  liveEnemies.value.push()
+  console.log('spawn boss')
+  const bossWidth = canvas.width / 3
+  const bossheight = canvas.width / 6
+  const boss1: Boss = {
+    x: canvas.width / 2 - bossWidth / 2,
+    y: -bossheight,
+    hp: 100,
+    movingRight: false,
+    width: bossWidth,
+    height: bossheight,
+    image: bossImage,
+    attack: boss1Attack,
+    xVel: boss1XVel,
+    yVel: (boss: Boss) => {
+      console.log(boss.y)
+      if (boss.y < PADDING * 2) return 0.3
+      return 0
+    }
+  }
+  liveBoss.value = boss1
+  bossSpawned = true
 }
 
 function handleEnemy() {
   // Spawn enemy?
   enemySpawnTimer += 1
-  if (enemySpawnTimer >= enemySpawnInterval) {
+  if (enemySpawnTimer >= enemySpawnInterval && !bossSpawned) {
     console.log('spawning enemy')
     const randomWidth = 20 + Math.random() * 10
     const randomEnemy: Enemy = {
@@ -240,6 +324,21 @@ function handlePlayerBullets() {
         enemy.hp -= 1
       }
     })
+    if (!liveBoss.value) {
+      return
+    }
+    if (
+      collides(
+        liveBoss.value.x,
+        liveBoss.value.y,
+        liveBoss.value.width,
+        liveBoss.value.height,
+        bullet
+      )
+    ) {
+      deadBulletIdx.add(i)
+      liveBoss.value.hp -= 1
+    }
   })
   playerBullets.value = playerBullets.value.filter((_, i) => !deadBulletIdx.has(i))
 }
@@ -260,12 +359,26 @@ function handleEnemyBullets() {
   enemyBullets.value = enemyBullets.value.filter((_, i) => !deadBulletIdx.has(i))
 }
 
+function handleBoss() {
+  if (!liveBoss.value) return
+  liveBoss.value.attack(liveBoss.value)
+  liveBoss.value.x += liveBoss.value.xVel(liveBoss.value)
+  liveBoss.value.y += liveBoss.value.yVel(liveBoss.value)
+  if (liveBoss.value.hp <= 0) {
+    live.value = false
+  }
+}
+
 function update() {
+  if (playerScore.value >= bossRequiredScore && !bossSpawned) {
+    spawnBoss()
+  }
   handlePlayerMove()
   handlePlayerUpdate()
   handleEnemy()
   handlePlayerBullets()
   handleEnemyBullets()
+  handleBoss()
 }
 
 function resetGame() {
@@ -281,6 +394,8 @@ function resetGame() {
   liveEnemies.value = []
   playerBullets.value = []
   enemyBullets.value = []
+  liveBoss.value = null
+  bossSpawned = false
 }
 
 let updateHandler = ref<number | null>(null)
@@ -337,7 +452,7 @@ onUnmounted(() => {
             i < player.hp ? 'favorite' : 'favorite_border'
           }}</span>
         </div>
-        <!--<div v-if="!bossFightMode" class="map-container">
+        <div v-if="!bossSpawned" class="map-container">
           <div class="map-content">
             <span class="end-flag material-icons-outlined">sports_score</span>
             <div class="map-line"></div>
@@ -347,7 +462,7 @@ onUnmounted(() => {
               >navigation</span
             >
           </div>
-        </div>-->
+        </div>
 
         <svg :height="canvas.height" :width="canvas.width">
           <!--Player related-->
@@ -413,6 +528,25 @@ onUnmounted(() => {
             :cy="bullet.y"
             :r="2"
           ></circle>
+          <!--boss-->
+          <g v-if="liveBoss" :x="liveBoss.x" :y="liveBoss.y">
+            <image
+              class="live-boss"
+              fill="white"
+              :href="liveBoss.image"
+              :width="liveBoss.width"
+              :height="liveBoss.height"
+              :x="liveBoss.x"
+              :y="liveBoss.y"
+            ></image>
+            <text
+              :x="liveBoss.x + liveBoss.width / 2"
+              :y="liveBoss.y + liveBoss.height / 2"
+              class="small hp-display"
+            >
+              {{ liveBoss.hp }}
+            </text>
+          </g>
         </svg>
       </div>
     </div>

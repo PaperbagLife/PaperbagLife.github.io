@@ -5,6 +5,7 @@ import ProjectsView from '../views/ProjectsView.vue'
 import InterestsView from '../views/InterestsView.vue'
 import TurnBasedGameView from '../views/TurnBasedGameView.vue'
 import ShooterGameView from '../views/ShooterGameView.vue'
+import DanmakuView from '..//views/DanmakuView.vue'
 
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
@@ -38,6 +39,11 @@ const router = createRouter({
       path: '/games/turnbased',
       name: 'turnbased',
       component: TurnBasedGameView
+    },
+    {
+      path: '/games/danmaku',
+      name: 'danmaku',
+      component: DanmakuView
     }
   ]
 })

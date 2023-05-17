@@ -25,7 +25,8 @@ type GamePage = {
 
 const games: GamePage[] = [
   { name: 'Shooter', route: '/games/shooter' },
-  { name: 'Turn based', route: '/games/turnbased' }
+  { name: 'Turn based', route: '/games/turnbased' },
+  { name: 'Danmaku', route: '/games/danmaku' }
 ]
 </script>
 
