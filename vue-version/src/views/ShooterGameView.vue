@@ -91,8 +91,8 @@ const controlsPressed = ref<ControlsPressed>({ up: false, down: false, left: fal
 const controlKeys = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd'])
 
 function onKeyDown(event: KeyboardEvent) {
-  if (event.key === ' ') {
-    live.value = !live.value
+  if (gameOver.value && event.key === ' ') {
+    resetGame()
   }
   if (controlKeys.has(event.key)) {
     event.preventDefault()
