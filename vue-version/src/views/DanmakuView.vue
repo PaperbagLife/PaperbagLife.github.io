@@ -252,9 +252,9 @@ function basicDirectedAttack(cx: number, cy: number) {
   enemyBullets.value.push(bullet)
 }
 
-const NUM_CENTER_SPREAD = 80
+const NUM_CENTER_SPREAD = 70
 function basicCenterSpreadAttack(cx: number, cy: number) {
-  const bulletSpeed = 0.5
+  const bulletSpeed = 0.7
   for (let i = 0; i < NUM_CENTER_SPREAD; i++) {
     const xVel =
       -Math.cos(((Math.PI * 2) / NUM_CENTER_SPREAD) * i) +
@@ -274,7 +274,7 @@ function basicCenterSpreadAttack(cx: number, cy: number) {
 const NUM_CENTER_SPRAY = 8
 function basicCenterSprayAttack(cx: number, cy: number, timeLeft: number) {
   const bulletSpeed = 1
-  const modifier = ((Math.sin(timeLeft / 80) > 0 ? 1 : -1) * timeLeft) / 150
+  const modifier = ((Math.sin(timeLeft / 80) >= 0 ? 1 : -1) * timeLeft) / 150
   for (let i = 0; i < NUM_CENTER_SPRAY; i++) {
     const dir = i + modifier
     const xVel =
@@ -294,7 +294,7 @@ function basicCenterSprayAttack(cx: number, cy: number, timeLeft: number) {
       2,
       2,
       [patternDirectional],
-      Math.sin(timeLeft / 80) > 0 ? RED : BLUE,
+      Math.sin(timeLeft / 80) >= 0 ? RED : BLUE,
       Date.now(),
       i
     )
