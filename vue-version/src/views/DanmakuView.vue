@@ -14,6 +14,10 @@ const PLAYER_INVUL_TIMER = 80
 
 const BASIC_ENEMY_BULLET_SPEED = 1
 
+const GREEN = '#66ffb8'
+const RED = '#ff668e'
+const BLUE = '#2c80ff'
+
 // type and class defs
 type ControlsPressed = {
   up: boolean
@@ -244,7 +248,7 @@ function basicDirectedAttack(cx: number, cy: number) {
   const xVel = (deltaX / hypo) * BASIC_ENEMY_BULLET_SPEED
   const yVel = (deltaY / hypo) * BASIC_ENEMY_BULLET_SPEED
   const patternTowards: MovePattern = { duration: -1, xVel, yVel }
-  const bullet = new Bullet(cx, cy, 5, 5, [patternTowards], 'red', Date.now(), 0)
+  const bullet = new Bullet(cx, cy, 5, 5, [patternTowards], GREEN, Date.now(), 0)
   enemyBullets.value.push(bullet)
 }
 
@@ -263,7 +267,7 @@ function basicCenterSpreadAttack(cx: number, cy: number) {
       xVel: xVel * bulletSpeed,
       yVel: yVel * bulletSpeed
     }
-    const bullet = new Bullet(cx, cy, 2, 2, [patternDirectional], 'red', Date.now(), i)
+    const bullet = new Bullet(cx, cy, 2, 2, [patternDirectional], RED, Date.now(), i)
     enemyBullets.value.push(bullet)
   }
 }
@@ -284,24 +288,31 @@ function basicCenterSprayAttack(cx: number, cy: number, timeLeft: number) {
       xVel: xVel * bulletSpeed,
       yVel: yVel * bulletSpeed
     }
-    const bullet = new Bullet(cx, cy, 2, 2, [patternDirectional], 'red', Date.now(), i)
+    const bullet = new Bullet(
+      cx,
+      cy,
+      2,
+      2,
+      [patternDirectional],
+      Math.sin(timeLeft / 80) > 0 ? RED : BLUE,
+      Date.now(),
+      i
+    )
     enemyBullets.value.push(bullet)
   }
 }
-
+const NUM_ROTATED = 40
 function basicRotatedAttack(cx: number, cy: number, timeLeft: number) {
-  let color = 'red'
+  let color = RED
   if (Math.floor(timeLeft / 100) % 2 === 1) {
-    color = 'blue'
+    color = BLUE
   }
   const bulletSpeed = 0.6
-  for (let i = 0; i < NUM_CENTER_SPREAD; i++) {
+  for (let i = 0; i < NUM_ROTATED; i++) {
     const xVel =
-      -Math.cos(((Math.PI * 2) / NUM_CENTER_SPREAD) * i) +
-      Math.sin(((Math.PI * 2) / NUM_CENTER_SPREAD) * i)
+      -Math.cos(((Math.PI * 2) / NUM_ROTATED) * i) + Math.sin(((Math.PI * 2) / NUM_ROTATED) * i)
     const yVel =
-      Math.sin(((Math.PI * 2) / NUM_CENTER_SPREAD) * i) +
-      Math.cos(((Math.PI * 2) / NUM_CENTER_SPREAD) * i)
+      Math.sin(((Math.PI * 2) / NUM_ROTATED) * i) + Math.cos(((Math.PI * 2) / NUM_ROTATED) * i)
     const patternDirectional: MovePattern = {
       duration: 70,
       xVel: xVel * bulletSpeed,
@@ -599,7 +610,7 @@ onUnmounted(() => {
 }
 
 .enemy {
-  fill: orange;
+  fill: #ff9966;
 }
 
 .hp-display {
