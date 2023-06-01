@@ -32,12 +32,14 @@ type MovePattern = {
   duration: number
   xVel: number
   yVel: number
+  rotation?: number
+  rotationDuration?: number
 }
 
 type AttackPattern = {
   duration: number
   interval: number
-  attack: (cx: number, cy: number) => void
+  attack: (cx: number, cy: number, timeLeft: number) => void
 }
 
 class Player {
@@ -54,8 +56,8 @@ class Player {
     this.cy = y
   }
   attack(cx: number, cy: number) {
-    const straightPattern: MovePattern[] = [{ duration: -1, xVel: 0, yVel: -1.8 }]
-    const centerBullet = new Bullet(cx, cy, 2, 2, straightPattern, 'white', Date.now())
+    const straightPattern: MovePattern[] = [{ duration: -1, xVel: 0, yVel: -2 }]
+    const centerBullet = new Bullet(cx, cy, 2, 2, straightPattern, 'white', Date.now(), 0)
     playerBullets.value.push(centerBullet)
   }
   isAlive() {
@@ -93,6 +95,7 @@ class Enemy {
   attackIndex = 0
   attackTimer = 0
   attackIntervalTimer = 0
+  speed: number
   movePatterns: MovePattern[]
   moveIndex = 0
   moveTimer = 0
@@ -105,6 +108,7 @@ class Enemy {
     width: number,
     height: number,
     attacks: AttackPattern[],
+    speed: number,
     movePatterns: MovePattern[]
   ) {
     this.name = name
@@ -116,6 +120,7 @@ class Enemy {
     this.height = height
     this.attackPatterns = attacks
     this.movePatterns = movePatterns
+    this.speed = speed
   }
 
   handleMovement() {
@@ -126,25 +131,25 @@ class Enemy {
       this.moveTimer = 0
       this.moveIndex = (this.moveIndex + 1) % this.movePatterns.length
     }
+    this.moveTimer++
     const deltaX = this.movePatterns[this.moveIndex].xVel
     const deltaY = this.movePatterns[this.moveIndex].yVel
-    this.cx = this.cx + deltaX
-    this.cy = this.cy + deltaY
-
-    this.moveTimer++
+    const mag = Math.hypot(deltaX, deltaY)
+    if (mag === 0) return
+    this.cx = this.cx + (deltaX / mag) * this.speed
+    this.cy = this.cy + (deltaY / mag) * this.speed
   }
   attack(cx: number, cy: number) {
-    //update a bullets coordinates
     const currentAttackCap = this.attackPatterns[this.attackIndex].duration
     if (currentAttackCap !== -1 && this.attackTimer > currentAttackCap) {
       // Go to the next pattern
       this.attackTimer = 0
-      this.attackTimer = (this.attackTimer + 1) % this.attackPatterns.length
+      this.attackIndex = (this.attackIndex + 1) % this.attackPatterns.length
       this.attackIntervalTimer = 0
     }
     const currentAttack = this.attackPatterns[this.attackIndex]
     if (this.attackIntervalTimer <= 0) {
-      currentAttack.attack(cx, cy)
+      currentAttack.attack(cx, cy, this.attackTimer)
       this.attackIntervalTimer = currentAttack.interval
     }
     this.attackTimer++
@@ -163,6 +168,7 @@ class Bullet {
   delete = false
   moveTimer = 0
   moveIndex = 0
+  id: number
   homing?: boolean
   target?: Enemy | Player
   constructor(
@@ -173,6 +179,7 @@ class Bullet {
     movePatterns: MovePattern[],
     color: string,
     createdTimestamp: number,
+    id: number,
     homing?: boolean,
     target?: Enemy
   ) {
@@ -185,6 +192,7 @@ class Bullet {
     this.createdTimestamp = createdTimestamp
     this.homing = homing
     this.target = target
+    this.id = id
   }
 
   update() {
@@ -195,15 +203,30 @@ class Bullet {
       this.moveTimer = 0
       this.moveIndex = (this.moveIndex + 1) % this.movePatterns.length
     }
-    const deltaX = this.movePatterns[this.moveIndex].xVel
-    const deltaY = this.movePatterns[this.moveIndex].yVel
+    const currentMovePattern = this.movePatterns[this.moveIndex]
+    let deltaX = currentMovePattern.xVel
+    let deltaY = currentMovePattern.yVel
+    if (currentMovePattern.rotation) {
+      const rotated = rotate(
+        deltaX,
+        deltaY,
+        currentMovePattern.rotationDuration
+          ? (currentMovePattern.rotation * this.moveTimer) / currentMovePattern.rotationDuration
+          : currentMovePattern.rotation
+      )
+      deltaX = rotated.x
+      deltaY = rotated.y
+    }
     this.cx = this.cx + deltaX
     this.cy = this.cy + deltaY
 
     //Check whether or not a bullet is off-screen
-    if (this.cx - this.width > canvas.width || this.cx + this.width < 0) {
+    if (this.cx - this.width > canvas.width * 1.2 || this.cx + this.width < -canvas.width / 5) {
       this.delete = true
-    } else if (this.cy - this.height > canvas.height || this.cy + this.height < 0) {
+    } else if (
+      this.cy - this.height > canvas.height * 1.2 ||
+      this.cy + this.height < -canvas.height / 5
+    ) {
       this.delete = true
     }
     this.moveTimer++
@@ -211,6 +234,9 @@ class Bullet {
 }
 
 // consts for attacks
+function emptyAttack() {
+  return
+}
 function basicDirectedAttack(cx: number, cy: number) {
   const deltaX = player.cx - cx
   const deltaY = player.cy - cy
@@ -218,9 +244,106 @@ function basicDirectedAttack(cx: number, cy: number) {
   const xVel = (deltaX / hypo) * BASIC_ENEMY_BULLET_SPEED
   const yVel = (deltaY / hypo) * BASIC_ENEMY_BULLET_SPEED
   const patternTowards: MovePattern = { duration: -1, xVel, yVel }
-  const bullet = new Bullet(cx, cy, 2, 2, [patternTowards], 'red', Date.now())
+  const bullet = new Bullet(cx, cy, 5, 5, [patternTowards], 'red', Date.now(), 0)
   enemyBullets.value.push(bullet)
 }
+
+const NUM_CENTER_SPREAD = 80
+function basicCenterSpreadAttack(cx: number, cy: number) {
+  const bulletSpeed = 0.5
+  for (let i = 0; i < NUM_CENTER_SPREAD; i++) {
+    const xVel =
+      -Math.cos(((Math.PI * 2) / NUM_CENTER_SPREAD) * i) +
+      Math.sin(((Math.PI * 2) / NUM_CENTER_SPREAD) * i)
+    const yVel =
+      Math.sin(((Math.PI * 2) / NUM_CENTER_SPREAD) * i) +
+      Math.cos(((Math.PI * 2) / NUM_CENTER_SPREAD) * i)
+    const patternDirectional: MovePattern = {
+      duration: -1,
+      xVel: xVel * bulletSpeed,
+      yVel: yVel * bulletSpeed
+    }
+    const bullet = new Bullet(cx, cy, 2, 2, [patternDirectional], 'red', Date.now(), i)
+    enemyBullets.value.push(bullet)
+  }
+}
+const NUM_CENTER_SPRAY = 8
+function basicCenterSprayAttack(cx: number, cy: number, timeLeft: number) {
+  const bulletSpeed = 1
+  const modifier = ((Math.sin(timeLeft / 80) > 0 ? 1 : -1) * timeLeft) / 150
+  for (let i = 0; i < NUM_CENTER_SPRAY; i++) {
+    const dir = i + modifier
+    const xVel =
+      -Math.cos(((Math.PI * 2) / NUM_CENTER_SPRAY) * dir) +
+      Math.sin(((Math.PI * 2) / NUM_CENTER_SPRAY) * dir)
+    const yVel =
+      Math.sin(((Math.PI * 2) / NUM_CENTER_SPRAY) * dir) +
+      Math.cos(((Math.PI * 2) / NUM_CENTER_SPRAY) * dir)
+    const patternDirectional: MovePattern = {
+      duration: -1,
+      xVel: xVel * bulletSpeed,
+      yVel: yVel * bulletSpeed
+    }
+    const bullet = new Bullet(cx, cy, 2, 2, [patternDirectional], 'red', Date.now(), i)
+    enemyBullets.value.push(bullet)
+  }
+}
+
+function basicRotatedAttack(cx: number, cy: number, timeLeft: number) {
+  let color = 'red'
+  if (Math.floor(timeLeft / 100) % 2 === 1) {
+    color = 'blue'
+  }
+  const bulletSpeed = 0.6
+  for (let i = 0; i < NUM_CENTER_SPREAD; i++) {
+    const xVel =
+      -Math.cos(((Math.PI * 2) / NUM_CENTER_SPREAD) * i) +
+      Math.sin(((Math.PI * 2) / NUM_CENTER_SPREAD) * i)
+    const yVel =
+      Math.sin(((Math.PI * 2) / NUM_CENTER_SPREAD) * i) +
+      Math.cos(((Math.PI * 2) / NUM_CENTER_SPREAD) * i)
+    const patternDirectional: MovePattern = {
+      duration: 70,
+      xVel: xVel * bulletSpeed,
+      yVel: yVel * bulletSpeed
+    }
+    const patternStop: MovePattern = {
+      duration: 100,
+      xVel: 0,
+      yVel: 0
+    }
+    const rotated = rotate(xVel, yVel, -Math.PI / 2)
+    const patternRotated: MovePattern = {
+      duration: -1,
+      xVel: rotated.x * (bulletSpeed * 1.4),
+      yVel: rotated.y * (bulletSpeed * 1.4),
+      rotation: -Math.PI / 4,
+      rotationDuration: 400
+    }
+
+    const movePatterns = [patternDirectional, patternStop, patternRotated]
+    const bullet = new Bullet(cx, cy, 2, 2, movePatterns, color, Date.now(), i)
+    enemyBullets.value.push(bullet)
+  }
+}
+
+function rotate(x: number, y: number, rotation: number) {
+  return {
+    x: Math.cos(rotation) * x - Math.sin(rotation) * y,
+    y: Math.sin(rotation) * x + Math.cos(rotation) * y
+  }
+}
+
+// const for move patterns
+
+const triangleMove = [
+  { duration: 300, xVel: -1, yVel: 2 },
+  { duration: 80, xVel: 0, yVel: 0 },
+  { duration: 268, xVel: 1, yVel: 0 },
+  { duration: 80, xVel: 0, yVel: 0 },
+  { duration: 300, xVel: -1, yVel: -2 },
+  { duration: 80, xVel: 0, yVel: 0 }
+]
 
 // const for gamestate
 const paused = ref(false)
@@ -229,7 +352,7 @@ const gameOver = ref(false)
 watch(gameOver, () => {
   if (gameOver.value) paused.value = true
 })
-const player = reactive(new Player(5, canvas.width / 2, canvas.height - 30))
+const player = reactive(new Player(200, canvas.width / 2, canvas.height - 30))
 const playerScore = ref(0)
 const enemy1 = new Enemy(
   'shit',
@@ -237,9 +360,19 @@ const enemy1 = new Enemy(
   canvas.width / 2,
   40,
   20,
-  20,
-  [{ duration: -1, interval: 100, attack: basicDirectedAttack }],
-  [{ duration: -1, xVel: 0, yVel: 0 }]
+  25,
+  [
+    { duration: 1000, interval: 100, attack: basicRotatedAttack },
+    { duration: 100, interval: 300, attack: emptyAttack },
+    { duration: 800, interval: 10, attack: basicCenterSprayAttack },
+    { duration: 100, interval: 300, attack: emptyAttack },
+    { duration: 800, interval: 60, attack: basicCenterSpreadAttack },
+    { duration: 100, interval: 300, attack: emptyAttack },
+    { duration: 500, interval: 100, attack: basicDirectedAttack },
+    { duration: 100, interval: 300, attack: emptyAttack }
+  ],
+  0.4,
+  triangleMove
 )
 const enemies = ref<Enemy[]>([enemy1])
 
@@ -446,7 +579,7 @@ onUnmounted(() => {
           <circle
             class="bullet"
             v-for="bullet in enemyBullets"
-            :key="`${bullet.createdTimestamp}+${bullet.cx}`"
+            :key="`${bullet.createdTimestamp}+${bullet.cx}+${bullet.id}`"
             :style="{ fill: bullet.color }"
             :cx="bullet.cx"
             :cy="bullet.cy"
@@ -466,7 +599,7 @@ onUnmounted(() => {
 }
 
 .enemy {
-  fill: red;
+  fill: orange;
 }
 
 .hp-display {
