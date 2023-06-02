@@ -420,15 +420,6 @@ const canvas = { width: 740, height: 360 }
               height="6"
             ></rect>
           </g>
-          <circle
-            class="bullets"
-            v-for="bullet in enemyBullets"
-            :key="`${bullet.timestamp}+${bullet.color}`"
-            :style="{ '--color': bullet.color }"
-            :cx="bullet.x"
-            :cy="bullet.y"
-            :r="2"
-          ></circle>
         </svg>
       </div>
     </div>

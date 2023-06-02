@@ -1,60 +1,31 @@
 <script setup lang="ts">
 import { useBreakpoints } from '../util/dimensions'
 import { ref, reactive, onMounted, onUnmounted, watch } from 'vue'
+import { getPowerLevel, rotate } from '../util/helpers'
+import {
+  PLAYER_WIDTH,
+  PLAYER_HEIGHT,
+  PLAYER_HIT_HEIGHT,
+  PLAYER_HIT_WIDTH,
+  PLAYER_SPEED,
+  BASE_PLAYER_ATTACK_INTERVAL,
+  RED,
+  GREEN,
+  BLUE,
+  Target,
+  BULLET_SCREEN_PADDING,
+  BASIC_ENEMY_BULLET_SPEED,
+  NUM_CENTER_SPRAY,
+  NUM_CENTER_SPREAD,
+  NUM_ROTATED,
+  type Canvas,
+  type MovePattern,
+  type AttackPattern,
+  type ControlsPressed
+} from '../util/const'
 const { type } = useBreakpoints()
-
-// constants
-const PLAYER_WIDTH = 10
-const PLAYER_HEIGHT = 30
-const PLAYER_HIT_WIDTH = 2
-const PLAYER_HIT_HEIGHT = 2
-const BASE_PLAYER_ATTACK_INTERVAL = 400
-const PLAYER_SPEED = 1
-const PLAYER_INVUL_TIMER = 80
-
-const BASIC_ENEMY_BULLET_SPEED = 1
-const BULLET_SCREEN_PADDING = 30
-
-const GREEN = '#66ffb8'
-const RED = '#ff668e'
-const BLUE = '#2c80ff'
-
-// type and class defs
-type ControlsPressed = {
-  up: boolean
-  down: boolean
-  left: boolean
-  right: boolean
-}
-
-enum Target {
-  PLAYER,
-  ENEMY
-}
-
-type Canvas = {
-  width: number
-  height: number
-}
 const canvas: Canvas = { width: 300, height: 400 }
 
-type MovePattern = {
-  duration: number
-  xVel: number
-  yVel: number
-  rotation?: number
-  rotationDuration?: number
-}
-
-type AttackPattern = {
-  duration: number
-  interval: number
-  attack: (cx: number, cy: number, timeLeft: number) => void
-}
-
-function getPowerLevel(power: number) {
-  return power < 10 ? 0 : power < 30 ? 1 : 2
-}
 class Player {
   cx: number
   cy: number
@@ -307,6 +278,33 @@ class Bullet {
   }
 }
 
+class Powerup {
+  cx: number
+  cy: number
+  size: number
+  constructor(cx: number, cy: number, size: number) {
+    this.cx = cx
+    this.cy = cy
+    this.size = size
+  }
+}
+
+function collides(x: number, y: number, width: number, height: number, bullet: Bullet) {
+  if (
+    y + height / 2 > bullet.cy - bullet.height / 2 &&
+    y - height / 2 < bullet.cy + bullet.height / 2
+  ) {
+    // check for x:
+    if (
+      x + width / 2 > bullet.cx - bullet.width / 2 &&
+      x - width / 2 < bullet.cx + bullet.width / 2
+    ) {
+      return true
+    }
+  }
+  return false
+}
+
 // consts for attacks
 function emptyAttack() {
   return
@@ -328,7 +326,6 @@ function basicDirectedAttack(cx: number, cy: number) {
   enemyBullets.value.push(bullet3)
 }
 
-const NUM_CENTER_SPREAD = 60
 function basicCenterSpreadAttack(cx: number, cy: number) {
   const bulletSpeed = 0.8
   for (let i = 0; i < NUM_CENTER_SPREAD; i++) {
@@ -347,7 +344,6 @@ function basicCenterSpreadAttack(cx: number, cy: number) {
     enemyBullets.value.push(bullet)
   }
 }
-const NUM_CENTER_SPRAY = 8
 function basicCenterSprayAttack(cx: number, cy: number, timeLeft: number) {
   const bulletSpeed = 1
   const modifier = ((Math.sin(timeLeft / 80) >= 0 ? 1 : -1) * timeLeft) / 150
@@ -377,7 +373,6 @@ function basicCenterSprayAttack(cx: number, cy: number, timeLeft: number) {
     enemyBullets.value.push(bullet)
   }
 }
-const NUM_ROTATED = 40
 function basicRotatedAttack(cx: number, cy: number, timeLeft: number) {
   let color = RED
   if (Math.floor(timeLeft / 100) % 2 === 1) {
@@ -412,13 +407,6 @@ function basicRotatedAttack(cx: number, cy: number, timeLeft: number) {
     const movePatterns = [patternDirectional, patternStop, patternRotated]
     const bullet = new Bullet(cx, cy, 2, 2, movePatterns, color, Date.now(), i)
     enemyBullets.value.push(bullet)
-  }
-}
-
-function rotate(x: number, y: number, rotation: number) {
-  return {
-    x: Math.cos(rotation) * x - Math.sin(rotation) * y,
-    y: Math.sin(rotation) * x + Math.cos(rotation) * y
   }
 }
 
@@ -469,22 +457,6 @@ const enemyBullets = ref<Bullet[]>([])
 
 const controlsPressed = ref<ControlsPressed>({ up: false, down: false, left: false, right: false })
 const controlKeys = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd'])
-
-function collides(x: number, y: number, width: number, height: number, bullet: Bullet) {
-  if (
-    y + height / 2 > bullet.cy - bullet.height / 2 &&
-    y - height / 2 < bullet.cy + bullet.height / 2
-  ) {
-    // check for x:
-    if (
-      x + width / 2 > bullet.cx - bullet.width / 2 &&
-      x - width / 2 < bullet.cx + bullet.width / 2
-    ) {
-      return true
-    }
-  }
-  return false
-}
 
 function update() {
   if (paused.value) {
