@@ -8,11 +8,12 @@ const PLAYER_WIDTH = 10
 const PLAYER_HEIGHT = 30
 const PLAYER_HIT_WIDTH = 2
 const PLAYER_HIT_HEIGHT = 2
-const PLAYER_ATTACK_INTERVAL = 120
+const BASE_PLAYER_ATTACK_INTERVAL = 400
 const PLAYER_SPEED = 1
 const PLAYER_INVUL_TIMER = 80
 
 const BASIC_ENEMY_BULLET_SPEED = 1
+const BULLET_SCREEN_PADDING = 30
 
 const GREEN = '#66ffb8'
 const RED = '#ff668e'
@@ -24,6 +25,11 @@ type ControlsPressed = {
   down: boolean
   left: boolean
   right: boolean
+}
+
+enum Target {
+  PLAYER,
+  ENEMY
 }
 
 type Canvas = {
@@ -46,6 +52,9 @@ type AttackPattern = {
   attack: (cx: number, cy: number, timeLeft: number) => void
 }
 
+function getPowerLevel(power: number) {
+  return power < 10 ? 0 : power < 30 ? 1 : 2
+}
 class Player {
   cx: number
   cy: number
@@ -53,6 +62,7 @@ class Player {
   hp: number
   power = 0
   invulTimer = 0
+  homingFireTrigger = 0
   constructor(maxHp: number, x: number, y: number) {
     this.maxHp = maxHp
     this.hp = maxHp
@@ -60,16 +70,47 @@ class Player {
     this.cy = y
   }
   attack(cx: number, cy: number) {
+    this.homingFireTrigger -= 1
+    const powerLevel = getPowerLevel(this.power)
     const straightPattern: MovePattern[] = [{ duration: -1, xVel: 0, yVel: -2 }]
-    const centerBullet = new Bullet(cx, cy, 2, 2, straightPattern, 'white', Date.now(), 0)
-    playerBullets.value.push(centerBullet)
+    if (powerLevel !== 2) {
+      const centerBullet = new Bullet(cx, cy, 2, 2, straightPattern, 'white', Date.now(), 0)
+      playerBullets.value.push(centerBullet)
+    } else {
+      // Add 1 more bullet
+      const centerBullet = new Bullet(cx - 1, cy, 2, 2, straightPattern, 'white', Date.now(), 0)
+      const centerBullet2 = new Bullet(cx + 1, cy, 2, 2, straightPattern, 'white', Date.now(), 1)
+      playerBullets.value.push(centerBullet)
+      playerBullets.value.push(centerBullet2)
+    }
+    if (this.homingFireTrigger <= 0) {
+      // Add 1 homing missle
+      const homingBullet = new Bullet(
+        cx,
+        cy,
+        2,
+        2,
+        straightPattern,
+        'gold',
+        Date.now() + 1,
+        0,
+        true,
+        Target.ENEMY
+      )
+      playerBullets.value.push(homingBullet)
+      this.homingFireTrigger = 3 - powerLevel
+    }
   }
   isAlive() {
     return this.hp > 0
   }
   reset() {
     this.hp = this.maxHp
-    setInterval(this.attack, PLAYER_ATTACK_INTERVAL)
+    setInterval(() => {
+      if (!paused.value) {
+        this.attack(this.cx, this.cy)
+      }
+    }, BASE_PLAYER_ATTACK_INTERVAL - this.power * 80)
   }
   handleMovement() {
     if (controlsPressed.value.up && this.cy - PLAYER_SPEED - PLAYER_HEIGHT / 2 > 0) {
@@ -174,7 +215,9 @@ class Bullet {
   moveIndex = 0
   id: number
   homing?: boolean
-  target?: Enemy | Player
+  target?: Target
+  lastDeltaX = 0
+  lastDeltaY = 0
   constructor(
     x: number,
     y: number,
@@ -185,7 +228,7 @@ class Bullet {
     createdTimestamp: number,
     id: number,
     homing?: boolean,
-    target?: Enemy
+    target?: Target
   ) {
     this.cx = x
     this.cy = y
@@ -210,26 +253,53 @@ class Bullet {
     const currentMovePattern = this.movePatterns[this.moveIndex]
     let deltaX = currentMovePattern.xVel
     let deltaY = currentMovePattern.yVel
-    if (currentMovePattern.rotation) {
-      const rotated = rotate(
-        deltaX,
-        deltaY,
-        currentMovePattern.rotationDuration
-          ? (currentMovePattern.rotation * this.moveTimer) / currentMovePattern.rotationDuration
-          : currentMovePattern.rotation
-      )
-      deltaX = rotated.x
-      deltaY = rotated.y
+    if (this.homing) {
+      let target = null
+      if (this.target === Target.ENEMY && enemies.value.length > 0) {
+        target = enemies.value[0]
+      }
+      if (this.target === Target.PLAYER) {
+        target = player
+      }
+      if (target) {
+        const diffX = target.cx - this.cx
+        const diffY = target.cy - this.cy
+        const hypo = Math.hypot(diffX, diffY)
+        const xVel = diffX / hypo
+        const yVel = diffY / hypo
+        this.cx += xVel
+        this.cy += yVel
+        this.lastDeltaX = xVel
+        this.lastDeltaY = yVel
+      } else {
+        this.cx += this.lastDeltaX
+        this.cy += this.lastDeltaY
+      }
+    } else {
+      if (currentMovePattern.rotation) {
+        const rotated = rotate(
+          deltaX,
+          deltaY,
+          currentMovePattern.rotationDuration
+            ? (currentMovePattern.rotation * this.moveTimer) / currentMovePattern.rotationDuration
+            : currentMovePattern.rotation
+        )
+        deltaX = rotated.x
+        deltaY = rotated.y
+      }
+      this.cx = this.cx + deltaX
+      this.cy = this.cy + deltaY
     }
-    this.cx = this.cx + deltaX
-    this.cy = this.cy + deltaY
 
     //Check whether or not a bullet is off-screen
-    if (this.cx - this.width > canvas.width * 1.2 || this.cx + this.width < -canvas.width / 5) {
+    if (
+      this.cx - this.width > canvas.width + BULLET_SCREEN_PADDING ||
+      this.cx + this.width < -BULLET_SCREEN_PADDING
+    ) {
       this.delete = true
     } else if (
-      this.cy - this.height > canvas.height * 1.2 ||
-      this.cy + this.height < -canvas.height / 5
+      this.cy - this.height > canvas.height + BULLET_SCREEN_PADDING ||
+      this.cy + this.height < -BULLET_SCREEN_PADDING
     ) {
       this.delete = true
     }
@@ -249,12 +319,18 @@ function basicDirectedAttack(cx: number, cy: number) {
   const yVel = (deltaY / hypo) * BASIC_ENEMY_BULLET_SPEED
   const patternTowards: MovePattern = { duration: -1, xVel, yVel }
   const bullet = new Bullet(cx, cy, 5, 5, [patternTowards], GREEN, Date.now(), 0)
+  const patternTowards2: MovePattern = { duration: -1, xVel: xVel + 0.03, yVel }
+  const bullet2 = new Bullet(cx + 5, cy, 5, 5, [patternTowards2], GREEN, Date.now(), 1)
+  const patternTowards3: MovePattern = { duration: -1, xVel: xVel - 0.03, yVel }
+  const bullet3 = new Bullet(cx - 5, cy, 5, 5, [patternTowards3], GREEN, Date.now(), 2)
   enemyBullets.value.push(bullet)
+  enemyBullets.value.push(bullet2)
+  enemyBullets.value.push(bullet3)
 }
 
-const NUM_CENTER_SPREAD = 70
+const NUM_CENTER_SPREAD = 60
 function basicCenterSpreadAttack(cx: number, cy: number) {
-  const bulletSpeed = 0.7
+  const bulletSpeed = 0.8
   for (let i = 0; i < NUM_CENTER_SPREAD; i++) {
     const xVel =
       -Math.cos(((Math.PI * 2) / NUM_CENTER_SPREAD) * i) +
@@ -314,21 +390,22 @@ function basicRotatedAttack(cx: number, cy: number, timeLeft: number) {
     const yVel =
       Math.sin(((Math.PI * 2) / NUM_ROTATED) * i) + Math.cos(((Math.PI * 2) / NUM_ROTATED) * i)
     const patternDirectional: MovePattern = {
-      duration: 70,
+      duration: 80,
       xVel: xVel * bulletSpeed,
       yVel: yVel * bulletSpeed
     }
     const patternStop: MovePattern = {
       duration: 100,
-      xVel: 0,
-      yVel: 0
+      xVel: xVel * 0.05,
+      yVel: yVel * 0.05
     }
-    const rotated = rotate(xVel, yVel, -Math.PI / 2)
+    const alternator = color === RED ? 1 : -1
+    const rotated = rotate(xVel, yVel, (-Math.PI * alternator) / 2)
     const patternRotated: MovePattern = {
       duration: -1,
       xVel: rotated.x * (bulletSpeed * 1.4),
       yVel: rotated.y * (bulletSpeed * 1.4),
-      rotation: -Math.PI / 4,
+      rotation: (-Math.PI * alternator) / 4,
       rotationDuration: 400
     }
 
@@ -471,15 +548,19 @@ function update() {
 
 function init() {
   updateHandler.value = setInterval(update, 10)
-  setInterval(() => {
-    if (!paused.value) player.attack(player.cx, player.cy - PLAYER_HEIGHT / 2)
-  }, PLAYER_ATTACK_INTERVAL)
+  player.reset()
 }
 
 function onKeyDown(event: KeyboardEvent) {
   if (event.key === ' ') {
     enemies.value[0].hp -= 1
     paused.value = !paused.value
+  }
+  if (event.key === 'p') {
+    player.power += 5
+  }
+  if (event.key === 'x') {
+    enemies.value[0].hp -= 100
   }
   if (controlKeys.has(event.key)) {
     event.preventDefault()
@@ -563,7 +644,8 @@ onUnmounted(() => {
           <circle
             class="bullet"
             v-for="bullet in playerBullets"
-            :key="`${bullet.createdTimestamp}+${bullet.cx}`"
+            :class="{ homing: bullet.homing }"
+            :key="`${bullet.createdTimestamp}+${bullet.id}`"
             :style="{ fill: bullet.color }"
             :cx="bullet.cx"
             :cy="bullet.cy"
