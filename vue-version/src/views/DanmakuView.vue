@@ -3,25 +3,27 @@ import { useBreakpoints } from '../util/dimensions'
 import { ref, reactive, onMounted, onUnmounted, watch } from 'vue'
 import { getPowerLevel, rotate } from '../util/helpers'
 import {
-  PLAYER_WIDTH,
+  BASE_PLAYER_ATTACK_INTERVAL,
+  BASIC_ENEMY_BULLET_SPEED,
+  BLUE,
+  BULLET_SCREEN_PADDING,
+  GREEN,
+  NUM_CENTER_SPRAY,
+  NUM_CENTER_SPREAD,
+  NUM_ROTATED,
   PLAYER_HEIGHT,
   PLAYER_HIT_HEIGHT,
   PLAYER_HIT_WIDTH,
   PLAYER_SPEED,
-  BASE_PLAYER_ATTACK_INTERVAL,
+  PLAYER_WIDTH,
+  POWERUP_ACC,
+  POWERUP_INITIAL_SPEED,
   RED,
-  GREEN,
-  BLUE,
   Target,
-  BULLET_SCREEN_PADDING,
-  BASIC_ENEMY_BULLET_SPEED,
-  NUM_CENTER_SPRAY,
-  NUM_CENTER_SPREAD,
-  NUM_ROTATED,
-  type Canvas,
-  type MovePattern,
   type AttackPattern,
-  type ControlsPressed
+  type Canvas,
+  type ControlsPressed,
+  type MovePattern
 } from '../util/const'
 const { type } = useBreakpoints()
 const canvas: Canvas = { width: 300, height: 400 }
@@ -282,6 +284,8 @@ class Powerup {
   cx: number
   cy: number
   size: number
+  speedX = POWERUP_INITIAL_SPEED
+  accX = POWERUP_ACC
   constructor(cx: number, cy: number, size: number) {
     this.cx = cx
     this.cy = cy
@@ -454,6 +458,7 @@ const enemies = ref<Enemy[]>([enemy1])
 
 const playerBullets = ref<Bullet[]>([])
 const enemyBullets = ref<Bullet[]>([])
+const powerups = ref<Powerup[]>([])
 
 const controlsPressed = ref<ControlsPressed>({ up: false, down: false, left: false, right: false })
 const controlKeys = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd'])

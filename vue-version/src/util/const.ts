@@ -19,6 +19,9 @@ export const NUM_CENTER_SPREAD = 60
 export const NUM_CENTER_SPRAY = 8
 export const NUM_ROTATED = 40
 
+export const POWERUP_INITIAL_SPEED = -10
+export const POWERUP_ACC = 3
+
 // type and class defs
 export type ControlsPressed = {
   up: boolean
