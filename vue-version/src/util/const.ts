@@ -19,8 +19,11 @@ export const NUM_CENTER_SPREAD = 60
 export const NUM_CENTER_SPRAY = 8
 export const NUM_ROTATED = 40
 
-export const POWERUP_INITIAL_SPEED = -10
-export const POWERUP_ACC = 3
+export const POWERUP_INITIAL_SPEED = -1.3
+export const POWERUP_ACC = 0.03
+export const POWERUP_TERMINAL_VEL = 1.4
+export const POWERUP_BASE_SIZE = 7
+export const POWERUP_SIZE_FACTOR = 3
 
 // type and class defs
 export type ControlsPressed = {

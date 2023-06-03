@@ -2,6 +2,8 @@
 import { useBreakpoints } from '../util/dimensions'
 import { ref, reactive, onMounted, onUnmounted, watch } from 'vue'
 import { getPowerLevel, rotate } from '../util/helpers'
+import powerupImage from '../assets/game/img/powerup.png'
+
 import {
   BASE_PLAYER_ATTACK_INTERVAL,
   BASIC_ENEMY_BULLET_SPEED,
@@ -17,7 +19,10 @@ import {
   PLAYER_SPEED,
   PLAYER_WIDTH,
   POWERUP_ACC,
+  POWERUP_BASE_SIZE,
   POWERUP_INITIAL_SPEED,
+  POWERUP_SIZE_FACTOR,
+  POWERUP_TERMINAL_VEL,
   RED,
   Target,
   type AttackPattern,
@@ -61,8 +66,8 @@ class Player {
       const homingBullet = new Bullet(
         cx,
         cy,
-        2,
-        2,
+        3,
+        3,
         straightPattern,
         'gold',
         Date.now() + 1,
@@ -109,6 +114,7 @@ class Enemy {
   name: string
   maxHp: number
   hp: number
+  entrance: boolean
   attackPatterns: AttackPattern[]
   attackIndex = 0
   attackTimer = 0
@@ -117,6 +123,7 @@ class Enemy {
   movePatterns: MovePattern[]
   moveIndex = 0
   moveTimer = 0
+  powerupSize: number
 
   constructor(
     name: string,
@@ -127,7 +134,9 @@ class Enemy {
     height: number,
     attacks: AttackPattern[],
     speed: number,
-    movePatterns: MovePattern[]
+    movePatterns: MovePattern[],
+    powerupSize: number,
+    entrance?: boolean
   ) {
     this.name = name
     this.maxHp = maxHp
@@ -139,9 +148,22 @@ class Enemy {
     this.attackPatterns = attacks
     this.movePatterns = movePatterns
     this.speed = speed
+    this.powerupSize = powerupSize
+    if (entrance) {
+      this.entrance = true
+    } else {
+      this.entrance = false
+    }
   }
 
   handleMovement() {
+    if (this.entrance) {
+      this.cy += 0.3
+      if (this.cy > 50) {
+        this.entrance = false
+      }
+      return
+    }
     //update a bullets coordinates
     const currentMoveCap = this.movePatterns[this.moveIndex].duration
     if (currentMoveCap !== -1 && this.moveTimer > currentMoveCap) {
@@ -158,6 +180,7 @@ class Enemy {
     this.cy = this.cy + (deltaY / mag) * this.speed
   }
   attack(cx: number, cy: number) {
+    if (this.entrance) return
     const currentAttackCap = this.attackPatterns[this.attackIndex].duration
     if (currentAttackCap !== -1 && this.attackTimer > currentAttackCap) {
       // Go to the next pattern
@@ -172,6 +195,13 @@ class Enemy {
     }
     this.attackTimer++
     this.attackIntervalTimer--
+  }
+
+  spawnPowerUp() {
+    if (this.powerupSize !== 0) {
+      const powerup = new Powerup(this.cx, this.cy, this.powerupSize)
+      powerups.value.push(powerup)
+    }
   }
 }
 
@@ -190,7 +220,7 @@ class Bullet {
   homing?: boolean
   target?: Target
   lastDeltaX = 0
-  lastDeltaY = 0
+  lastDeltaY = -1
   constructor(
     x: number,
     y: number,
@@ -284,13 +314,47 @@ class Powerup {
   cx: number
   cy: number
   size: number
-  speedX = POWERUP_INITIAL_SPEED
-  accX = POWERUP_ACC
+  delete = false
+  speedY = POWERUP_INITIAL_SPEED
+  accY = POWERUP_ACC
   constructor(cx: number, cy: number, size: number) {
     this.cx = cx
     this.cy = cy
     this.size = size
   }
+  collidesWithPlayer() {
+    if (
+      this.cy + (this.size * POWERUP_SIZE_FACTOR + POWERUP_BASE_SIZE) >
+        player.cy - PLAYER_HEIGHT / 2 &&
+      this.cy < player.cy + PLAYER_HEIGHT / 2
+    ) {
+      // check x
+      if (
+        this.cx + (this.size * POWERUP_SIZE_FACTOR + POWERUP_BASE_SIZE) >
+          player.cx - PLAYER_WIDTH / 2 &&
+        this.cx < player.cx + PLAYER_WIDTH / 2
+      ) {
+        return true
+      }
+    }
+    return false
+  }
+  update() {
+    this.cy += this.speedY
+    if (this.speedY < POWERUP_TERMINAL_VEL) {
+      this.speedY += this.accY
+    }
+    if (this.cx - this.size / 2 > canvas.width || this.cx + this.size / 2 < 0) {
+      this.delete = true
+    } else if (this.cy - this.size > canvas.height || this.cy + this.size < 0) {
+      this.delete = true
+    }
+  }
+}
+
+export type Spawn = {
+  interval: number
+  enemies: Enemy[]
 }
 
 function collides(x: number, y: number, width: number, height: number, bullet: Bullet) {
@@ -312,6 +376,17 @@ function collides(x: number, y: number, width: number, height: number, bullet: B
 // consts for attacks
 function emptyAttack() {
   return
+}
+
+function basicSingleDirectedAttack(cx: number, cy: number) {
+  const deltaX = player.cx - cx
+  const deltaY = player.cy - cy
+  const hypo = Math.hypot(deltaX, deltaY)
+  const xVel = (deltaX / hypo) * BASIC_ENEMY_BULLET_SPEED
+  const yVel = (deltaY / hypo) * BASIC_ENEMY_BULLET_SPEED
+  const patternTowards: MovePattern = { duration: -1, xVel, yVel }
+  const bullet = new Bullet(cx, cy, 4, 4, [patternTowards], GREEN, Date.now(), 0)
+  enemyBullets.value.push(bullet)
 }
 function basicDirectedAttack(cx: number, cy: number) {
   const deltaX = player.cx - cx
@@ -344,7 +419,7 @@ function basicCenterSpreadAttack(cx: number, cy: number) {
       xVel: xVel * bulletSpeed,
       yVel: yVel * bulletSpeed
     }
-    const bullet = new Bullet(cx, cy, 2, 2, [patternDirectional], RED, Date.now(), i)
+    const bullet = new Bullet(cx, cy, 3, 3, [patternDirectional], RED, Date.now(), i)
     enemyBullets.value.push(bullet)
   }
 }
@@ -367,8 +442,8 @@ function basicCenterSprayAttack(cx: number, cy: number, timeLeft: number) {
     const bullet = new Bullet(
       cx,
       cy,
-      2,
-      2,
+      3,
+      3,
       [patternDirectional],
       Math.sin(timeLeft / 80) >= 0 ? RED : BLUE,
       Date.now(),
@@ -409,7 +484,7 @@ function basicRotatedAttack(cx: number, cy: number, timeLeft: number) {
     }
 
     const movePatterns = [patternDirectional, patternStop, patternRotated]
-    const bullet = new Bullet(cx, cy, 2, 2, movePatterns, color, Date.now(), i)
+    const bullet = new Bullet(cx, cy, 3, 3, movePatterns, color, Date.now(), i)
     enemyBullets.value.push(bullet)
   }
 }
@@ -434,13 +509,14 @@ watch(gameOver, () => {
 })
 const player = reactive(new Player(200, canvas.width / 2, canvas.height - 30))
 const playerScore = ref(0)
-const enemy1 = new Enemy(
-  'shit',
+const boss1 = new Enemy(
+  'boss1',
   500,
   canvas.width / 2,
-  40,
+  0,
   20,
   25,
+
   [
     { duration: 1000, interval: 100, attack: basicRotatedAttack },
     { duration: 100, interval: 300, attack: emptyAttack },
@@ -452,9 +528,11 @@ const enemy1 = new Enemy(
     { duration: 100, interval: 300, attack: emptyAttack }
   ],
   0.4,
-  triangleMove
+  triangleMove,
+  1,
+  true
 )
-const enemies = ref<Enemy[]>([enemy1])
+const enemies = ref<Enemy[]>([])
 
 const playerBullets = ref<Bullet[]>([])
 const enemyBullets = ref<Bullet[]>([])
@@ -463,10 +541,79 @@ const powerups = ref<Powerup[]>([])
 const controlsPressed = ref<ControlsPressed>({ up: false, down: false, left: false, right: false })
 const controlKeys = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd'])
 
+const downRight: MovePattern[] = [
+  { xVel: 0, yVel: 1, duration: 200 },
+  { xVel: 1, yVel: 0.5, duration: -1 }
+]
+const downLeft: MovePattern[] = [
+  { xVel: 0, yVel: 1, duration: 200 },
+  { xVel: -1, yVel: 0.5, duration: -1 }
+]
+
+function getBasicEnemy(cx: number, move: MovePattern[]) {
+  const basicLeftEnemey = {
+    interval: 80,
+    enemies: [
+      new Enemy(
+        'generic',
+        5,
+        cx,
+        0,
+        20,
+        25,
+        [{ duration: -1, interval: 300, attack: basicSingleDirectedAttack }],
+        0.5,
+        move,
+        Math.random() > 0.5 ? 2 : 1
+      )
+    ]
+  }
+  return basicLeftEnemey
+}
+
+const leftWave = [
+  getBasicEnemy(40, downRight),
+  getBasicEnemy(40, downRight),
+  getBasicEnemy(40, downRight),
+  getBasicEnemy(40, downRight),
+  getBasicEnemy(40, downRight),
+  {
+    interval: 500,
+    enemies: []
+  }
+]
+
+const rightWave = [
+  getBasicEnemy(canvas.width - 40, downLeft),
+  getBasicEnemy(canvas.width - 40, downLeft),
+  getBasicEnemy(canvas.width - 40, downLeft),
+  getBasicEnemy(canvas.width - 40, downLeft),
+  getBasicEnemy(canvas.width - 40, downLeft),
+  {
+    interval: 500,
+    enemies: []
+  }
+]
+
+const bossWave = { enemies: [boss1], interval: 0 }
+const currentLevel = ref<Spawn[]>([...leftWave, ...rightWave, bossWave])
+const currentInterval = ref(200)
+
+function handleSpawn() {
+  if (currentLevel.value.length === 0) return
+  currentInterval.value -= 1
+  if (currentInterval.value > 0) return
+  const currentSpawn = currentLevel.value.shift()
+  if (!currentSpawn) return
+  currentInterval.value = currentSpawn.interval
+  enemies.value.push(...currentSpawn.enemies)
+}
+
 function update() {
   if (paused.value) {
     return
   }
+  handleSpawn()
   if (!player.isAlive()) {
     gameOver.value = true
   }
@@ -510,10 +657,17 @@ function update() {
     if (enemy.hp <= 0) {
       deadEnemyIdx.add(i)
       playerScore.value += 1
+      enemy.spawnPowerUp()
     }
-    if (enemy.cx - enemy.width > canvas.width || enemy.cx + enemy.width < 0) {
+    if (
+      enemy.cx - enemy.width > canvas.width + BULLET_SCREEN_PADDING ||
+      enemy.cx + enemy.width < -BULLET_SCREEN_PADDING
+    ) {
       deadEnemyIdx.add(i)
-    } else if (enemy.cy - enemy.height > canvas.height || enemy.cy + enemy.height < 0) {
+    } else if (
+      enemy.cy - enemy.height > canvas.height + BULLET_SCREEN_PADDING ||
+      enemy.cy + enemy.height < -BULLET_SCREEN_PADDING
+    ) {
       deadEnemyIdx.add(i)
     }
   })
@@ -521,6 +675,19 @@ function update() {
   enemies.value.forEach((enemy) => {
     enemy.attack(enemy.cx, enemy.cy)
   })
+
+  const deadPowerups = new Set<number>()
+  powerups.value.forEach((powerup, i) => {
+    powerup.update()
+    if (powerup.collidesWithPlayer()) {
+      player.power += powerup.size
+      powerup.delete = true
+    }
+    if (powerup.delete) {
+      deadPowerups.add(i)
+    }
+  })
+  powerups.value = powerups.value.filter((_, i) => !deadPowerups.has(i))
 }
 
 function init() {
@@ -595,6 +762,10 @@ onUnmounted(() => {
 <template>
   <main :class="type">
     <div class="col d-flex justify-content-center">
+      <div class="stats col-1">
+        <div class="row d-flex">{{ `HP: ${player.hp}` }}</div>
+        <div class="row d-flex">{{ `Power: ${player.power}` }}</div>
+      </div>
       <div class="game-viewport">
         <svg :height="canvas.height" :width="canvas.width">
           <!--Player related-->
@@ -631,12 +802,13 @@ onUnmounted(() => {
           <!--Enemy Related-->
           <g
             v-for="enemy in enemies"
-            :key="`${enemy.height} + ${enemy.width}`"
+            :key="`${enemy.name} + ${enemy.cx} + ${enemy.cy}`"
             :x="enemy.cx"
             :y="enemy.cy"
           >
             <rect
               class="enemy"
+              :class="enemy.name"
               :width="enemy.width"
               :height="enemy.height"
               :x="enemy.cx - enemy.width / 2"
@@ -655,6 +827,15 @@ onUnmounted(() => {
             :cy="bullet.cy"
             :r="bullet.width"
           ></circle>
+          <image
+            v-for="powerup in powerups"
+            :key="powerup.cx + powerup.cy"
+            :href="powerupImage"
+            :x="powerup.cx"
+            :y="powerup.cy"
+            :width="powerup.size * POWERUP_SIZE_FACTOR + POWERUP_BASE_SIZE"
+            :height="powerup.size * POWERUP_SIZE_FACTOR + POWERUP_BASE_SIZE"
+          ></image>
         </svg>
       </div>
     </div>
@@ -668,8 +849,12 @@ onUnmounted(() => {
   stroke-width: 1.5px;
 }
 
-.enemy {
+.boss1 {
   fill: #ff9966;
+}
+
+.generic {
+  fill: #b24bf3;
 }
 
 .hp-display {
@@ -682,5 +867,8 @@ onUnmounted(() => {
   border-radius: 4px;
   width: 302px;
   height: 402px;
+}
+.stats {
+  position: relative;
 }
 </style>
