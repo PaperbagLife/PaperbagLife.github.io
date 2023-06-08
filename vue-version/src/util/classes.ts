@@ -1,5 +1,8 @@
 import {
+  BASE_PLAYER_ATTACK_INTERVAL,
   BULLET_SCREEN_PADDING,
+  CANVAS_HEIGHT,
+  CANVAS_WIDTH,
   PLAYER_HEIGHT,
   PLAYER_SPEED,
   PLAYER_WIDTH,
@@ -11,9 +14,7 @@ import {
   Target,
   type AttackPattern,
   type ControlsPressed,
-  type MovePattern,
-  type CanvasDimensions,
-  BASE_PLAYER_ATTACK_INTERVAL
+  type MovePattern
 } from './const'
 import { getPowerLevel, rotate } from './helpers'
 
@@ -105,23 +106,17 @@ export class Player {
   reset() {
     this.hp = this.maxHp
   }
-  handleMovement(controlsPressed: ControlsPressed, canvasDimensions: CanvasDimensions) {
+  handleMovement(controlsPressed: ControlsPressed) {
     if (controlsPressed.up && this.cy - PLAYER_SPEED - PLAYER_HEIGHT / 2 > 0) {
       this.cy -= PLAYER_SPEED
     }
-    if (
-      controlsPressed.down &&
-      this.cy + PLAYER_SPEED + PLAYER_HEIGHT / 2 < canvasDimensions.height
-    ) {
+    if (controlsPressed.down && this.cy + PLAYER_SPEED + PLAYER_HEIGHT / 2 < CANVAS_HEIGHT) {
       this.cy += PLAYER_SPEED
     }
     if (controlsPressed.left && this.cx - PLAYER_SPEED - PLAYER_WIDTH / 2 > 0) {
       this.cx -= PLAYER_SPEED
     }
-    if (
-      controlsPressed.right &&
-      this.cx + PLAYER_SPEED + PLAYER_WIDTH / 2 < canvasDimensions.width
-    ) {
+    if (controlsPressed.right && this.cx + PLAYER_SPEED + PLAYER_WIDTH / 2 < CANVAS_WIDTH) {
       this.cx += PLAYER_SPEED
     }
   }
@@ -266,7 +261,7 @@ export class Bullet {
     this.id = id
   }
 
-  update(enemies: Enemy[], player: Player, canvasDimensions: CanvasDimensions) {
+  update(enemies: Enemy[], player: Player) {
     //update a bullets coordinates
     const currentMoveCap = this.movePatterns[this.moveIndex].duration
     if (currentMoveCap !== -1 && this.moveTimer > currentMoveCap) {
@@ -317,12 +312,12 @@ export class Bullet {
 
     //Check whether or not a bullet is off-screen
     if (
-      this.cx - this.width > canvasDimensions.width + BULLET_SCREEN_PADDING ||
+      this.cx - this.width > CANVAS_WIDTH + BULLET_SCREEN_PADDING ||
       this.cx + this.width < -BULLET_SCREEN_PADDING
     ) {
       this.delete = true
     } else if (
-      this.cy - this.height > canvasDimensions.height + BULLET_SCREEN_PADDING ||
+      this.cy - this.height > CANVAS_HEIGHT + BULLET_SCREEN_PADDING ||
       this.cy + this.height < -BULLET_SCREEN_PADDING
     ) {
       this.delete = true
@@ -360,14 +355,14 @@ export class Powerup {
     }
     return false
   }
-  update(canvasDimensions: CanvasDimensions) {
+  update() {
     this.cy += this.speedY
     if (this.speedY < POWERUP_TERMINAL_VEL) {
       this.speedY += this.accY
     }
-    if (this.cx - this.size / 2 > canvasDimensions.width || this.cx + this.size / 2 < 0) {
+    if (this.cx - this.size / 2 > CANVAS_WIDTH || this.cx + this.size / 2 < 0) {
       this.delete = true
-    } else if (this.cy - this.size > canvasDimensions.height || this.cy + this.size < 0) {
+    } else if (this.cy - this.size > CANVAS_HEIGHT || this.cy + this.size < 0) {
       this.delete = true
     }
   }

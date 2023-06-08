@@ -23,7 +23,6 @@ import { leftWave, rightWave, bossWave } from '../util/levels'
 import { Player, Bullet, Enemy, Powerup } from '../util/classes'
 
 const { type } = useBreakpoints()
-const canvasDimensions = { width: CANVAS_WIDTH, height: CANVAS_HEIGHT }
 let ctx: null | CanvasRenderingContext2D = null
 
 const powerupImage = new Image()
@@ -57,7 +56,7 @@ const gameOver = ref(false)
 watch(gameOver, () => {
   if (gameOver.value) paused.value = true
 })
-const player = reactive(new Player(200, canvasDimensions.width / 2, canvasDimensions.height - 30))
+const player = reactive(new Player(200, CANVAS_WIDTH / 2, CANVAS_HEIGHT - 30))
 const playerScore = ref(0)
 
 const enemies = ref<Enemy[]>([])
@@ -91,13 +90,13 @@ function update() {
     gameOver.value = true
   }
   // Handle movement
-  player.handleMovement(controlsPressed.value, canvasDimensions)
+  player.handleMovement(controlsPressed.value)
   player.attack(playerBullets.value)
   enemies.value.forEach((enemy) => {
     enemy.handleMovement()
   })
-  playerBullets.value.forEach((bullet) => bullet.update(enemies.value, player, canvasDimensions))
-  enemyBullets.value.forEach((bullet) => bullet.update(enemies.value, player, canvasDimensions))
+  playerBullets.value.forEach((bullet) => bullet.update(enemies.value, player))
+  enemyBullets.value.forEach((bullet) => bullet.update(enemies.value, player))
   // Handle collision
   const deadBulletIdx = new Set<number>()
   playerBullets.value.forEach((bullet, i) => {
@@ -134,12 +133,12 @@ function update() {
       enemy.spawnPowerUp(powerups.value)
     }
     if (
-      enemy.cx - enemy.width > canvasDimensions.width + BULLET_SCREEN_PADDING ||
+      enemy.cx - enemy.width > CANVAS_WIDTH + BULLET_SCREEN_PADDING ||
       enemy.cx + enemy.width < -BULLET_SCREEN_PADDING
     ) {
       deadEnemyIdx.add(i)
     } else if (
-      enemy.cy - enemy.height > canvasDimensions.height + BULLET_SCREEN_PADDING ||
+      enemy.cy - enemy.height > CANVAS_HEIGHT + BULLET_SCREEN_PADDING ||
       enemy.cy + enemy.height < -BULLET_SCREEN_PADDING
     ) {
       deadEnemyIdx.add(i)
@@ -152,7 +151,7 @@ function update() {
 
   const deadPowerups = new Set<number>()
   powerups.value.forEach((powerup, i) => {
-    powerup.update(canvasDimensions)
+    powerup.update()
     if (powerup.collidesWithPlayer(player.cx, player.cy)) {
       player.power += powerup.size
       powerup.delete = true
@@ -167,8 +166,8 @@ function update() {
   ctx.clearRect(
     -BULLET_SCREEN_PADDING,
     -BULLET_SCREEN_PADDING,
-    canvasDimensions.width + BULLET_SCREEN_PADDING,
-    canvasDimensions.height + BULLET_SCREEN_PADDING
+    CANVAS_WIDTH + BULLET_SCREEN_PADDING,
+    CANVAS_HEIGHT + BULLET_SCREEN_PADDING
   )
   ctx.save()
   ctx.fillStyle = 'white'
@@ -293,11 +292,7 @@ onUnmounted(() => {
         <div class="row d-flex">{{ `Power: ${player.power}` }}</div>
       </div>
       <div class="game-viewport">
-        <canvas
-          id="game-canvas"
-          :height="canvasDimensions.height"
-          :width="canvasDimensions.width"
-        ></canvas>
+        <canvas id="game-canvas" :height="CANVAS_HEIGHT" :width="CANVAS_WIDTH"></canvas>
       </div>
     </div>
   </main>
