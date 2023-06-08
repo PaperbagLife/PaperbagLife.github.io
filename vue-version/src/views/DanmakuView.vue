@@ -2,14 +2,16 @@
 import { useBreakpoints } from '../util/dimensions'
 import { ref, reactive, onMounted, onUnmounted, watch } from 'vue'
 import { getPowerLevel, rotate } from '../util/helpers'
-import powerupImage from '../assets/game/img/powerup.png'
+import powerupPNG from '../assets/game/img/powerup.png'
 
 import {
   BASE_PLAYER_ATTACK_INTERVAL,
   BASIC_ENEMY_BULLET_SPEED,
   BLUE,
+  BOSS_COLOR,
   BULLET_SCREEN_PADDING,
   GREEN,
+  GENERIC_ENEMY_COLOR,
   NUM_CENTER_SPRAY,
   NUM_CENTER_SPREAD,
   NUM_ROTATED,
@@ -32,6 +34,9 @@ import {
 const { type } = useBreakpoints()
 const canvasDimensions = { width: 300, height: 400 }
 let ctx: null | CanvasRenderingContext2D = null
+
+const powerupImage = new Image()
+powerupImage.src = powerupPNG
 
 class Player {
   cx: number
@@ -394,17 +399,23 @@ function basicSingleDirectedAttack(cx: number, cy: number) {
   const bullet = new Bullet(cx, cy, 4, 4, [patternTowards], GREEN, Date.now(), 0)
   enemyBullets.value.push(bullet)
 }
-function basicDirectedAttack(cx: number, cy: number) {
+function basicDirectedAttack(cx: number, cy: number, timeLeft: number) {
+  if (timeLeft % 200 > 100) return
+  if (timeLeft % 300 === 0) {
+    // bonus!
+    basicCenterSpreadAttack(cx, cy)
+  }
+  const bulletSpeed = 1.3
   const deltaX = player.cx - cx
   const deltaY = player.cy - cy
   const hypo = Math.hypot(deltaX, deltaY)
-  const xVel = (deltaX / hypo) * BASIC_ENEMY_BULLET_SPEED
-  const yVel = (deltaY / hypo) * BASIC_ENEMY_BULLET_SPEED
-  const patternTowards: MovePattern = { duration: -1, xVel, yVel }
+  const xVel = (deltaX / hypo) * BASIC_ENEMY_BULLET_SPEED * bulletSpeed
+  const yVel = (deltaY / hypo) * BASIC_ENEMY_BULLET_SPEED * bulletSpeed
+  const patternTowards: MovePattern = { duration: -1, xVel: xVel, yVel }
   const bullet = new Bullet(cx, cy, 5, 5, [patternTowards], GREEN, Date.now(), 0)
-  const patternTowards2: MovePattern = { duration: -1, xVel: xVel + 0.03, yVel }
+  const patternTowards2: MovePattern = { duration: -1, xVel: xVel + 0.3, yVel }
   const bullet2 = new Bullet(cx + 5, cy, 5, 5, [patternTowards2], GREEN, Date.now(), 1)
-  const patternTowards3: MovePattern = { duration: -1, xVel: xVel - 0.03, yVel }
+  const patternTowards3: MovePattern = { duration: -1, xVel: xVel - 0.3, yVel }
   const bullet3 = new Bullet(cx - 5, cy, 5, 5, [patternTowards3], GREEN, Date.now(), 2)
   enemyBullets.value.push(bullet)
   enemyBullets.value.push(bullet2)
@@ -431,7 +442,7 @@ function basicCenterSpreadAttack(cx: number, cy: number) {
 }
 function basicCenterSprayAttack(cx: number, cy: number, timeLeft: number) {
   const bulletSpeed = 1
-  const modifier = ((Math.sin(timeLeft / 80) >= 0 ? 1 : -1) * timeLeft) / 150
+  const modifier = ((Math.sin(timeLeft / 80) >= 0 ? 1 : -1) * timeLeft) / 100
   for (let i = 0; i < NUM_CENTER_SPRAY; i++) {
     const dir = i + modifier
     const xVel =
@@ -715,11 +726,6 @@ function update() {
   ctx.arc(player.cx, player.cy, PLAYER_HIT_HEIGHT, 0, 2 * Math.PI)
   ctx.fill()
   ctx.restore()
-  enemies.value.forEach((enemy) => {
-    if (ctx == null) return
-    ctx.fillStyle = enemy.name === 'generic' ? '#b24bf3' : '#ff9966'
-    ctx.fillRect(enemy.cx - enemy.width / 2, enemy.cy - enemy.height / 2, enemy.width, enemy.height)
-  })
   enemyBullets.value.forEach((bullet) => {
     if (ctx == null) return
     ctx.beginPath()
@@ -727,12 +733,26 @@ function update() {
     ctx.arc(bullet.cx, bullet.cy, bullet.width, 0, 2 * Math.PI)
     ctx.fill()
   })
+  enemies.value.forEach((enemy) => {
+    if (ctx == null) return
+    ctx.fillStyle = enemy.name === 'generic' ? GENERIC_ENEMY_COLOR : BOSS_COLOR
+    ctx.fillRect(enemy.cx - enemy.width / 2, enemy.cy - enemy.height / 2, enemy.width, enemy.height)
+  })
   playerBullets.value.forEach((bullet) => {
     if (ctx == null) return
     ctx.beginPath()
     ctx.fillStyle = bullet.color
     ctx.arc(bullet.cx, bullet.cy, bullet.width, 0, 2 * Math.PI)
     ctx.fill()
+  })
+  powerups.value.forEach((powerup) => {
+    ctx?.drawImage(
+      powerupImage,
+      powerup.cx,
+      powerup.cy,
+      powerup.size * POWERUP_SIZE_FACTOR + POWERUP_BASE_SIZE,
+      powerup.size * POWERUP_SIZE_FACTOR + POWERUP_BASE_SIZE
+    )
   })
 }
 
@@ -797,6 +817,7 @@ onMounted(() => {
   })
   const canvas = document.getElementById('game-canvas') as HTMLCanvasElement
   ctx = canvas.getContext('2d')
+  if (ctx == null) return
   init()
 })
 

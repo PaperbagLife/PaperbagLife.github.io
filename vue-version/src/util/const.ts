@@ -14,6 +14,9 @@ export const GREEN = '#66ffb8'
 export const RED = '#ff668e'
 export const BLUE = '#2c80ff'
 
+export const GENERIC_ENEMY_COLOR = '#b24bf3'
+export const BOSS_COLOR = '#ff9966'
+
 // consts for attacks
 export const NUM_CENTER_SPREAD = 100
 export const NUM_CENTER_SPRAY = 12
@@ -50,4 +53,9 @@ export type AttackPattern = {
   duration: number
   interval: number
   attack: (cx: number, cy: number, timeLeft: number) => void
+}
+
+export type CanvasDimensions = {
+  width: number
+  height: number
 }
