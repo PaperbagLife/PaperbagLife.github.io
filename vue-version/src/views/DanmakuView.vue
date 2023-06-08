@@ -26,12 +26,12 @@ import {
   RED,
   Target,
   type AttackPattern,
-  type Canvas,
   type ControlsPressed,
   type MovePattern
 } from '../util/const'
 const { type } = useBreakpoints()
-const canvas: Canvas = { width: 300, height: 400 }
+const canvasDimensions = { width: 300, height: 400 }
+let ctx: null | CanvasRenderingContext2D = null
 
 class Player {
   cx: number
@@ -94,13 +94,19 @@ class Player {
     if (controlsPressed.value.up && this.cy - PLAYER_SPEED - PLAYER_HEIGHT / 2 > 0) {
       this.cy -= PLAYER_SPEED
     }
-    if (controlsPressed.value.down && this.cy + PLAYER_SPEED + PLAYER_HEIGHT / 2 < canvas.height) {
+    if (
+      controlsPressed.value.down &&
+      this.cy + PLAYER_SPEED + PLAYER_HEIGHT / 2 < canvasDimensions.height
+    ) {
       this.cy += PLAYER_SPEED
     }
     if (controlsPressed.value.left && this.cx - PLAYER_SPEED - PLAYER_WIDTH / 2 > 0) {
       this.cx -= PLAYER_SPEED
     }
-    if (controlsPressed.value.right && this.cx + PLAYER_SPEED + PLAYER_WIDTH / 2 < canvas.width) {
+    if (
+      controlsPressed.value.right &&
+      this.cx + PLAYER_SPEED + PLAYER_WIDTH / 2 < canvasDimensions.width
+    ) {
       this.cx += PLAYER_SPEED
     }
   }
@@ -296,12 +302,12 @@ class Bullet {
 
     //Check whether or not a bullet is off-screen
     if (
-      this.cx - this.width > canvas.width + BULLET_SCREEN_PADDING ||
+      this.cx - this.width > canvasDimensions.width + BULLET_SCREEN_PADDING ||
       this.cx + this.width < -BULLET_SCREEN_PADDING
     ) {
       this.delete = true
     } else if (
-      this.cy - this.height > canvas.height + BULLET_SCREEN_PADDING ||
+      this.cy - this.height > canvasDimensions.height + BULLET_SCREEN_PADDING ||
       this.cy + this.height < -BULLET_SCREEN_PADDING
     ) {
       this.delete = true
@@ -344,9 +350,9 @@ class Powerup {
     if (this.speedY < POWERUP_TERMINAL_VEL) {
       this.speedY += this.accY
     }
-    if (this.cx - this.size / 2 > canvas.width || this.cx + this.size / 2 < 0) {
+    if (this.cx - this.size / 2 > canvasDimensions.width || this.cx + this.size / 2 < 0) {
       this.delete = true
-    } else if (this.cy - this.size > canvas.height || this.cy + this.size < 0) {
+    } else if (this.cy - this.size > canvasDimensions.height || this.cy + this.size < 0) {
       this.delete = true
     }
   }
@@ -507,12 +513,12 @@ const gameOver = ref(false)
 watch(gameOver, () => {
   if (gameOver.value) paused.value = true
 })
-const player = reactive(new Player(200, canvas.width / 2, canvas.height - 30))
+const player = reactive(new Player(200, canvasDimensions.width / 2, canvasDimensions.height - 30))
 const playerScore = ref(0)
 const boss1 = new Enemy(
   'boss1',
   500,
-  canvas.width / 2,
+  canvasDimensions.width / 2,
   0,
   20,
   25,
@@ -584,11 +590,11 @@ const leftWave = [
 ]
 
 const rightWave = [
-  getBasicEnemy(canvas.width - 40, downLeft),
-  getBasicEnemy(canvas.width - 40, downLeft),
-  getBasicEnemy(canvas.width - 40, downLeft),
-  getBasicEnemy(canvas.width - 40, downLeft),
-  getBasicEnemy(canvas.width - 40, downLeft),
+  getBasicEnemy(canvasDimensions.width - 40, downLeft),
+  getBasicEnemy(canvasDimensions.width - 40, downLeft),
+  getBasicEnemy(canvasDimensions.width - 40, downLeft),
+  getBasicEnemy(canvasDimensions.width - 40, downLeft),
+  getBasicEnemy(canvasDimensions.width - 40, downLeft),
   {
     interval: 500,
     enemies: []
@@ -610,7 +616,7 @@ function handleSpawn() {
 }
 
 function update() {
-  if (paused.value) {
+  if (paused.value || ctx == null) {
     return
   }
   handleSpawn()
@@ -660,12 +666,12 @@ function update() {
       enemy.spawnPowerUp()
     }
     if (
-      enemy.cx - enemy.width > canvas.width + BULLET_SCREEN_PADDING ||
+      enemy.cx - enemy.width > canvasDimensions.width + BULLET_SCREEN_PADDING ||
       enemy.cx + enemy.width < -BULLET_SCREEN_PADDING
     ) {
       deadEnemyIdx.add(i)
     } else if (
-      enemy.cy - enemy.height > canvas.height + BULLET_SCREEN_PADDING ||
+      enemy.cy - enemy.height > canvasDimensions.height + BULLET_SCREEN_PADDING ||
       enemy.cy + enemy.height < -BULLET_SCREEN_PADDING
     ) {
       deadEnemyIdx.add(i)
@@ -688,6 +694,46 @@ function update() {
     }
   })
   powerups.value = powerups.value.filter((_, i) => !deadPowerups.has(i))
+
+  // Logic handled, now draw the frame
+  ctx.clearRect(
+    -BULLET_SCREEN_PADDING,
+    -BULLET_SCREEN_PADDING,
+    canvasDimensions.width + BULLET_SCREEN_PADDING,
+    canvasDimensions.height + BULLET_SCREEN_PADDING
+  )
+  ctx.save()
+  ctx.fillStyle = 'white'
+  ctx.fillRect(
+    player.cx - PLAYER_WIDTH / 2,
+    player.cy - PLAYER_HEIGHT / 2,
+    PLAYER_WIDTH,
+    PLAYER_HEIGHT
+  )
+  ctx.beginPath()
+  ctx.fillStyle = 'red'
+  ctx.arc(player.cx, player.cy, PLAYER_HIT_HEIGHT, 0, 2 * Math.PI)
+  ctx.fill()
+  ctx.restore()
+  enemies.value.forEach((enemy) => {
+    if (ctx == null) return
+    ctx.fillStyle = enemy.name === 'generic' ? '#b24bf3' : '#ff9966'
+    ctx.fillRect(enemy.cx - enemy.width / 2, enemy.cy - enemy.height / 2, enemy.width, enemy.height)
+  })
+  enemyBullets.value.forEach((bullet) => {
+    if (ctx == null) return
+    ctx.beginPath()
+    ctx.fillStyle = bullet.color
+    ctx.arc(bullet.cx, bullet.cy, bullet.width, 0, 2 * Math.PI)
+    ctx.fill()
+  })
+  playerBullets.value.forEach((bullet) => {
+    if (ctx == null) return
+    ctx.beginPath()
+    ctx.fillStyle = bullet.color
+    ctx.arc(bullet.cx, bullet.cy, bullet.width, 0, 2 * Math.PI)
+    ctx.fill()
+  })
 }
 
 function init() {
@@ -749,6 +795,8 @@ onMounted(() => {
   window.addEventListener('blur', () => {
     paused.value = true
   })
+  const canvas = document.getElementById('game-canvas') as HTMLCanvasElement
+  ctx = canvas.getContext('2d')
   init()
 })
 
@@ -767,100 +815,17 @@ onUnmounted(() => {
         <div class="row d-flex">{{ `Power: ${player.power}` }}</div>
       </div>
       <div class="game-viewport">
-        <svg :height="canvas.height" :width="canvas.width">
-          <!--Player related-->
-          <g :x="player.cx" :y="player.cy">
-            <rect
-              class="player"
-              :class="player.invulTimer > 0 ? 'invulnerable' : ''"
-              :x="player.cx - PLAYER_WIDTH / 2"
-              :y="player.cy - PLAYER_HEIGHT / 2"
-              :width="PLAYER_WIDTH"
-              :height="PLAYER_HEIGHT"
-              rx="3"
-            ></rect>
-            <circle
-              class="player-hit-target"
-              :cx="player.cx"
-              :cy="player.cy"
-              :r="PLAYER_HIT_HEIGHT"
-              fill="red"
-              rx="3"
-            ></circle>
-          </g>
-
-          <circle
-            class="bullet"
-            v-for="bullet in playerBullets"
-            :class="{ homing: bullet.homing }"
-            :key="`${bullet.createdTimestamp}+${bullet.id}`"
-            :style="{ fill: bullet.color }"
-            :cx="bullet.cx"
-            :cy="bullet.cy"
-            :r="bullet.width"
-          ></circle>
-          <!--Enemy Related-->
-          <g
-            v-for="enemy in enemies"
-            :key="`${enemy.name} + ${enemy.cx} + ${enemy.cy}`"
-            :x="enemy.cx"
-            :y="enemy.cy"
-          >
-            <rect
-              class="enemy"
-              :class="enemy.name"
-              :width="enemy.width"
-              :height="enemy.height"
-              :x="enemy.cx - enemy.width / 2"
-              :y="enemy.cy - enemy.height / 2"
-            ></rect>
-            <text :x="enemy.cx" :y="enemy.cy" class="small hp-display">
-              {{ enemy.hp }}
-            </text>
-          </g>
-          <circle
-            class="bullet"
-            v-for="bullet in enemyBullets"
-            :key="`${bullet.createdTimestamp}+${bullet.cx}+${bullet.id}`"
-            :style="{ fill: bullet.color }"
-            :cx="bullet.cx"
-            :cy="bullet.cy"
-            :r="bullet.width"
-          ></circle>
-          <image
-            v-for="powerup in powerups"
-            :key="powerup.cx + powerup.cy"
-            :href="powerupImage"
-            :x="powerup.cx"
-            :y="powerup.cy"
-            :width="powerup.size * POWERUP_SIZE_FACTOR + POWERUP_BASE_SIZE"
-            :height="powerup.size * POWERUP_SIZE_FACTOR + POWERUP_BASE_SIZE"
-          ></image>
-        </svg>
+        <canvas
+          id="game-canvas"
+          :height="canvasDimensions.height"
+          :width="canvasDimensions.width"
+        ></canvas>
       </div>
     </div>
   </main>
 </template>
 
 <style scoped>
-.player {
-  fill: white;
-  stroke: #66ccff;
-  stroke-width: 1.5px;
-}
-
-.boss1 {
-  fill: #ff9966;
-}
-
-.generic {
-  fill: #b24bf3;
-}
-
-.hp-display {
-  dominant-baseline: middle;
-  text-anchor: middle;
-}
 .game-viewport {
   background-color: black;
   border: 2px solid #66ccff;

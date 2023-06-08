@@ -15,9 +15,9 @@ export const RED = '#ff668e'
 export const BLUE = '#2c80ff'
 
 // consts for attacks
-export const NUM_CENTER_SPREAD = 60
-export const NUM_CENTER_SPRAY = 8
-export const NUM_ROTATED = 40
+export const NUM_CENTER_SPREAD = 100
+export const NUM_CENTER_SPRAY = 12
+export const NUM_ROTATED = 60
 
 export const POWERUP_INITIAL_SPEED = -1.3
 export const POWERUP_ACC = 0.03
@@ -36,11 +36,6 @@ export type ControlsPressed = {
 export enum Target {
   PLAYER,
   ENEMY
-}
-
-export type Canvas = {
-  width: number
-  height: number
 }
 
 export type MovePattern = {
