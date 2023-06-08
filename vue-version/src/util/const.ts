@@ -1,9 +1,42 @@
+import { Player, Bullet } from './classes'
+// type defs
+export type ControlsPressed = {
+  up: boolean
+  down: boolean
+  left: boolean
+  right: boolean
+}
+
+export enum Target {
+  PLAYER,
+  ENEMY
+}
+
+export type MovePattern = {
+  duration: number
+  xVel: number
+  yVel: number
+  rotation?: number
+  rotationDuration?: number
+}
+
+export type AttackPattern = {
+  duration: number
+  interval: number
+  attack: (cx: number, cy: number, enemyBullets: Bullet[], timeLeft: number, player: Player) => void
+}
+
+export type CanvasDimensions = {
+  width: number
+  height: number
+}
+
 // constants
 export const PLAYER_WIDTH = 10
 export const PLAYER_HEIGHT = 30
 export const PLAYER_HIT_WIDTH = 2
 export const PLAYER_HIT_HEIGHT = 2
-export const BASE_PLAYER_ATTACK_INTERVAL = 400
+export const BASE_PLAYER_ATTACK_INTERVAL = 40
 export const PLAYER_SPEED = 1
 export const PLAYER_INVUL_TIMER = 80
 
@@ -28,34 +61,5 @@ export const POWERUP_TERMINAL_VEL = 1.4
 export const POWERUP_BASE_SIZE = 7
 export const POWERUP_SIZE_FACTOR = 3
 
-// type and class defs
-export type ControlsPressed = {
-  up: boolean
-  down: boolean
-  left: boolean
-  right: boolean
-}
-
-export enum Target {
-  PLAYER,
-  ENEMY
-}
-
-export type MovePattern = {
-  duration: number
-  xVel: number
-  yVel: number
-  rotation?: number
-  rotationDuration?: number
-}
-
-export type AttackPattern = {
-  duration: number
-  interval: number
-  attack: (cx: number, cy: number, timeLeft: number) => void
-}
-
-export type CanvasDimensions = {
-  width: number
-  height: number
-}
+export const CANVAS_WIDTH = 300
+export const CANVAS_HEIGHT = 400
