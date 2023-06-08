@@ -31,6 +31,8 @@ export const downLeft: MovePattern[] = [
   { xVel: -1, yVel: 0.5, duration: -1 }
 ]
 
+export const straightDown: MovePattern[] = [{ xVel: 0, yVel: 1, duration: -1 }]
+
 // attack patterns
 export function basicSingleDirectedAttack(
   cx: number,
@@ -48,6 +50,19 @@ export function basicSingleDirectedAttack(
   const bullet = new Bullet(cx, cy, 4, 4, [patternTowards], GREEN, Date.now(), 0)
   enemyBullets.push(bullet)
 }
+export function bossDirectedAttack(
+  cx: number,
+  cy: number,
+  enemyBullets: Bullet[],
+  timeLeft: number,
+  player: Player
+) {
+  if (timeLeft % 300 === 0) {
+    // bonus!
+    basicCenterSpreadAttack(cx, cy, enemyBullets)
+  }
+  basicDirectedAttack(cx, cy, enemyBullets, timeLeft, player)
+}
 export function basicDirectedAttack(
   cx: number,
   cy: number,
@@ -56,10 +71,6 @@ export function basicDirectedAttack(
   player: Player
 ) {
   if (timeLeft % 200 > 100) return
-  if (timeLeft % 300 === 0) {
-    // bonus!
-    basicCenterSpreadAttack(cx, cy, enemyBullets)
-  }
   const bulletSpeed = 1.3
   const deltaX = player.cx - cx
   const deltaY = player.cy - cy

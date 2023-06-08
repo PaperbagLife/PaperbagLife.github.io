@@ -18,7 +18,7 @@ import {
   type ControlsPressed
 } from '../util/const'
 
-import { leftWave, rightWave, bossWave } from '../util/levels'
+import { leftWave, rightWave, bossWave, randomWave } from '../util/levels'
 
 import { Player, Bullet, Enemy, Powerup } from '../util/classes'
 
@@ -68,7 +68,7 @@ const powerups = ref<Powerup[]>([])
 const controlsPressed = ref<ControlsPressed>({ up: false, down: false, left: false, right: false })
 const controlKeys = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd'])
 
-const currentLevel = ref<Spawn[]>([...leftWave, ...rightWave, bossWave])
+const currentLevel = ref<Spawn[]>([...leftWave, ...rightWave, ...randomWave, bossWave])
 const currentInterval = ref(200)
 
 function handleSpawn() {
