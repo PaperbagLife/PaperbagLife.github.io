@@ -25,7 +25,7 @@ const { type } = useBreakpoints()
           <p>
             <b>Gaming/Game Design</b><br />
             <i>2010 - present</i><br />
-            I have constantly tried to play games since I got a PSP in 2012.<br />
+            I have played countless games since I got a PSP in 2012.<br />
             Evetually, I started developing interest towards making a game myself.<br />
             Tools I have used so far: RPG Maker series, Powerpoint, Scratch, GameMaker, Pygame,
             Unity
