@@ -286,13 +286,62 @@ onUnmounted(() => {
 
 <template>
   <main :class="type">
-    <div class="col d-flex justify-content-center">
-      <div class="stats col-1">
-        <div class="row d-flex">{{ `HP: ${player.hp}` }}</div>
-        <div class="row d-flex">{{ `Power: ${player.power}` }}</div>
+    <div class="col">
+      <div class="row justify-content-center">
+        <div class="game-viewport">
+          <canvas id="game-canvas" :height="CANVAS_HEIGHT" :width="CANVAS_WIDTH"></canvas>
+          <div class="stats col-auto">
+            <div class="row my-0">{{ `HP: ${player.hp}` }}</div>
+            <div class="row">{{ `Pow: ${player.power}` }}</div>
+          </div>
+        </div>
       </div>
-      <div class="game-viewport">
-        <canvas id="game-canvas" :height="CANVAS_HEIGHT" :width="CANVAS_WIDTH"></canvas>
+      <div class="row controls justify-content-center" :class="type === 'xs' ? 'mt-2' : ''">
+        <div class="col">
+          <div v-if="type !== 'xs'" class="row justify-content-center hint">
+            You can use WASD/Arrow Keys too
+          </div>
+          <div class="row justify-content-center">
+            <button
+              @mousedown="controlsPressed.up = true"
+              @mouseup="controlsPressed.up = false"
+              @touchstart.prevent="controlsPressed.up = true"
+              @touchend.prevent="controlsPressed.up = false"
+              class="btn m-0 material-icons-outlined"
+            >
+              expand_less
+            </button>
+          </div>
+          <div class="row justify-content-center">
+            <button
+              @mousedown="controlsPressed.left = true"
+              @mouseup="controlsPressed.left = false"
+              @touchstart.prevent="controlsPressed.left = true"
+              @touchend.prevent="controlsPressed.left = false"
+              class="btn m-0 material-icons-outlined"
+            >
+              chevron_left
+            </button>
+            <button
+              @mousedown="controlsPressed.down = true"
+              @mouseup="controlsPressed.down = false"
+              @touchstart.prevent="controlsPressed.down = true"
+              @touchend.prevent="controlsPressed.down = false"
+              class="btn m-0 material-icons-outlined"
+            >
+              expand_more
+            </button>
+            <button
+              @mousedown="controlsPressed.right = true"
+              @mouseup="controlsPressed.right = false"
+              @touchstart.prevent="controlsPressed.right = true"
+              @touchend.prevent="controlsPressed.right = false"
+              class="btn m-0 material-icons-outlined"
+            >
+              chevron_right
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </main>
@@ -307,6 +356,19 @@ onUnmounted(() => {
   height: 402px;
 }
 .stats {
-  position: relative;
+  font-size: 12px;
+  color: white;
+  position: absolute;
+  bottom: -2px;
+  left: 3px;
+}
+
+.controls .btn {
+  box-shadow: none;
+  border: 2px solid #66ccff;
+}
+
+.controls div {
+  user-select: none;
 }
 </style>
