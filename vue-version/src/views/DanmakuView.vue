@@ -16,11 +16,11 @@ import {
   CANVAS_HEIGHT,
   POWERUP_SIZE_FACTOR,
   type ControlsPressed
-} from '../util/const'
+} from '../util/shooter/const'
 
-import { leftWave, rightWave, bossWave, randomWave } from '../util/levels'
+import { leftWave, rightWave, bossWave, randomWave } from '../util/shooter/levels'
 
-import { Player, Bullet, Enemy, Powerup } from '../util/classes'
+import { Player, Bullet, Enemy, Powerup } from '../util/shooter/classes'
 
 const { type } = useBreakpoints()
 let ctx: null | CanvasRenderingContext2D = null
@@ -372,3 +372,4 @@ onUnmounted(() => {
   user-select: none;
 }
 </style>
+../util/shooter/classes ../util/shooter/const ../util/shooter/levels
