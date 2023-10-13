@@ -135,7 +135,8 @@ class CombatManager {}
 
 // Class for organizing functions to do with turns
 class TurnManager {
-  resolveTurn(turn: TimelineTurn) {
+  static resolveTurn(turn?: TimelineTurn) {
+    if (!turn) return
     if (turn.character.type === CharacterType.ENEMY) {
       const enemy = turn.character as Enemy
       gameState.turnCharacter = enemy
@@ -143,6 +144,7 @@ class TurnManager {
       // player turn
       const player = turn.character as PlayerCharacter
       gameState.turnCharacter = player
+      // Block until an action is taken
     }
 
     let currentSubTurn = null
@@ -151,7 +153,7 @@ class TurnManager {
     }
   }
 
-  playerInputSkill() {
+  static playerInputSkill() {
     switch (gameState.turnState.stateEnum) {
       case TurnStateEnum.PLAYER_TURN_DEFAULT: {
         gameState.turnState.stateEnum = TurnStateEnum.PLAYER_TURN_SKILL_PENDING
@@ -187,6 +189,12 @@ class Timeline {
       subTurns: []
     })
   }
+
+  static getNextTurn() {
+    const turn = gameState.queue.shift()
+    gameState.queue.forEach((futureTurn) => (futureTurn.timeUntil -= turn?.timeUntil ?? 0))
+    return turn
+  }
 }
 
 // Class for maintaining the main gamestate
@@ -215,6 +223,8 @@ class GameState {
   initGame() {
     this.playerCharacters.forEach((char) => Timeline.enqueue(char))
     this.enemies.forEach((char) => Timeline.enqueue(char))
+    const nextTurn = Timeline.getNextTurn()
+    TurnManager.resolveTurn(nextTurn)
   }
 }
 
@@ -246,6 +256,25 @@ function printGameState() {
   <main :class="type">
     <div class="col mt-2 d-flex justify-content-center">
       <div class="game-viewport">
+        <div class="skill-points-container">
+          <span v-for="i in [...Array(5).keys()]" :key="i" class="material-icons-outlined">{{
+            i < gameState.skillPoints ? 'star' : 'star_outline'
+          }}</span>
+        </div>
+        <div
+          v-if="gameState.turnCharacter?.type === CharacterType.PLAYER"
+          class="action-buttons d-flex justify-content-center align-items-center"
+        >
+          <div class="attack-button d-flex justify-content-center align-items-center">
+            <div class="material-icons-outlined">sports_cricket</div>
+          </div>
+          <div
+            v-if="gameState.skillPoints > 0"
+            class="skill-button d-flex justify-content-center align-items-center"
+          >
+            <div class="material-icons-outlined">{{ 'close' }}</div>
+          </div>
+        </div>
         <div>
           {{ gameState.cameraState.mode === CameraMode.DEFAULT ? 'Default view' : 'Allies view' }}
         </div>
@@ -332,17 +361,55 @@ function printGameState() {
           {{ '[char: ' + turn.character.name + ' timeUntil:' + turn.timeUntil + ']' }}
         </div>
       </div>
+      <div class="row justify-content-center d-flex">
+        <div>Current:</div>
+        <div>{{ gameState.turnCharacter?.name }}</div>
+      </div>
     </div>
   </main>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .game-viewport {
   background-color: black;
   border: 2px solid #66ccff;
   border-radius: 4px;
   width: var(width);
   height: var(height);
+}
+
+.attack-button .material-icons-outlined {
+  font-size: 50px;
+  color: white;
+}
+
+.action-buttons {
+  top: 320px;
+  .attack-button,
+  .skill-button {
+    z-index: 1;
+    cursor: pointer;
+    position: absolute;
+    border-radius: 50%;
+    background-color: transparent;
+    border: solid 1px white;
+    .material-icons-outlined {
+      font-size: 30px;
+      color: white;
+    }
+  }
+}
+
+.skill-button {
+  height: 60px;
+  width: 60px;
+  right: 20px;
+}
+
+.attack-button {
+  height: 80px;
+  width: 80px;
+  right: 90px;
 }
 
 .health-bar {
@@ -355,5 +422,11 @@ function printGameState() {
 }
 .character-portrait {
   fill: white;
+}
+
+.skill-points-container {
+  position: absolute;
+  bottom: 20px;
+  right: 25%;
 }
 </style>
