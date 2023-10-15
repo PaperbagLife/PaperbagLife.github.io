@@ -5,6 +5,7 @@ import mainCharacterImage from '../assets/game/img/mc.png'
 import bailuImage from '../assets/game/img/bailu.png'
 import frostSpawnImage from '../assets/game/img/frostspawn.png'
 import fireShadewalkerImage from '../assets/game/img/fire_shadewalker.png'
+import { Player } from '@/util/shooter/classes'
 const { type } = useBreakpoints()
 
 const MAX_SKILLPOINTS = 5
@@ -13,8 +14,8 @@ const TURN_TIME = 4000
 const TIMELINE_DISTANCE = 10000
 
 enum CameraMode {
-  DEFAULT,
-  ALLIES
+  DEFAULT = 'default view',
+  ALLIES = 'allies view'
 }
 
 type CameraState = {
@@ -24,11 +25,11 @@ type CameraState = {
 }
 
 enum TurnStateEnum {
-  EMPTY,
-  ENEMY_TURN,
-  PLAYER_TURN_DEFAULT,
-  PLAYER_TURN_SKILL_PENDING,
-  PLAYER_ULT_PENDING
+  EMPTY = 'empty',
+  ENEMY_TURN = 'enemy_turn',
+  PLAYER_TURN_DEFAULT = 'default',
+  PLAYER_TURN_SKILL_PENDING = 'skill pending',
+  PLAYER_ULT_PENDING = 'ult pending'
 }
 
 type TurnState = {
@@ -42,11 +43,11 @@ enum CharacterType {
 }
 
 enum TargetType {
-  SINGLE_ALLY,
-  ALL_ALLIES,
-  SINGLE_ENEMY,
-  ALL_ENEMIES,
-  RANDOM_ENEMY
+  SINGLE_ALLY = 'single ally',
+  ALL_ALLIES = 'all allies',
+  SINGLE_ENEMY = 'single enemy',
+  ALL_ENEMIES = 'all enemies',
+  RANDOM_ENEMY = 'random enemy'
 }
 
 enum SkillEffect {
@@ -124,6 +125,17 @@ type SubTurn = {
   cb: () => void
 }
 
+enum PlayerButton {
+  ATTACK,
+  SKILL,
+  ULT
+}
+
+type PlayerInput = {
+  type: PlayerButton
+  ult?: number // for cut-in ult
+}
+
 enum SubTurnType {
   REACTION,
   ULT
@@ -135,22 +147,69 @@ class CombatManager {}
 
 // Class for organizing functions to do with turns
 class TurnManager {
-  static resolveTurn(turn?: TimelineTurn) {
+  static async resolveTurn(turn?: TimelineTurn) {
     if (!turn) return
     if (turn.character.type === CharacterType.ENEMY) {
       const enemy = turn.character as Enemy
       gameState.turnCharacter = enemy
+      console.log('enemy turn???')
     } else {
       // player turn
       const player = turn.character as PlayerCharacter
       gameState.turnCharacter = player
+      gameState.turnState.stateEnum = TurnStateEnum.PLAYER_TURN_DEFAULT
       // Block until an action is taken
+      let turnTaken = false
+      while (!turnTaken) {
+        if (gameState.playerInput != null) {
+          switch (gameState.playerInput.type) {
+            case PlayerButton.ATTACK: {
+              if (gameState.turnState.stateEnum === TurnStateEnum.PLAYER_TURN_DEFAULT) {
+                // Fire basic attack
+                turnTaken = true
+                break
+              }
+              if (gameState.turnState.stateEnum === TurnStateEnum.PLAYER_TURN_SKILL_PENDING) {
+                // Go to default state
+                gameState.turnState.stateEnum = TurnStateEnum.PLAYER_TURN_DEFAULT
+              }
+              break
+            }
+            case PlayerButton.SKILL: {
+              if (gameState.turnState.stateEnum === TurnStateEnum.PLAYER_TURN_SKILL_PENDING) {
+                if (gameState.skillPoints > 0) {
+                  // Fire skill
+                  turnTaken = true
+                  break
+                } else {
+                  uiElements.show0SkillPoint = true
+                  setTimeout(() => (uiElements.show0SkillPoint = false), 1000)
+                }
+              }
+              if (gameState.turnState.stateEnum === TurnStateEnum.PLAYER_TURN_DEFAULT) {
+                // Go to skill ready state
+                gameState.turnState.stateEnum = TurnStateEnum.PLAYER_TURN_SKILL_PENDING
+              }
+              break
+            }
+            case PlayerButton.ULT: {
+              // not deaing with this
+              break
+            }
+            default:
+          }
+          gameState.playerInput = null
+        }
+        await delay(200)
+      }
     }
 
     let currentSubTurn = null
     while (turn.subTurns.length > 0) {
       currentSubTurn = turn.subTurns.shift()
     }
+    Timeline.enqueue(gameState.turnCharacter)
+    gameState.turnCharacter = null
   }
 
   static playerInputSkill() {
@@ -180,6 +239,10 @@ class TurnManager {
   }
 }
 
+class UIElements {
+  show0SkillPoint = false
+}
+
 // Class for organizing functions to do with timeline
 class Timeline {
   static enqueue(character: Character) {
@@ -207,6 +270,7 @@ class GameState {
   playerCharacters: PlayerCharacter[]
   enemies: Enemy[]
   skillPoints: number
+  playerInput: PlayerInput | null = null
 
   constructor(playerCharacters: PlayerCharacter[], enemies: Enemy[]) {
     this.cameraState = {
@@ -220,11 +284,13 @@ class GameState {
     this.enemies = enemies
     this.skillPoints = 3
   }
-  initGame() {
+  async initGame() {
     this.playerCharacters.forEach((char) => Timeline.enqueue(char))
     this.enemies.forEach((char) => Timeline.enqueue(char))
-    const nextTurn = Timeline.getNextTurn()
-    TurnManager.resolveTurn(nextTurn)
+    while (true) {
+      const nextTurn = Timeline.getNextTurn()
+      await TurnManager.resolveTurn(nextTurn)
+    }
   }
 }
 
@@ -242,6 +308,15 @@ const mainCharacter = new PlayerCharacter(
 )
 const simpleEnemy = new Enemy('frostspawn', frostSpawnImage, 10, 1, 90)
 const gameState = reactive(new GameState([mainCharacter], [simpleEnemy]))
+const uiElements = reactive(new UIElements())
+
+function attackButton() {
+  gameState.playerInput = { type: PlayerButton.ATTACK }
+}
+
+function skillButton() {
+  gameState.playerInput = { type: PlayerButton.SKILL }
+}
 
 onMounted(() => {
   gameState.initGame()
@@ -265,11 +340,15 @@ function printGameState() {
           v-if="gameState.turnCharacter?.type === CharacterType.PLAYER"
           class="action-buttons d-flex justify-content-center align-items-center"
         >
-          <div class="attack-button d-flex justify-content-center align-items-center">
+          <div
+            @click="attackButton"
+            class="attack-button d-flex justify-content-center align-items-center"
+          >
             <div class="material-icons-outlined">sports_cricket</div>
           </div>
           <div
             v-if="gameState.skillPoints > 0"
+            @click="skillButton"
             class="skill-button d-flex justify-content-center align-items-center"
           >
             <div class="material-icons-outlined">{{ 'close' }}</div>
@@ -362,8 +441,12 @@ function printGameState() {
         </div>
       </div>
       <div class="row justify-content-center d-flex">
-        <div>Current:</div>
+        <div>Turn Character:</div>
         <div>{{ gameState.turnCharacter?.name }}</div>
+      </div>
+      <div class="row justify-content-center d-flex">
+        <div>Turn state:</div>
+        <div>{{ gameState.turnState.stateEnum }}</div>
       </div>
     </div>
   </main>
