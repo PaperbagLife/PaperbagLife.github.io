@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import { useBreakpoints } from '../util/dimensions'
-import { onMounted, ref, reactive } from 'vue'
+import { onMounted, ref, reactive, onUnmounted } from 'vue'
 import mainCharacterImage from '../assets/game/img/mc.png'
 import bailuImage from '../assets/game/img/bailu.png'
 import frostSpawnImage from '../assets/game/img/frostspawn.png'
 import fireShadewalkerImage from '../assets/game/img/fire_shadewalker.png'
-import { Player } from '@/util/shooter/classes'
 const { type } = useBreakpoints()
 
 const MAX_SKILLPOINTS = 5
-const TURN_TIME = 4000
+const TURN_TIME = 1000
 
 const TIMELINE_DISTANCE = 10000
 
@@ -18,11 +17,14 @@ enum CameraMode {
   ALLIES = 'allies view'
 }
 
+// focus for now is always friendly character, the one getting hit or the one attacking
 type CameraState = {
   mode: CameraMode
-  focus: TargetType
-  focusModifier: number | null // 0-4 for enemies, 0-3 for allies, -1 for all targets based on target type
+  focus: number // For who the main focus of camera is
 }
+
+// Notes: the focus is on player 1 if player 1 has a damage skill of single target.
+// In that case the FocusedTarget variable is who is targeted for a hit but not the focus of camera
 
 enum TurnStateEnum {
   EMPTY = 'empty',
@@ -46,8 +48,13 @@ enum TargetType {
   SINGLE_ALLY = 'single ally',
   ALL_ALLIES = 'all allies',
   SINGLE_ENEMY = 'single enemy',
+  SPLASH_ENEMY = 'splash enemy',
   ALL_ENEMIES = 'all enemies',
   RANDOM_ENEMY = 'random enemy'
+}
+
+type FocusedTarget = {
+  mainTarget: number
 }
 
 enum SkillEffect {
@@ -56,7 +63,9 @@ enum SkillEffect {
 }
 
 type Skill = {
-  target: TargetType
+  targetType: TargetType
+  modifier: number
+  hits?: number
   effect: SkillEffect
 }
 
@@ -93,16 +102,22 @@ class Character {
 
 class PlayerCharacter extends Character {
   skill: Skill
+  energy: number
+  maxEnergy: number
   constructor(
     name: string,
     portrait: string,
     hp: number,
     attack: number,
     skill: Skill,
-    speed: number
+    speed: number,
+    energy: number,
+    maxEnergy: number
   ) {
     super(CharacterType.PLAYER, name, portrait, hp, attack, speed)
     this.skill = skill
+    this.energy = energy
+    this.maxEnergy = maxEnergy
   }
 }
 
@@ -114,21 +129,20 @@ class Enemy extends Character {
 
 type TimelineTurn = {
   character: Character
+  index: number
   timeUntil: number
   subTurns: SubTurn[]
 }
 
-// A smaller unit, usually an reaction
+// A smaller unit, usually an reaction, in the form of damage to enemy
 type SubTurn = {
   type: SubTurnType
   character: Character
-  cb: () => void
 }
 
 enum PlayerButton {
   ATTACK,
-  SKILL,
-  ULT
+  SKILL
 }
 
 type PlayerInput = {
@@ -143,16 +157,72 @@ enum SubTurnType {
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
-class CombatManager {}
+function getRandomInt(max: number) {
+  max = Math.floor(max)
+  return Math.floor(Math.random() * max)
+}
+
+// Combat, Damage related logic
+class CombatManager {
+  static async resolveEnemyMove() {
+    const enemy = gameState.turnCharacter as Enemy
+    await delay(TURN_TIME)
+    const damage = enemy.attack
+    const target = getRandomInt(gameState.playerCharacters.length)
+    gameState.playerCharacters[target].hp -= damage
+  }
+  static async resolvePlayerSkill() {
+    const player = gameState.turnCharacter as PlayerCharacter
+    await delay(TURN_TIME)
+    if (player.skill.effect === SkillEffect.DAMAGE) {
+      const damage = player.attack * player.skill.modifier
+      const target = gameState.focusedTarget.mainTarget
+      // Depending on the type of the skill do differnt calculations here
+      switch (player.skill.targetType) {
+        case TargetType.SINGLE_ENEMY: {
+          gameState.enemies[target].hp -= damage
+          break
+        }
+        case TargetType.SPLASH_ENEMY: {
+          gameState.enemies[target].hp -= damage
+          if (target > 0) {
+            gameState.enemies[target - 1].hp -= damage
+          }
+          if (target < gameState.enemies.length - 1) {
+            gameState.enemies[target + 1].hp -= damage
+          }
+          break
+        }
+        case TargetType.ALL_ENEMIES:
+        case TargetType.RANDOM_ENEMY: {
+          for (let i = 0; i < (player.skill.hits ?? 1); i += 1) {
+            const enemyIdx = getRandomInt(gameState.enemies.length)
+            gameState.enemies[enemyIdx].hp -= damage
+          }
+        }
+      }
+    }
+    // TODO: Healing skill here
+  }
+
+  static async resolvePlayerAttack() {
+    const player = gameState.turnCharacter as PlayerCharacter
+    await delay(TURN_TIME)
+    const damage = player.attack
+    const target = gameState.focusedTarget.mainTarget
+    // Assume basic attack always single target (TODO: change this paradigm later)
+    gameState.enemies[target].hp -= damage
+  }
+}
 
 // Class for organizing functions to do with turns
 class TurnManager {
-  static async resolveTurn(turn?: TimelineTurn) {
-    if (!turn) return
+  static async resolveTurn(turn: TimelineTurn) {
+    gameState.currentTurn = turn
     if (turn.character.type === CharacterType.ENEMY) {
       const enemy = turn.character as Enemy
       gameState.turnCharacter = enemy
-      console.log('enemy turn???')
+      await CombatManager.resolveEnemyMove()
     } else {
       // player turn
       const player = turn.character as PlayerCharacter
@@ -161,17 +231,21 @@ class TurnManager {
       // Block until an action is taken
       let turnTaken = false
       while (!turnTaken) {
+        // Check for insert ult
         if (gameState.playerInput != null) {
           switch (gameState.playerInput.type) {
             case PlayerButton.ATTACK: {
               if (gameState.turnState.stateEnum === TurnStateEnum.PLAYER_TURN_DEFAULT) {
                 // Fire basic attack
+                await CombatManager.resolvePlayerAttack()
                 turnTaken = true
                 break
               }
               if (gameState.turnState.stateEnum === TurnStateEnum.PLAYER_TURN_SKILL_PENDING) {
                 // Go to default state
                 gameState.turnState.stateEnum = TurnStateEnum.PLAYER_TURN_DEFAULT
+                gameState.cameraState.mode = CameraMode.ALLIES
+                gameState.cameraState.focus = turn.index
               }
               break
             }
@@ -179,6 +253,7 @@ class TurnManager {
               if (gameState.turnState.stateEnum === TurnStateEnum.PLAYER_TURN_SKILL_PENDING) {
                 if (gameState.skillPoints > 0) {
                   // Fire skill
+                  await CombatManager.resolvePlayerSkill()
                   turnTaken = true
                   break
                 } else {
@@ -189,14 +264,17 @@ class TurnManager {
               if (gameState.turnState.stateEnum === TurnStateEnum.PLAYER_TURN_DEFAULT) {
                 // Go to skill ready state
                 gameState.turnState.stateEnum = TurnStateEnum.PLAYER_TURN_SKILL_PENDING
+                if (
+                  player.skill.targetType === TargetType.ALL_ALLIES ||
+                  player.skill.targetType === TargetType.SINGLE_ALLY
+                ) {
+                  gameState.cameraState.mode = CameraMode.ALLIES
+                  gameState.cameraState.focus = turn.index
+                  player.skill.targetType === TargetType.SINGLE_ALLY ? 0 : -1
+                }
               }
               break
             }
-            case PlayerButton.ULT: {
-              // not deaing with this
-              break
-            }
-            default:
           }
           gameState.playerInput = null
         }
@@ -207,35 +285,10 @@ class TurnManager {
     let currentSubTurn = null
     while (turn.subTurns.length > 0) {
       currentSubTurn = turn.subTurns.shift()
+      // handle ult and reactions here, kinda need to sort them
     }
-    Timeline.enqueue(gameState.turnCharacter)
+    Timeline.enqueue(gameState.turnCharacter, turn.index)
     gameState.turnCharacter = null
-  }
-
-  static playerInputSkill() {
-    switch (gameState.turnState.stateEnum) {
-      case TurnStateEnum.PLAYER_TURN_DEFAULT: {
-        gameState.turnState.stateEnum = TurnStateEnum.PLAYER_TURN_SKILL_PENDING
-        // Change cameraMode to Allies if skill targets allies
-        const player = gameState.turnCharacter as PlayerCharacter
-        if (
-          player.skill.target === TargetType.ALL_ALLIES ||
-          player.skill.target === TargetType.SINGLE_ALLY
-        ) {
-          gameState.cameraState.mode = CameraMode.ALLIES
-          gameState.cameraState.focus = player.skill.target
-          gameState.cameraState.focusModifier =
-            player.skill.target === TargetType.SINGLE_ALLY ? 0 : -1
-        }
-        break
-      }
-
-      case TurnStateEnum.PLAYER_TURN_SKILL_PENDING:
-        // Handle player Skill
-        break
-      default:
-        return
-    }
   }
 }
 
@@ -245,9 +298,10 @@ class UIElements {
 
 // Class for organizing functions to do with timeline
 class Timeline {
-  static enqueue(character: Character) {
+  static enqueue(character: Character, index: number) {
     gameState.queue.push({
       character,
+      index,
       timeUntil: TIMELINE_DISTANCE / character.speed,
       subTurns: []
     })
@@ -258,12 +312,21 @@ class Timeline {
     gameState.queue.forEach((futureTurn) => (futureTurn.timeUntil -= turn?.timeUntil ?? 0))
     return turn
   }
+
+  static ult(index: number) {
+    const character = gameState.playerCharacters[index]
+    if (character.energy === character.maxEnergy) {
+      gameState.currentTurn?.subTurns.push({
+        type: SubTurnType.ULT,
+        character: gameState.playerCharacters[index]
+      })
+    }
+  }
 }
 
 // Class for maintaining the main gamestate
 class GameState {
   cameraState: CameraState
-  turnManager: TurnManager
   turnState: TurnState = { stateEnum: TurnStateEnum.EMPTY, resolvingSubTurn: false }
   turnCharacter: Character | null = null
   queue: TimelineTurn[]
@@ -271,24 +334,29 @@ class GameState {
   enemies: Enemy[]
   skillPoints: number
   playerInput: PlayerInput | null = null
+  focusedTarget: FocusedTarget = { mainTarget: 0 }
+  currentTurn: TimelineTurn | null = null
+  gameOver = false
 
   constructor(playerCharacters: PlayerCharacter[], enemies: Enemy[]) {
     this.cameraState = {
       mode: CameraMode.DEFAULT,
-      focus: TargetType.SINGLE_ENEMY,
-      focusModifier: null
+      focus: 0
     }
-    this.turnManager = new TurnManager()
     this.queue = []
     this.playerCharacters = playerCharacters
     this.enemies = enemies
     this.skillPoints = 3
   }
   async initGame() {
-    this.playerCharacters.forEach((char) => Timeline.enqueue(char))
-    this.enemies.forEach((char) => Timeline.enqueue(char))
-    while (true) {
+    this.playerCharacters.forEach((char, i) => Timeline.enqueue(char, i))
+    this.enemies.forEach((char, i) => Timeline.enqueue(char, i))
+    while (!this.gameOver) {
       const nextTurn = Timeline.getNextTurn()
+      if (!nextTurn) {
+        console.log('no more turns??')
+        return
+      }
       await TurnManager.resolveTurn(nextTurn)
     }
   }
@@ -301,13 +369,17 @@ const mainCharacter = new PlayerCharacter(
   10,
   1,
   {
-    target: TargetType.SINGLE_ENEMY,
-    effect: SkillEffect.DAMAGE
+    targetType: TargetType.SPLASH_ENEMY,
+    effect: SkillEffect.DAMAGE,
+    modifier: 1.2
   },
+  100,
+  100,
   100
 )
 const simpleEnemy = new Enemy('frostspawn', frostSpawnImage, 10, 1, 90)
-const gameState = reactive(new GameState([mainCharacter], [simpleEnemy]))
+const simpleEnemy2 = new Enemy('frostspawn2', frostSpawnImage, 10, 1, 90)
+const gameState = reactive(new GameState([mainCharacter], [simpleEnemy, simpleEnemy2]))
 const uiElements = reactive(new UIElements())
 
 function attackButton() {
@@ -318,8 +390,52 @@ function skillButton() {
   gameState.playerInput = { type: PlayerButton.SKILL }
 }
 
+// Function to handle keyboard input
+function onKeyPress(e: KeyboardEvent) {
+  switch (e.key) {
+    case 'a': {
+      const currentFocus = gameState.focusedTarget.mainTarget
+      gameState.focusedTarget.mainTarget = Math.max(currentFocus - 1, 0)
+      break
+    }
+    case 'd': {
+      const currentFocus = gameState.focusedTarget.mainTarget
+      gameState.focusedTarget.mainTarget = Math.min(currentFocus + 1, gameState.enemies.length - 1)
+      break
+    }
+    case 'space': {
+      gameState.playerInput = { type: PlayerButton.ATTACK }
+      break
+    }
+    case 'e': {
+      gameState.playerInput = { type: PlayerButton.SKILL }
+      break
+    }
+    case '1': {
+      Timeline.ult(0)
+      break
+    }
+    case '2': {
+      Timeline.ult(1)
+      break
+    }
+    case '3': {
+      Timeline.ult(2)
+      break
+    }
+    case '4': {
+      Timeline.ult(3)
+      break
+    }
+  }
+}
+
 onMounted(() => {
   gameState.initGame()
+  document.addEventListener('keypress', onKeyPress)
+})
+onUnmounted(() => {
+  document.removeEventListener('keypress', onKeyPress)
 })
 
 function printGameState() {
@@ -427,8 +543,6 @@ function printGameState() {
         >
           {{ '[name: ' + character.name + ' hp:' + character.hp + ']' }}
         </div>
-      </div>
-      <div class="row justify-content-center d-flex">
         <div>Enemies:</div>
         <div v-for="character in gameState.enemies" :key="`${character.name + character.hp}`">
           {{ '[name: ' + character.name + ' hp:' + character.hp + ']' }}
@@ -443,10 +557,13 @@ function printGameState() {
       <div class="row justify-content-center d-flex">
         <div>Turn Character:</div>
         <div>{{ gameState.turnCharacter?.name }}</div>
-      </div>
-      <div class="row justify-content-center d-flex">
+        <div>|</div>
         <div>Turn state:</div>
         <div>{{ gameState.turnState.stateEnum }}</div>
+      </div>
+      <div class="row justify-content-center d-flex">
+        <div>Focused Target:</div>
+        <div>{{ gameState.focusedTarget.mainTarget }}</div>
       </div>
     </div>
   </main>
@@ -481,18 +598,17 @@ function printGameState() {
       color: white;
     }
   }
-}
+  .skill-button {
+    height: 60px;
+    width: 60px;
+    right: 20px;
+  }
 
-.skill-button {
-  height: 60px;
-  width: 60px;
-  right: 20px;
-}
-
-.attack-button {
-  height: 80px;
-  width: 80px;
-  right: 90px;
+  .attack-button {
+    height: 80px;
+    width: 80px;
+    right: 90px;
+  }
 }
 
 .health-bar {
