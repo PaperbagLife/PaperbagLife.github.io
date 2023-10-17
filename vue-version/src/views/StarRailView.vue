@@ -104,6 +104,7 @@ class PlayerCharacter extends Character {
   skill: Skill
   energy: number
   maxEnergy: number
+  ult: Skill
   constructor(
     name: string,
     portrait: string,
@@ -112,12 +113,14 @@ class PlayerCharacter extends Character {
     skill: Skill,
     speed: number,
     energy: number,
-    maxEnergy: number
+    maxEnergy: number,
+    ult: Skill
   ) {
     super(CharacterType.PLAYER, name, portrait, hp, attack, speed)
     this.skill = skill
     this.energy = energy
     this.maxEnergy = maxEnergy
+    this.ult = ult
   }
 }
 
@@ -128,7 +131,7 @@ class Enemy extends Character {
 }
 
 type TimelineTurn = {
-  character: Character
+  character?: Character // A subturn where you ult from player turn, this will be undefined
   index: number
   timeUntil: number
   subTurns: SubTurn[]
@@ -210,8 +213,42 @@ class CombatManager {
     await delay(TURN_TIME)
     const damage = player.attack
     const target = gameState.focusedTarget.mainTarget
-    // Assume basic attack always single target (TODO: change this paradigm later)
+    // Assume basic attack always single target (TODO p2: change this paradigm later)
     gameState.enemies[target].hp -= damage
+  }
+
+  static async resolvePlayerUlt() {
+    const player = gameState.turnCharacter as PlayerCharacter
+    await delay(TURN_TIME)
+    if (player.ult.effect === SkillEffect.DAMAGE) {
+      const damage = player.attack * player.ult.modifier
+      const target = gameState.focusedTarget.mainTarget
+      // Depending on the type of the skill do differnt calculations here
+      switch (player.ult.targetType) {
+        case TargetType.SINGLE_ENEMY: {
+          gameState.enemies[target].hp -= damage
+          break
+        }
+        case TargetType.SPLASH_ENEMY: {
+          gameState.enemies[target].hp -= damage
+          if (target > 0) {
+            gameState.enemies[target - 1].hp -= damage
+          }
+          if (target < gameState.enemies.length - 1) {
+            gameState.enemies[target + 1].hp -= damage
+          }
+          break
+        }
+        case TargetType.ALL_ENEMIES:
+        case TargetType.RANDOM_ENEMY: {
+          for (let i = 0; i < (player.ult.hits ?? 1); i += 1) {
+            const enemyIdx = getRandomInt(gameState.enemies.length)
+            gameState.enemies[enemyIdx].hp -= damage
+          }
+        }
+      }
+    }
+    // TODO: Healing skill here
   }
 }
 
@@ -219,6 +256,7 @@ class CombatManager {
 class TurnManager {
   static async resolveTurn(turn: TimelineTurn) {
     gameState.currentTurn = turn
+    if (!turn.character) return
     if (turn.character.type === CharacterType.ENEMY) {
       const enemy = turn.character as Enemy
       gameState.turnCharacter = enemy
@@ -232,11 +270,31 @@ class TurnManager {
       let turnTaken = false
       while (!turnTaken) {
         // Check for insert ult
+        if (gameState.ultSignaled != null) {
+          console.log('ult triggered in player turn', turn.timeUntil)
+          // put the current turn back
+          gameState.queue.unshift(turn)
+          gameState.currentTurn = {
+            character: undefined,
+            index: gameState.ultSignaled,
+            timeUntil: 0,
+            subTurns: [
+              {
+                type: SubTurnType.ULT,
+                character: gameState.playerCharacters[gameState.ultSignaled]
+              }
+            ]
+          }
+          gameState.ultSignaled = null
+          break
+        }
         if (gameState.playerInput != null) {
           switch (gameState.playerInput.type) {
             case PlayerButton.ATTACK: {
               if (gameState.turnState.stateEnum === TurnStateEnum.PLAYER_TURN_DEFAULT) {
                 // Fire basic attack
+                console.log('fire basic attack')
+                gameState.skillPoints = Math.min(gameState.skillPoints + 1, MAX_SKILLPOINTS)
                 await CombatManager.resolvePlayerAttack()
                 turnTaken = true
                 break
@@ -244,7 +302,7 @@ class TurnManager {
               if (gameState.turnState.stateEnum === TurnStateEnum.PLAYER_TURN_SKILL_PENDING) {
                 // Go to default state
                 gameState.turnState.stateEnum = TurnStateEnum.PLAYER_TURN_DEFAULT
-                gameState.cameraState.mode = CameraMode.ALLIES
+                gameState.cameraState.mode = CameraMode.DEFAULT
                 gameState.cameraState.focus = turn.index
               }
               break
@@ -253,6 +311,7 @@ class TurnManager {
               if (gameState.turnState.stateEnum === TurnStateEnum.PLAYER_TURN_SKILL_PENDING) {
                 if (gameState.skillPoints > 0) {
                   // Fire skill
+                  gameState.skillPoints -= 1
                   await CombatManager.resolvePlayerSkill()
                   turnTaken = true
                   break
@@ -270,7 +329,6 @@ class TurnManager {
                 ) {
                   gameState.cameraState.mode = CameraMode.ALLIES
                   gameState.cameraState.focus = turn.index
-                  player.skill.targetType === TargetType.SINGLE_ALLY ? 0 : -1
                 }
               }
               break
@@ -282,13 +340,44 @@ class TurnManager {
       }
     }
 
-    let currentSubTurn = null
-    while (turn.subTurns.length > 0) {
-      currentSubTurn = turn.subTurns.shift()
-      // handle ult and reactions here, kinda need to sort them
-    }
+    if (!gameState.currentTurn) return
+
     Timeline.enqueue(gameState.turnCharacter, turn.index)
     gameState.turnCharacter = null
+
+    let currentSubTurn = null
+    while (gameState.currentTurn.subTurns.length > 0) {
+      gameState.currentTurn.subTurns.sort((a, b) =>
+        a.type === b.type ? 0 : a.type === SubTurnType.REACTION ? -1 : 1
+      )
+      currentSubTurn = turn.subTurns.shift()
+      // handle ult and reactions here, kinda need to sort them
+      if (!currentSubTurn) break
+      gameState.turnCharacter = currentSubTurn.character
+      if (currentSubTurn.type === SubTurnType.REACTION) {
+        // TODO: Reaction subturns
+      }
+      if (currentSubTurn.type === SubTurnType.ULT) {
+        gameState.turnState.stateEnum = TurnStateEnum.PLAYER_ULT_PENDING
+        let ultFired = false
+        // Adjust camera state
+        const player = gameState.turnCharacter as PlayerCharacter
+        if (
+          player.ult.targetType === TargetType.ALL_ALLIES ||
+          player.ult.targetType === TargetType.SINGLE_ALLY
+        ) {
+          gameState.cameraState.mode = CameraMode.ALLIES
+          gameState.cameraState.focus = turn.index
+        }
+        while (!ultFired) {
+          if (gameState.playerInput != null && gameState.playerInput.type === PlayerButton.ATTACK) {
+            ultFired = true
+            await CombatManager.resolvePlayerUlt()
+          }
+          await delay(200)
+        }
+      }
+    }
   }
 }
 
@@ -310,16 +399,29 @@ class Timeline {
   static getNextTurn() {
     const turn = gameState.queue.shift()
     gameState.queue.forEach((futureTurn) => (futureTurn.timeUntil -= turn?.timeUntil ?? 0))
-    return turn
+    if (turn) {
+      turn.timeUntil = 0
+      return turn
+    }
   }
 
   static ult(index: number) {
     const character = gameState.playerCharacters[index]
     if (character.energy === character.maxEnergy) {
-      gameState.currentTurn?.subTurns.push({
-        type: SubTurnType.ULT,
-        character: gameState.playerCharacters[index]
-      })
+      character.energy = 0
+      // Either append ult turn at the end of subTurn or immediately resolve ult turn
+      if (
+        gameState.turnState.stateEnum === TurnStateEnum.PLAYER_TURN_DEFAULT ||
+        gameState.turnState.stateEnum === TurnStateEnum.PLAYER_TURN_SKILL_PENDING
+      ) {
+        // Immediately resolve ult turn
+        gameState.ultSignaled = index
+      } else {
+        gameState.currentTurn?.subTurns.push({
+          type: SubTurnType.ULT,
+          character: gameState.playerCharacters[index]
+        })
+      }
     }
   }
 }
@@ -336,6 +438,7 @@ class GameState {
   playerInput: PlayerInput | null = null
   focusedTarget: FocusedTarget = { mainTarget: 0 }
   currentTurn: TimelineTurn | null = null
+  ultSignaled: number | null = null
   gameOver = false
 
   constructor(playerCharacters: PlayerCharacter[], enemies: Enemy[]) {
@@ -373,9 +476,16 @@ const mainCharacter = new PlayerCharacter(
     effect: SkillEffect.DAMAGE,
     modifier: 1.2
   },
+
   100,
   100,
-  100
+  100,
+  {
+    targetType: TargetType.RANDOM_ENEMY,
+    hits: 3,
+    effect: SkillEffect.DAMAGE,
+    modifier: 2
+  }
 )
 const simpleEnemy = new Enemy('frostspawn', frostSpawnImage, 10, 1, 90)
 const simpleEnemy2 = new Enemy('frostspawn2', frostSpawnImage, 10, 1, 90)
@@ -412,6 +522,7 @@ function onKeyPress(e: KeyboardEvent) {
       break
     }
     case '1': {
+      console.log('ulting 0')
       Timeline.ult(0)
       break
     }
@@ -525,8 +636,13 @@ function printGameState() {
             ></rect>
           </g>
 
-          <g v-for="(actor, i) in gameState.queue" :key="actor.character.name">
-            <text x="20" :y="i * 30 + 60">{{ `${actor.character.name} ${actor.timeUntil}` }}</text>
+          <g
+            v-for="(turn, i) in gameState.queue"
+            :key="turn.character?.name ?? '' + turn.timeUntil"
+          >
+            <text class="turn-entries" x="20" :y="i * 30 + 60">
+              {{ `${turn.character?.name} ${turn.timeUntil}` }}
+            </text>
           </g>
         </svg>
       </div>
@@ -550,8 +666,11 @@ function printGameState() {
       </div>
       <div class="row justify-content-center d-flex">
         <div>Timeline:</div>
-        <div v-for="turn in gameState.queue" :key="`${turn.character.name + turn.timeUntil}`">
-          {{ '[char: ' + turn.character.name + ' timeUntil:' + turn.timeUntil + ']' }}
+        <div
+          v-for="turn in gameState.queue"
+          :key="`${turn.character?.name ?? '' + turn.timeUntil}`"
+        >
+          {{ '[char: ' + turn.character?.name + ' timeUntil:' + turn.timeUntil + ']' }}
         </div>
       </div>
       <div class="row justify-content-center d-flex">
@@ -583,6 +702,9 @@ function printGameState() {
   color: white;
 }
 
+.turn-entries {
+  fill: white;
+}
 .action-buttons {
   top: 320px;
   .attack-button,
