@@ -9,6 +9,15 @@ const { type } = useBreakpoints()
 
 const MAX_SKILLPOINTS = 5
 const TURN_TIME = 1000
+const MULTIHIT_DELAY = 300
+const PROFILE_PIC_HEIGHT = 80
+const PROFILE_PIC_WIDTH = 80
+const HP_BAR_HEIGHT = 10
+const HP_BAR_OFFSET = 2
+const PROFILE_PIC_SIDE_OFFSET = 120
+const PROFILE_PIC_BASE_OFFSET = 30
+const ULT_GAUGE_BASE_OFFSET = 100
+const BASIC_ATTACK_ENERGY_GAIN = 5
 
 const TIMELINE_DISTANCE = 10000
 
@@ -69,6 +78,35 @@ type Skill = {
   effect: SkillEffect
 }
 
+enum Elements {
+  FIRE = 'fire',
+  ICE = 'ice',
+  LIGHTNING = 'lightning',
+  WIND = 'wind',
+  QUANTUM = 'quantum',
+  IMAGINARY = 'imaginary',
+  PHYSICAL = 'physical'
+}
+
+function getElementColor(element: Elements) {
+  switch (element) {
+    case Elements.FIRE:
+      return 'rgb(227,43,41)'
+    case Elements.ICE:
+      return 'rgb(42,146,211)'
+    case Elements.LIGHTNING:
+      return 'rgb(186,81,219)'
+    case Elements.WIND:
+      return 'rgb(97,200,150)'
+    case Elements.QUANTUM:
+      return 'rgb(85,73,188)'
+    case Elements.IMAGINARY:
+      return 'rgb(245,223,50)'
+    case Elements.PHYSICAL:
+      return 'rgb(197,197,197)'
+  }
+}
+
 class Character {
   type: CharacterType
   name: string
@@ -104,6 +142,7 @@ class PlayerCharacter extends Character {
   skill: Skill
   energy: number
   maxEnergy: number
+  element: Elements
   ult: Skill
   constructor(
     name: string,
@@ -114,13 +153,15 @@ class PlayerCharacter extends Character {
     speed: number,
     energy: number,
     maxEnergy: number,
-    ult: Skill
+    ult: Skill,
+    element: Elements
   ) {
     super(CharacterType.PLAYER, name, portrait, hp, attack, speed)
     this.skill = skill
     this.energy = energy
     this.maxEnergy = maxEnergy
     this.ult = ult
+    this.element = element
   }
 }
 
@@ -211,6 +252,7 @@ class CombatManager {
   static async resolvePlayerAttack() {
     const player = gameState.turnCharacter as PlayerCharacter
     await delay(TURN_TIME)
+    player.energy += BASIC_ATTACK_ENERGY_GAIN
     const damage = player.attack
     const target = gameState.focusedTarget.mainTarget
     // Assume basic attack always single target (TODO p2: change this paradigm later)
@@ -243,6 +285,7 @@ class CombatManager {
         case TargetType.RANDOM_ENEMY: {
           for (let i = 0; i < (player.ult.hits ?? 1); i += 1) {
             const enemyIdx = getRandomInt(gameState.enemies.length)
+            await delay(MULTIHIT_DELAY)
             gameState.enemies[enemyIdx].hp -= damage
           }
         }
@@ -271,7 +314,6 @@ class TurnManager {
       while (!turnTaken) {
         // Check for insert ult
         if (gameState.ultSignaled != null) {
-          console.log('ult triggered in player turn', turn.timeUntil)
           // put the current turn back
           gameState.queue.unshift(turn)
           gameState.currentTurn = {
@@ -285,7 +327,9 @@ class TurnManager {
               }
             ]
           }
+          gameState.turnCharacter = null
           gameState.ultSignaled = null
+          gameState.playerInput = null
           break
         }
         if (gameState.playerInput != null) {
@@ -341,8 +385,9 @@ class TurnManager {
     }
 
     if (!gameState.currentTurn) return
-
-    Timeline.enqueue(gameState.turnCharacter, turn.index)
+    if (gameState.turnCharacter) {
+      Timeline.enqueue(gameState.turnCharacter, turn.index)
+    }
     gameState.turnCharacter = null
 
     let currentSubTurn = null
@@ -350,8 +395,9 @@ class TurnManager {
       gameState.currentTurn.subTurns.sort((a, b) =>
         a.type === b.type ? 0 : a.type === SubTurnType.REACTION ? -1 : 1
       )
-      currentSubTurn = turn.subTurns.shift()
+      currentSubTurn = gameState.currentTurn.subTurns.shift()
       // handle ult and reactions here, kinda need to sort them
+      console.log('currentsubturn', currentSubTurn)
       if (!currentSubTurn) break
       gameState.turnCharacter = currentSubTurn.character
       if (currentSubTurn.type === SubTurnType.REACTION) {
@@ -372,6 +418,7 @@ class TurnManager {
         while (!ultFired) {
           if (gameState.playerInput != null && gameState.playerInput.type === PlayerButton.ATTACK) {
             ultFired = true
+            gameState.playerInput = null
             await CombatManager.resolvePlayerUlt()
           }
           await delay(200)
@@ -406,6 +453,7 @@ class Timeline {
   }
 
   static ult(index: number) {
+    if (index > gameState.playerCharacters.length) return
     const character = gameState.playerCharacters[index]
     if (character.energy === character.maxEnergy) {
       character.energy = 0
@@ -465,9 +513,9 @@ class GameState {
   }
 }
 
-const canvas = { width: 740, height: 360 }
+const canvas = { width: 840, height: 360 }
 const mainCharacter = new PlayerCharacter(
-  'main character',
+  'main-character',
   mainCharacterImage,
   10,
   1,
@@ -478,18 +526,40 @@ const mainCharacter = new PlayerCharacter(
   },
 
   100,
-  100,
+  50,
   100,
   {
     targetType: TargetType.RANDOM_ENEMY,
     hits: 3,
     effect: SkillEffect.DAMAGE,
     modifier: 2
-  }
+  },
+  Elements.PHYSICAL
+)
+const bailu = new PlayerCharacter(
+  'bailu',
+  bailuImage,
+  10,
+  1,
+  {
+    targetType: TargetType.SPLASH_ENEMY,
+    effect: SkillEffect.DAMAGE,
+    modifier: 1.2
+  },
+  100,
+  50,
+  100,
+  {
+    targetType: TargetType.RANDOM_ENEMY,
+    hits: 3,
+    effect: SkillEffect.DAMAGE,
+    modifier: 2
+  },
+  Elements.LIGHTNING
 )
 const simpleEnemy = new Enemy('frostspawn', frostSpawnImage, 10, 1, 90)
 const simpleEnemy2 = new Enemy('frostspawn2', frostSpawnImage, 10, 1, 90)
-const gameState = reactive(new GameState([mainCharacter], [simpleEnemy, simpleEnemy2]))
+const gameState = reactive(new GameState([mainCharacter, bailu], [simpleEnemy, simpleEnemy2]))
 const uiElements = reactive(new UIElements())
 
 function attackButton() {
@@ -522,7 +592,6 @@ function onKeyPress(e: KeyboardEvent) {
       break
     }
     case '1': {
-      console.log('ulting 0')
       Timeline.ult(0)
       break
     }
@@ -591,25 +660,66 @@ function printGameState() {
           >
             <image
               :href="character.portrait"
-              height="80"
-              width="80"
-              :x="30 + i * 100"
+              :height="PROFILE_PIC_HEIGHT"
+              :width="PROFILE_PIC_WIDTH"
+              :x="PROFILE_PIC_BASE_OFFSET + i * PROFILE_PIC_SIDE_OFFSET"
               y="250"
             ></image>
             <rect
               class="health-bar-outline"
-              :x="30 + i * 100"
+              :x="PROFILE_PIC_BASE_OFFSET + i * PROFILE_PIC_SIDE_OFFSET"
               y="330"
-              width="80"
-              height="10"
+              :width="PROFILE_PIC_WIDTH"
+              :height="HP_BAR_HEIGHT"
             ></rect>
             <rect
               class="health-bar"
-              :x="32 + i * 100"
+              :x="PROFILE_PIC_BASE_OFFSET + HP_BAR_OFFSET + i * PROFILE_PIC_SIDE_OFFSET"
               y="332"
-              :width="(character.hp / character.maxHp) * 76"
-              height="6"
+              :width="(character.hp / character.maxHp) * (PROFILE_PIC_WIDTH - HP_BAR_OFFSET * 2)"
+              :height="HP_BAR_HEIGHT - 2 * HP_BAR_OFFSET"
             ></rect>
+            <linearGradient
+              :id="character.name + 'energy-gradient'"
+              x1="0.5"
+              y1="1"
+              x2="0.5"
+              y2="0"
+            >
+              <stop
+                :offset="`${(character.energy / character.maxEnergy) * 100}%`"
+                stop-opacity="1"
+                :stop-color="getElementColor(character.element)"
+              ></stop>
+              <stop
+                :offset="`${(character.energy / character.maxEnergy) * 100}%`"
+                stop-opacity="0"
+                :stop-color="getElementColor(character.element)"
+              ></stop>
+              <stop
+                offset="100%"
+                stop-opacity="0"
+                :stop-color="getElementColor(character.element)"
+              />
+            </linearGradient>
+            <g class="ult-circle">
+              <circle
+                class="ult-circle"
+                :cx="ULT_GAUGE_BASE_OFFSET + i * PROFILE_PIC_SIDE_OFFSET"
+                cy="290"
+                r="30"
+                fill="black"
+              />
+              <circle
+                class="ult-circle"
+                :cx="ULT_GAUGE_BASE_OFFSET + i * PROFILE_PIC_SIDE_OFFSET"
+                cy="290"
+                r="30"
+                :fill="`url(#${character.name}energy-gradient)`"
+                stroke="grey"
+                stroke-width="1"
+              />
+            </g>
           </g>
           <!--Enemy characters-->
           <g v-for="(character, i) in gameState.enemies" :key="character.name + character.hp">
@@ -731,6 +841,10 @@ function printGameState() {
     width: 80px;
     right: 90px;
   }
+}
+
+.ult-circle {
+  opacity: 80%;
 }
 
 .health-bar {
