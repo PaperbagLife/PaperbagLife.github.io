@@ -252,7 +252,7 @@ class CombatManager {
   static async resolvePlayerAttack() {
     const player = gameState.turnCharacter as PlayerCharacter
     await delay(TURN_TIME)
-    player.energy += BASIC_ATTACK_ENERGY_GAIN
+    player.energy = Math.min(player.energy + BASIC_ATTACK_ENERGY_GAIN, player.maxEnergy)
     const damage = player.attack
     const target = gameState.focusedTarget.mainTarget
     // Assume basic attack always single target (TODO p2: change this paradigm later)
@@ -302,6 +302,7 @@ class TurnManager {
     if (!turn.character) return
     if (turn.character.type === CharacterType.ENEMY) {
       const enemy = turn.character as Enemy
+      gameState.turnState = { resolvingSubTurn: false, stateEnum: TurnStateEnum.ENEMY_TURN }
       gameState.turnCharacter = enemy
       await CombatManager.resolveEnemyMove()
     } else {
@@ -399,6 +400,7 @@ class TurnManager {
       // handle ult and reactions here, kinda need to sort them
       console.log('currentsubturn', currentSubTurn)
       if (!currentSubTurn) break
+      gameState.currentResolvingSubTurn = currentSubTurn
       gameState.turnCharacter = currentSubTurn.character
       if (currentSubTurn.type === SubTurnType.REACTION) {
         // TODO: Reaction subturns
@@ -486,6 +488,7 @@ class GameState {
   playerInput: PlayerInput | null = null
   focusedTarget: FocusedTarget = { mainTarget: 0 }
   currentTurn: TimelineTurn | null = null
+  currentResolvingSubTurn: SubTurn | null = null
   ultSignaled: number | null = null
   gameOver = false
 
@@ -526,7 +529,7 @@ const mainCharacter = new PlayerCharacter(
   },
 
   100,
-  50,
+  95,
   100,
   {
     targetType: TargetType.RANDOM_ENEMY,
@@ -547,7 +550,7 @@ const bailu = new PlayerCharacter(
     modifier: 1.2
   },
   100,
-  50,
+  95,
   100,
   {
     targetType: TargetType.RANDOM_ENEMY,
@@ -583,12 +586,12 @@ function onKeyPress(e: KeyboardEvent) {
       gameState.focusedTarget.mainTarget = Math.min(currentFocus + 1, gameState.enemies.length - 1)
       break
     }
-    case 'space': {
-      gameState.playerInput = { type: PlayerButton.ATTACK }
+    case ' ': {
+      attackButton()
       break
     }
     case 'e': {
-      gameState.playerInput = { type: PlayerButton.SKILL }
+      skillButton()
       break
     }
     case '1': {
@@ -655,6 +658,7 @@ function printGameState() {
         </div>
         <svg :height="canvas.height" :width="canvas.width">
           <g
+            class="player-ui"
             v-for="(character, i) in gameState.playerCharacters"
             :key="character.name + character.hp"
           >
@@ -722,7 +726,11 @@ function printGameState() {
             </g>
           </g>
           <!--Enemy characters-->
-          <g v-for="(character, i) in gameState.enemies" :key="character.name + character.hp">
+          <g
+            class="enemy-ui"
+            v-for="(character, i) in gameState.enemies"
+            :key="character.name + character.hp"
+          >
             <image
               :href="character.portrait"
               height="80"
@@ -746,13 +754,60 @@ function printGameState() {
             ></rect>
           </g>
 
+          <g class="current-turn">
+            <g v-if="gameState.currentTurn?.character">
+              <rect height="20" width="40" stroke="white" fill="grey" x="20" :y="10"></rect>
+              <image
+                :href="gameState.currentTurn.character?.portrait"
+                height="20"
+                width="20"
+                x="30"
+                :y="10"
+              />
+            </g>
+            <g
+              v-for="(subTurn, i) in gameState.currentTurn?.subTurns"
+              :key="subTurn.character.name + subTurn.type"
+            >
+              <rect
+                height="20"
+                width="40"
+                stroke="white"
+                fill="grey"
+                :x="60 + 40 * i"
+                :y="10"
+              ></rect>
+              <image
+                :href="subTurn.character.portrait"
+                height="20"
+                width="20"
+                :x="70 + 40 * i"
+                :y="10"
+              />
+            </g>
+          </g>
+          <g v-if="gameState.currentResolvingSubTurn" class="current-subturn">
+            <rect height="20" width="40" stroke="white" fill="grey" x="20" :y="10"></rect>
+            <image
+              :href="gameState.currentResolvingSubTurn.character?.portrait"
+              height="20"
+              width="20"
+              x="30"
+              :y="10"
+            />
+          </g>
           <g
             v-for="(turn, i) in gameState.queue"
             :key="turn.character?.name ?? '' + turn.timeUntil"
           >
-            <text class="turn-entries" x="20" :y="i * 30 + 60">
-              {{ `${turn.character?.name} ${turn.timeUntil}` }}
-            </text>
+            <rect height="20" width="40" stroke="white" fill="grey" x="20" :y="i * 30 + 40"></rect>
+            <image
+              :href="turn.character?.portrait"
+              height="20"
+              width="20"
+              x="30"
+              :y="i * 30 + 40"
+            />
           </g>
         </svg>
       </div>
@@ -847,10 +902,20 @@ function printGameState() {
   opacity: 80%;
 }
 
-.health-bar {
-  fill: white;
-  stroke: black;
+.player-ui {
+  .health-bar {
+    fill: rgb(100, 248, 250);
+    stroke: black;
+  }
 }
+
+.enemy-ui {
+  .health-bar {
+    fill: rgb(190, 82, 61);
+    stroke: black;
+  }
+}
+
 .health-bar-outline {
   fill: transparent;
   stroke: white;
