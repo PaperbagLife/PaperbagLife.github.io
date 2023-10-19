@@ -11,6 +11,9 @@ const { type } = useBreakpoints()
 const MAX_SKILLPOINTS = 5
 const TURN_TIME = 1000
 const MULTIHIT_DELAY = 300
+
+const HIT_ENERGY_REGEN = 5
+
 const PROFILE_PIC_HEIGHT = 80
 const PROFILE_PIC_WIDTH = 80
 const HP_BAR_HEIGHT = 10
@@ -220,6 +223,10 @@ class CombatManager {
     const damage = enemy.attack
     const target = getRandomInt(gameState.playerCharacters.length)
     gameState.playerCharacters[target].hp -= damage
+    gameState.playerCharacters[target].energy = Math.min(
+      gameState.playerCharacters[target].energy + HIT_ENERGY_REGEN,
+      gameState.playerCharacters[target].maxEnergy
+    )
   }
   static async resolvePlayerSkill() {
     const player = gameState.turnCharacter as PlayerCharacter
@@ -360,16 +367,11 @@ class TurnManager {
             }
             case PlayerButton.SKILL: {
               if (gameState.turnState.stateEnum === TurnStateEnum.PLAYER_TURN_SKILL_PENDING) {
-                if (gameState.skillPoints > 0) {
-                  // Fire skill
-                  gameState.skillPoints -= 1
-                  await CombatManager.resolvePlayerSkill()
-                  turnTaken = true
-                  break
-                } else {
-                  uiElements.show0SkillPoint = true
-                  setTimeout(() => (uiElements.show0SkillPoint = false), 1000)
-                }
+                // Fire skill
+                gameState.skillPoints -= 1
+                await CombatManager.resolvePlayerSkill()
+                turnTaken = true
+                break
               }
               if (gameState.turnState.stateEnum === TurnStateEnum.PLAYER_TURN_DEFAULT) {
                 // Go to skill ready state
@@ -507,7 +509,7 @@ class GameState {
     this.queue = []
     this.playerCharacters = playerCharacters
     this.enemies = enemies
-    this.skillPoints = 3
+    this.skillPoints = 1
   }
   async initGame() {
     this.playerCharacters.forEach((char, i) => Timeline.enqueue(char, i))
@@ -520,6 +522,9 @@ class GameState {
       }
       await TurnManager.resolveTurn(nextTurn)
       // Check deaths
+      gameState.enemies = gameState.enemies.filter((enemy) => enemy.isAlive())
+      gameState.playerCharacters = gameState.playerCharacters.filter((player) => player.isAlive())
+      gameState.queue = gameState.queue.filter((turn) => turn.character?.isAlive())
     }
   }
 }
@@ -568,11 +573,11 @@ const bailu = new PlayerCharacter(
   },
   Elements.LIGHTNING
 )
-const simpleEnemy = new Enemy('frostspawn', frostSpawnImage, 10, 1, 90)
-const simpleEnemy2 = new Enemy('frostspawn2', frostSpawnImage, 10, 1, 90)
-const simpleEnemy3 = new Enemy('frostspawn3', frostSpawnImage, 10, 1, 90)
-const simpleEnemy4 = new Enemy('frostspawn4', frostSpawnImage, 10, 1, 90)
-const simpleEnemy5 = new Enemy('frostspawn5', frostSpawnImage, 10, 1, 90)
+const simpleEnemy = new Enemy('frostspawn', frostSpawnImage, 5, 1, 90)
+const simpleEnemy2 = new Enemy('frostspawn2', frostSpawnImage, 5, 1, 90)
+const simpleEnemy3 = new Enemy('frostspawn3', frostSpawnImage, 5, 1, 90)
+const simpleEnemy4 = new Enemy('frostspawn4', frostSpawnImage, 5, 1, 90)
+const simpleEnemy5 = new Enemy('frostspawn5', frostSpawnImage, 5, 1, 90)
 const gameState = reactive(
   new GameState(
     [mainCharacter, bailu],
@@ -639,10 +644,26 @@ const targetMarkers = computed<TargetMarkers>(() => {
 })
 
 function attackButton() {
+  if (gameState.turnState.stateEnum === TurnStateEnum.ENEMY_TURN) {
+    return
+  }
   gameState.playerInput = { type: PlayerButton.ATTACK }
 }
 
+let last0SkillReset = 0
 function skillButton() {
+  if (gameState.skillPoints === 0) {
+    clearTimeout(last0SkillReset)
+    uiElements.show0SkillPoint = true
+    last0SkillReset = setTimeout(() => {
+      console.log('shit')
+      uiElements.show0SkillPoint = false
+    }, 2000)
+    return
+  }
+  if (gameState.turnState.stateEnum === TurnStateEnum.ENEMY_TURN) {
+    return
+  }
   gameState.playerInput = { type: PlayerButton.SKILL }
 }
 
@@ -720,6 +741,9 @@ function printGameState() {
     <div class="col mt-2 d-flex justify-content-center">
       <div class="game-viewport">
         <div class="skill-points-container">
+          <div class="no-skill-point-tip" v-if="uiElements.show0SkillPoint">
+            Not enough skill points
+          </div>
           <span v-for="i in [...Array(5).keys()]" :key="i" class="material-icons-outlined">{{
             i < gameState.skillPoints ? 'star' : 'star_outline'
           }}</span>
@@ -991,6 +1015,12 @@ function printGameState() {
   border-radius: 4px;
   width: var(width);
   height: var(height);
+}
+
+.no-skill-point-tip {
+  position: absolute;
+  width: 200px;
+  top: 20px;
 }
 
 .attack-button .material-icons-outlined {
