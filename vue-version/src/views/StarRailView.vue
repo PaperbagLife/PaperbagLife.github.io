@@ -97,7 +97,7 @@ enum Elements {
   PHYSICAL = 'physical'
 }
 
-function getElementColor(element: Elements) {
+function getElementColor(element?: Elements) {
   switch (element) {
     case Elements.FIRE:
       return 'rgb(227,43,41)'
@@ -113,6 +113,8 @@ function getElementColor(element: Elements) {
       return 'rgb(245,223,50)'
     case Elements.PHYSICAL:
       return 'rgb(197,197,197)'
+    default:
+      return 'white'
   }
 }
 
@@ -231,6 +233,8 @@ class CombatManager {
   static async resolvePlayerSkill() {
     const player = gameState.turnCharacter as PlayerCharacter
     await delay(TURN_TIME)
+    gameState.turnState.stateEnum = TurnStateEnum.PLAYER_TURN_DEFAULT
+    gameState.focusedTarget.targetType = TargetType.SINGLE_ENEMY
     if (player.skill.effect === SkillEffect.DAMAGE) {
       const damage = player.attack * player.skill.modifier
       const target = gameState.focusedTarget.mainTarget
@@ -238,15 +242,19 @@ class CombatManager {
       switch (player.skill.targetType) {
         case TargetType.SINGLE_ENEMY: {
           gameState.enemies[target].hp -= damage
+          makeDamageNumber(damage, CharacterType.ENEMY, target, player.element)
           break
         }
         case TargetType.SPLASH_ENEMY: {
           gameState.enemies[target].hp -= damage
+          makeDamageNumber(damage, CharacterType.ENEMY, target, player.element)
           if (target > 0) {
             gameState.enemies[target - 1].hp -= damage
+            makeDamageNumber(damage, CharacterType.ENEMY, target - 1, player.element)
           }
           if (target < gameState.enemies.length - 1) {
             gameState.enemies[target + 1].hp -= damage
+            makeDamageNumber(damage, CharacterType.ENEMY, target + 1, player.element)
           }
           break
         }
@@ -255,6 +263,7 @@ class CombatManager {
           for (let i = 0; i < (player.skill.hits ?? 1); i += 1) {
             const enemyIdx = getRandomInt(gameState.enemies.length)
             gameState.enemies[enemyIdx].hp -= damage
+            makeDamageNumber(damage, CharacterType.ENEMY, enemyIdx, player.element)
           }
         }
       }
@@ -270,6 +279,7 @@ class CombatManager {
     const target = gameState.focusedTarget.mainTarget
     // Assume basic attack always single target (TODO p2: change this paradigm later)
     gameState.enemies[target].hp -= damage
+    makeDamageNumber(damage, CharacterType.ENEMY, target, player.element)
   }
 
   static async resolvePlayerUlt() {
@@ -533,8 +543,8 @@ const canvas = { width: 840, height: 360 }
 const mainCharacter = new PlayerCharacter(
   'main-character',
   mainCharacterImage,
+  100,
   10,
-  1,
   {
     targetType: TargetType.SPLASH_ENEMY,
     effect: SkillEffect.DAMAGE,
@@ -555,8 +565,8 @@ const mainCharacter = new PlayerCharacter(
 const bailu = new PlayerCharacter(
   'bailu',
   bailuImage,
+  100,
   10,
-  1,
   {
     targetType: TargetType.SPLASH_ENEMY,
     effect: SkillEffect.DAMAGE,
@@ -573,11 +583,11 @@ const bailu = new PlayerCharacter(
   },
   Elements.LIGHTNING
 )
-const simpleEnemy = new Enemy('frostspawn', frostSpawnImage, 5, 1, 90)
-const simpleEnemy2 = new Enemy('frostspawn2', frostSpawnImage, 5, 1, 90)
-const simpleEnemy3 = new Enemy('frostspawn3', frostSpawnImage, 5, 1, 90)
-const simpleEnemy4 = new Enemy('frostspawn4', frostSpawnImage, 5, 1, 90)
-const simpleEnemy5 = new Enemy('frostspawn5', frostSpawnImage, 5, 1, 90)
+const simpleEnemy = new Enemy('frostspawn', frostSpawnImage, 50, 6, 90)
+const simpleEnemy2 = new Enemy('frostspawn2', frostSpawnImage, 50, 8, 90)
+const simpleEnemy3 = new Enemy('frostspawn3', frostSpawnImage, 50, 9, 90)
+const simpleEnemy4 = new Enemy('frostspawn4', frostSpawnImage, 50, 7, 90)
+const simpleEnemy5 = new Enemy('frostspawn5', frostSpawnImage, 50, 5, 90)
 const gameState = reactive(
   new GameState(
     [mainCharacter, bailu],
@@ -665,6 +675,36 @@ function skillButton() {
     return
   }
   gameState.playerInput = { type: PlayerButton.SKILL }
+}
+
+type DamageNumber = {
+  damage: number
+  x: number
+  y: number
+  type?: Elements
+}
+let damageNumberIndex = 0
+const damageNumbers = reactive(new Map<number, DamageNumber>())
+function makeDamageNumber(
+  damage: number,
+  characterType: CharacterType,
+  index: number,
+  element?: Elements
+) {
+  damageNumberIndex += 1
+  if (characterType === CharacterType.ENEMY) {
+    const damageNumber = {
+      damage,
+      x: enemyXPositions.value[index] + ENEMY_SIZE / 2,
+      y: ENEMY_CENTER_Y,
+      type: element
+    }
+    damageNumbers.set(damageNumberIndex, damageNumber)
+    const thisIdx = damageNumberIndex
+    setTimeout(() => {
+      damageNumbers.delete(thisIdx)
+    }, 400)
+  }
 }
 
 // Function to handle keyboard input
@@ -957,34 +997,23 @@ function printGameState() {
               <line x1="0" y1="10" x2="0" y2="20" stroke="rgb(255, 8, 0)"></line>
             </g>
           </g>
+          <g class="damage-numbers">
+            <text
+              v-for="[idx, damageNumber] in damageNumbers"
+              :key="idx"
+              :fill="getElementColor(damageNumber.type)"
+              :x="damageNumber.x"
+              :y="damageNumber.y"
+            >
+              {{ damageNumber.damage }}
+            </text>
+          </g>
         </svg>
       </div>
     </div>
     <div class="col mt-2">
       <div class="row justify-content-center d-flex">
         <button @click="printGameState" style="width: 130px; height: 30px">Print Console</button>
-      </div>
-      <div class="row justify-content-center d-flex">
-        <div>Players:</div>
-        <div
-          v-for="character in gameState.playerCharacters"
-          :key="`${character.name + character.hp}`"
-        >
-          {{ '[name: ' + character.name + ' hp:' + character.hp + ']' }}
-        </div>
-        <div>Enemies:</div>
-        <div v-for="character in gameState.enemies" :key="`${character.name + character.hp}`">
-          {{ '[name: ' + character.name + ' hp:' + character.hp + ']' }}
-        </div>
-      </div>
-      <div class="row justify-content-center d-flex">
-        <div>Timeline:</div>
-        <div
-          v-for="turn in gameState.queue"
-          :key="`${turn.character?.name ?? '' + turn.timeUntil}`"
-        >
-          {{ '[char: ' + turn.character?.name + ' timeUntil:' + turn.timeUntil + ']' }}
-        </div>
       </div>
       <div class="row justify-content-center d-flex">
         <div>Turn Character:</div>
@@ -997,6 +1026,7 @@ function printGameState() {
         <div>Focused Target:</div>
         <div>{{ gameState.focusedTarget.mainTarget }}</div>
         <div>{{ gameState.focusedTarget.targetType }}</div>
+        <div>{{ targetMarkers }}</div>
       </div>
       <div class="row justify-content-center d-flex">
         <div>Camera Focus:</div>
@@ -1061,6 +1091,11 @@ function printGameState() {
     width: 80px;
     right: 90px;
   }
+}
+
+.damage-numbers {
+  text-anchor: middle;
+  font-size: 30px;
 }
 
 .ult-circle {
