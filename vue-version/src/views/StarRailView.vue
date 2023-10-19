@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { useBreakpoints } from '../util/dimensions'
-import { onMounted, ref, reactive, onUnmounted } from 'vue'
+import { onMounted, ref, computed, reactive, onUnmounted } from 'vue'
 import mainCharacterImage from '../assets/game/img/mc.png'
 import bailuImage from '../assets/game/img/bailu.png'
 import frostSpawnImage from '../assets/game/img/frostspawn.png'
 import fireShadewalkerImage from '../assets/game/img/fire_shadewalker.png'
+import { Target } from '@/util/shooter/const'
 const { type } = useBreakpoints()
 
 const MAX_SKILLPOINTS = 5
@@ -18,6 +19,10 @@ const PROFILE_PIC_SIDE_OFFSET = 120
 const PROFILE_PIC_BASE_OFFSET = 30
 const ULT_GAUGE_BASE_OFFSET = 100
 const BASIC_ATTACK_ENERGY_GAIN = 5
+
+const ENEMY_SIZE = PROFILE_PIC_WIDTH
+const ENEMY_TOP_PADDING = 30
+const ENEMY_CENTER_Y = ENEMY_TOP_PADDING + ENEMY_SIZE / 2
 
 const TIMELINE_DISTANCE = 10000
 
@@ -64,6 +69,7 @@ enum TargetType {
 
 type FocusedTarget = {
   mainTarget: number
+  targetType: TargetType
 }
 
 enum SkillEffect {
@@ -338,7 +344,6 @@ class TurnManager {
             case PlayerButton.ATTACK: {
               if (gameState.turnState.stateEnum === TurnStateEnum.PLAYER_TURN_DEFAULT) {
                 // Fire basic attack
-                console.log('fire basic attack')
                 gameState.skillPoints = Math.min(gameState.skillPoints + 1, MAX_SKILLPOINTS)
                 await CombatManager.resolvePlayerAttack()
                 turnTaken = true
@@ -349,6 +354,7 @@ class TurnManager {
                 gameState.turnState.stateEnum = TurnStateEnum.PLAYER_TURN_DEFAULT
                 gameState.cameraState.mode = CameraMode.DEFAULT
                 gameState.cameraState.focus = turn.index
+                gameState.focusedTarget.targetType = TargetType.SINGLE_ENEMY
               }
               break
             }
@@ -368,6 +374,7 @@ class TurnManager {
               if (gameState.turnState.stateEnum === TurnStateEnum.PLAYER_TURN_DEFAULT) {
                 // Go to skill ready state
                 gameState.turnState.stateEnum = TurnStateEnum.PLAYER_TURN_SKILL_PENDING
+                gameState.focusedTarget.targetType = player.skill.targetType
                 if (
                   player.skill.targetType === TargetType.ALL_ALLIES ||
                   player.skill.targetType === TargetType.SINGLE_ALLY
@@ -398,7 +405,6 @@ class TurnManager {
       )
       currentSubTurn = gameState.currentTurn.subTurns.shift()
       // handle ult and reactions here, kinda need to sort them
-      console.log('currentsubturn', currentSubTurn)
       if (!currentSubTurn) break
       gameState.currentResolvingSubTurn = currentSubTurn
       gameState.turnCharacter = currentSubTurn.character
@@ -417,6 +423,7 @@ class TurnManager {
           gameState.cameraState.mode = CameraMode.ALLIES
           gameState.cameraState.focus = turn.index
         }
+        gameState.focusedTarget.targetType = player.ult.targetType
         while (!ultFired) {
           if (gameState.playerInput != null && gameState.playerInput.type === PlayerButton.ATTACK) {
             ultFired = true
@@ -486,7 +493,7 @@ class GameState {
   enemies: Enemy[]
   skillPoints: number
   playerInput: PlayerInput | null = null
-  focusedTarget: FocusedTarget = { mainTarget: 0 }
+  focusedTarget: FocusedTarget = { mainTarget: 0, targetType: TargetType.SINGLE_ENEMY }
   currentTurn: TimelineTurn | null = null
   currentResolvingSubTurn: SubTurn | null = null
   ultSignaled: number | null = null
@@ -512,6 +519,7 @@ class GameState {
         return
       }
       await TurnManager.resolveTurn(nextTurn)
+      // Check deaths
     }
   }
 }
@@ -529,7 +537,7 @@ const mainCharacter = new PlayerCharacter(
   },
 
   100,
-  95,
+  100,
   100,
   {
     targetType: TargetType.RANDOM_ENEMY,
@@ -550,7 +558,7 @@ const bailu = new PlayerCharacter(
     modifier: 1.2
   },
   100,
-  95,
+  100,
   100,
   {
     targetType: TargetType.RANDOM_ENEMY,
@@ -562,8 +570,73 @@ const bailu = new PlayerCharacter(
 )
 const simpleEnemy = new Enemy('frostspawn', frostSpawnImage, 10, 1, 90)
 const simpleEnemy2 = new Enemy('frostspawn2', frostSpawnImage, 10, 1, 90)
-const gameState = reactive(new GameState([mainCharacter, bailu], [simpleEnemy, simpleEnemy2]))
+const simpleEnemy3 = new Enemy('frostspawn3', frostSpawnImage, 10, 1, 90)
+const simpleEnemy4 = new Enemy('frostspawn4', frostSpawnImage, 10, 1, 90)
+const simpleEnemy5 = new Enemy('frostspawn5', frostSpawnImage, 10, 1, 90)
+const gameState = reactive(
+  new GameState(
+    [mainCharacter, bailu],
+    [simpleEnemy, simpleEnemy2, simpleEnemy3, simpleEnemy4, simpleEnemy5]
+  )
+)
 const uiElements = reactive(new UIElements())
+
+const enemyXPositions = computed<number[]>(() => {
+  const space = 640
+  const START_LOCATION = 200
+  const ENEMY_BETWEEN_PADDING = 20
+  const sidePadding =
+    (space -
+      gameState.enemies.length * (ENEMY_SIZE + ENEMY_BETWEEN_PADDING) -
+      ENEMY_BETWEEN_PADDING) /
+    2
+  const result: number[] = []
+  for (let i = 0; i < gameState.enemies.length; i++) {
+    result.push(
+      START_LOCATION +
+        sidePadding +
+        ENEMY_BETWEEN_PADDING +
+        i * (ENEMY_SIZE + ENEMY_BETWEEN_PADDING)
+    )
+  }
+  return result
+})
+
+type TargetMarkers = {
+  main: number[]
+  sub: number[]
+}
+const targetMarkers = computed<TargetMarkers>(() => {
+  const mainTarget = gameState.focusedTarget.mainTarget
+  switch (gameState.focusedTarget.targetType) {
+    case TargetType.SINGLE_ALLY:
+      return { main: [], sub: [] }
+    case TargetType.ALL_ALLIES: {
+      return { main: [], sub: [] }
+    }
+    case TargetType.SINGLE_ENEMY:
+      return { main: [mainTarget], sub: [] }
+    case TargetType.SPLASH_ENEMY: {
+      const targets = { main: [mainTarget], sub: [] as number[] }
+      if (mainTarget - 1 >= 0) {
+        targets.sub.push(mainTarget - 1)
+      }
+      if (mainTarget + 1 < gameState.enemies.length) {
+        targets.sub.push(mainTarget + 1)
+      }
+      return targets
+    }
+    case TargetType.ALL_ENEMIES:
+    case TargetType.RANDOM_ENEMY: {
+      return {
+        main: Array.from({ length: gameState.enemies.length }, (_, index) => index),
+        sub: []
+      }
+    }
+    default:
+      return { main: [], sub: [] }
+  }
+})
 
 function attackButton() {
   gameState.playerInput = { type: PlayerButton.ATTACK }
@@ -587,6 +660,7 @@ function onKeyPress(e: KeyboardEvent) {
       break
     }
     case ' ': {
+      e.preventDefault()
       attackButton()
       break
     }
@@ -610,6 +684,21 @@ function onKeyPress(e: KeyboardEvent) {
       Timeline.ult(3)
       break
     }
+  }
+}
+
+function onGameTouch(e: MouseEvent | TouchEvent) {
+  if (!(e.target instanceof Element)) {
+    return
+  }
+  const button = e.target.closest<SVGGElement>('.ult-circle')
+  if (button) {
+    Timeline.ult(parseInt(button.dataset.index ?? ''))
+  }
+
+  const enemy = e.target.closest<SVGGElement>('.enemy-ui')
+  if (enemy) {
+    gameState.focusedTarget.mainTarget = parseInt(enemy.dataset.index ?? '')
   }
 }
 
@@ -639,24 +728,26 @@ function printGameState() {
           v-if="gameState.turnCharacter?.type === CharacterType.PLAYER"
           class="action-buttons d-flex justify-content-center align-items-center"
         >
-          <div
+          <button
             @click="attackButton"
             class="attack-button d-flex justify-content-center align-items-center"
           >
             <div class="material-icons-outlined">sports_cricket</div>
-          </div>
-          <div
-            v-if="gameState.skillPoints > 0"
+          </button>
+          <button
+            v-if="gameState.turnState.stateEnum != TurnStateEnum.PLAYER_ULT_PENDING"
             @click="skillButton"
             class="skill-button d-flex justify-content-center align-items-center"
           >
             <div class="material-icons-outlined">{{ 'close' }}</div>
-          </div>
+          </button>
         </div>
-        <div>
-          {{ gameState.cameraState.mode === CameraMode.DEFAULT ? 'Default view' : 'Allies view' }}
-        </div>
-        <svg :height="canvas.height" :width="canvas.width">
+        <svg
+          :height="canvas.height"
+          @touchend="onGameTouch"
+          @mouseup="onGameTouch"
+          :width="canvas.width"
+        >
           <g
             class="player-ui"
             v-for="(character, i) in gameState.playerCharacters"
@@ -706,16 +797,14 @@ function printGameState() {
                 :stop-color="getElementColor(character.element)"
               />
             </linearGradient>
-            <g class="ult-circle">
+            <g class="ult-circle" :data-index="i">
               <circle
-                class="ult-circle"
                 :cx="ULT_GAUGE_BASE_OFFSET + i * PROFILE_PIC_SIDE_OFFSET"
                 cy="290"
                 r="30"
                 fill="black"
               />
               <circle
-                class="ult-circle"
                 :cx="ULT_GAUGE_BASE_OFFSET + i * PROFILE_PIC_SIDE_OFFSET"
                 cy="290"
                 r="30"
@@ -728,32 +817,34 @@ function printGameState() {
           <!--Enemy characters-->
           <g
             class="enemy-ui"
-            v-for="(character, i) in gameState.enemies"
-            :key="character.name + character.hp"
+            v-for="(enemy, i) in gameState.enemies"
+            :key="enemy.name + enemy.hp"
+            :data-index="i"
           >
             <image
-              :href="character.portrait"
-              height="80"
-              width="80"
-              :x="580 - i * 100"
-              y="30"
+              :href="enemy.portrait"
+              :height="PROFILE_PIC_HEIGHT"
+              :width="PROFILE_PIC_WIDTH"
+              :x="enemyXPositions[i]"
+              :y="ENEMY_TOP_PADDING"
             ></image>
             <rect
               class="health-bar-outline"
-              :x="580 - i * 100"
+              :x="enemyXPositions[i]"
               y="18"
-              width="80"
-              height="10"
+              :width="PROFILE_PIC_WIDTH"
+              :height="HP_BAR_HEIGHT"
             ></rect>
             <rect
               class="health-bar"
-              :x="582 - i * 100"
-              y="20"
-              :width="(character.hp / character.maxHp) * 76"
-              height="6"
+              :x="enemyXPositions[i] + HP_BAR_OFFSET"
+              :y="20"
+              :width="(enemy.hp / enemy.maxHp) * 76"
+              :height="HP_BAR_HEIGHT - HP_BAR_OFFSET * 2"
             ></rect>
           </g>
 
+          <!--Timeline-->
           <g class="current-turn">
             <g v-if="gameState.currentTurn?.character">
               <rect height="20" width="40" stroke="white" fill="grey" x="20" :y="10"></rect>
@@ -809,6 +900,39 @@ function printGameState() {
               :y="i * 30 + 40"
             />
           </g>
+          <g class="target-crosshair" v-if="gameState.turnCharacter?.type === CharacterType.PLAYER">
+            <g
+              v-for="targetMarker in targetMarkers.main"
+              :key="targetMarker"
+              :transform="`translate(${
+                enemyXPositions[targetMarker] + ENEMY_SIZE / 2
+              }, ${ENEMY_CENTER_Y})`"
+            >
+              <circle fill="transparent" stroke="rgb(255, 8, 0)" r="20"></circle>
+              <line x1="10" y1="00" x2="20" y2="0" stroke="rgb(255, 8, 0)"></line>
+              <line x1="-20" y1="00" x2="-10" y2="0" stroke="rgb(255, 8, 0)"></line>
+              <line x1="0" y1="-20" x2="0" y2="-10" stroke="rgb(255, 8, 0)"></line>
+              <line x1="0" y1="10" x2="0" y2="20" stroke="rgb(255, 8, 0)"></line>
+            </g>
+          </g>
+          <g
+            class="sub-target-crosshair"
+            v-if="gameState.turnCharacter?.type === CharacterType.PLAYER"
+          >
+            <g
+              v-for="targetMarker in targetMarkers.sub"
+              :key="targetMarker"
+              :transform="`translate(${
+                enemyXPositions[targetMarker] + ENEMY_SIZE / 2
+              }, ${ENEMY_CENTER_Y})`"
+            >
+              <circle fill="transparent" stroke="rgb(255, 8, 0)" r="10"></circle>
+              <line x1="10" y1="00" x2="20" y2="0" stroke="rgb(255, 8, 0)"></line>
+              <line x1="-20" y1="00" x2="-10" y2="0" stroke="rgb(255, 8, 0)"></line>
+              <line x1="0" y1="-20" x2="0" y2="-10" stroke="rgb(255, 8, 0)"></line>
+              <line x1="0" y1="10" x2="0" y2="20" stroke="rgb(255, 8, 0)"></line>
+            </g>
+          </g>
         </svg>
       </div>
     </div>
@@ -848,6 +972,13 @@ function printGameState() {
       <div class="row justify-content-center d-flex">
         <div>Focused Target:</div>
         <div>{{ gameState.focusedTarget.mainTarget }}</div>
+        <div>{{ gameState.focusedTarget.targetType }}</div>
+      </div>
+      <div class="row justify-content-center d-flex">
+        <div>Camera Focus:</div>
+        <div>
+          {{ gameState.cameraState.mode === CameraMode.DEFAULT ? 'Default view' : 'Allies view' }}
+        </div>
       </div>
     </div>
   </main>
@@ -880,9 +1011,13 @@ function printGameState() {
     border-radius: 50%;
     background-color: transparent;
     border: solid 1px white;
+    &:focus {
+      outline: none;
+    }
     .material-icons-outlined {
       font-size: 30px;
       color: white;
+      user-select: none;
     }
   }
   .skill-button {
@@ -928,5 +1063,6 @@ function printGameState() {
   position: absolute;
   bottom: 20px;
   right: 25%;
+  color: white;
 }
 </style>
