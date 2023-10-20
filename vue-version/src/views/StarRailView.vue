@@ -310,6 +310,7 @@ class CombatManager {
             const enemyIdx = getRandomInt(gameState.enemies.length)
             await delay(MULTIHIT_DELAY)
             gameState.enemies[enemyIdx].hp -= damage
+            makeDamageNumber(damage, CharacterType.ENEMY, enemyIdx, player.element)
           }
         }
       }
