@@ -23,8 +23,13 @@ const PROFILE_PIC_BASE_OFFSET = 30
 const ULT_GAUGE_BASE_OFFSET = 100
 const BASIC_ATTACK_ENERGY_GAIN = 5
 
+const PLAYER_AVATAR_HEIGHT = 250
+const PLAYER_AVATAR_WIDTH = 80
+const PLAYER_BETWEEN_PADDING = 40
+
 const ENEMY_SIZE = PROFILE_PIC_WIDTH
 const ENEMY_TOP_PADDING = 30
+const ENEMY_BETWEEN_PADDING = 20
 const ENEMY_CENTER_Y = ENEMY_TOP_PADDING + ENEMY_SIZE / 2
 
 const TIMELINE_DISTANCE = 10000
@@ -267,8 +272,18 @@ class CombatManager {
           }
         }
       }
+    } else if (player.skill.effect === SkillEffect.HEAL) {
+      switch (player.skill.targetType) {
+        case TargetType.SINGLE_ALLY: {
+          const target = gameState.focusedTarget.mainTarget
+          gameState.playerCharacters[target].hp += player.skill.modifier
+          break
+        }
+        case TargetType.ALL_ALLIES: {
+          gameState.playerCharacters.forEach((pc) => (pc.hp += player.skill.modifier))
+        }
+      }
     }
-    // TODO: Healing skill here
   }
 
   static async resolvePlayerAttack() {
@@ -283,6 +298,7 @@ class CombatManager {
   }
 
   static async resolvePlayerUlt() {
+    console.log('resolve ult')
     const player = gameState.turnCharacter as PlayerCharacter
     await delay(TURN_TIME)
     if (player.ult.effect === SkillEffect.DAMAGE) {
@@ -314,8 +330,20 @@ class CombatManager {
           }
         }
       }
+    } else if (player.ult.effect === SkillEffect.HEAL) {
+      switch (player.ult.targetType) {
+        case TargetType.SINGLE_ALLY: {
+          const target = gameState.focusedTarget.mainTarget
+          gameState.playerCharacters[target].hp += player.ult.modifier
+          break
+        }
+        case TargetType.ALL_ALLIES: {
+          gameState.playerCharacters.forEach((pc) => {
+            pc.hp += player.ult.modifier
+          })
+        }
+      }
     }
-    // TODO: Healing skill here
   }
 }
 
@@ -386,8 +414,10 @@ class TurnManager {
               }
               if (gameState.turnState.stateEnum === TurnStateEnum.PLAYER_TURN_DEFAULT) {
                 // Go to skill ready state
+                console.log('go to skill ready state')
                 gameState.turnState.stateEnum = TurnStateEnum.PLAYER_TURN_SKILL_PENDING
                 gameState.focusedTarget.targetType = player.skill.targetType
+                gameState.focusedTarget.mainTarget = gameState.currentTurn.index
                 if (
                   player.skill.targetType === TargetType.ALL_ALLIES ||
                   player.skill.targetType === TargetType.SINGLE_ALLY
@@ -569,18 +599,18 @@ const bailu = new PlayerCharacter(
   100,
   10,
   {
-    targetType: TargetType.SPLASH_ENEMY,
-    effect: SkillEffect.DAMAGE,
-    modifier: 1.2
+    targetType: TargetType.SINGLE_ALLY,
+    effect: SkillEffect.HEAL,
+    modifier: 10
   },
   100,
   100,
   100,
   {
-    targetType: TargetType.RANDOM_ENEMY,
+    targetType: TargetType.ALL_ALLIES,
     hits: 3,
-    effect: SkillEffect.DAMAGE,
-    modifier: 2
+    effect: SkillEffect.HEAL,
+    modifier: 20
   },
   Elements.LIGHTNING
 )
@@ -597,10 +627,30 @@ const gameState = reactive(
 )
 const uiElements = reactive(new UIElements())
 
-const enemyXPositions = computed<number[]>(() => {
-  const space = 640
+const playerXPositions = computed<number[]>(() => {
   const START_LOCATION = 200
-  const ENEMY_BETWEEN_PADDING = 20
+  const space = canvas.width - START_LOCATION
+  const sidePadding =
+    (space -
+      gameState.playerCharacters.length * (PLAYER_AVATAR_WIDTH + PLAYER_BETWEEN_PADDING) -
+      PLAYER_BETWEEN_PADDING) /
+    2
+  const result: number[] = []
+  for (let i = 0; i < gameState.playerCharacters.length; i++) {
+    result.push(
+      START_LOCATION +
+        sidePadding +
+        PLAYER_BETWEEN_PADDING +
+        i * (PLAYER_AVATAR_WIDTH + PLAYER_BETWEEN_PADDING)
+    )
+  }
+  return result
+})
+
+const enemyXPositions = computed<number[]>(() => {
+  const START_LOCATION = 200
+  const space = canvas.width - START_LOCATION
+
   const sidePadding =
     (space -
       gameState.enemies.length * (ENEMY_SIZE + ENEMY_BETWEEN_PADDING) -
@@ -626,9 +676,9 @@ const targetMarkers = computed<TargetMarkers>(() => {
   const mainTarget = gameState.focusedTarget.mainTarget
   switch (gameState.focusedTarget.targetType) {
     case TargetType.SINGLE_ALLY:
-      return { main: [], sub: [] }
+      return { main: [gameState.focusedTarget.mainTarget], sub: [] }
     case TargetType.ALL_ALLIES: {
-      return { main: [], sub: [] }
+      return { main: [gameState.focusedTarget.mainTarget], sub: [] }
     }
     case TargetType.SINGLE_ENEMY:
       return { main: [mainTarget], sub: [] }
@@ -726,6 +776,10 @@ function onKeyPress(e: KeyboardEvent) {
       attackButton()
       break
     }
+    case 'f': {
+      gameState.playerCharacters.map((pc) => (pc.hp -= 10))
+      break
+    }
     case 'e': {
       skillButton()
       break
@@ -813,6 +867,7 @@ function printGameState() {
           @mouseup="onGameTouch"
           :width="canvas.width"
         >
+          <!--Player UI-->
           <g
             class="player-ui"
             v-for="(character, i) in gameState.playerCharacters"
@@ -824,21 +879,21 @@ function printGameState() {
               :width="PROFILE_PIC_WIDTH"
               :x="PROFILE_PIC_BASE_OFFSET + i * PROFILE_PIC_SIDE_OFFSET"
               y="250"
-            ></image>
+            />
             <rect
               class="health-bar-outline"
               :x="PROFILE_PIC_BASE_OFFSET + i * PROFILE_PIC_SIDE_OFFSET"
               y="330"
               :width="PROFILE_PIC_WIDTH"
               :height="HP_BAR_HEIGHT"
-            ></rect>
+            />
             <rect
               class="health-bar"
               :x="PROFILE_PIC_BASE_OFFSET + HP_BAR_OFFSET + i * PROFILE_PIC_SIDE_OFFSET"
               y="332"
               :width="(character.hp / character.maxHp) * (PROFILE_PIC_WIDTH - HP_BAR_OFFSET * 2)"
               :height="HP_BAR_HEIGHT - 2 * HP_BAR_OFFSET"
-            ></rect>
+            />
             <linearGradient
               :id="character.name + 'energy-gradient'"
               x1="0.5"
@@ -850,12 +905,12 @@ function printGameState() {
                 :offset="`${(character.energy / character.maxEnergy) * 100}%`"
                 stop-opacity="1"
                 :stop-color="getElementColor(character.element)"
-              ></stop>
+              />
               <stop
                 :offset="`${(character.energy / character.maxEnergy) * 100}%`"
                 stop-opacity="0"
                 :stop-color="getElementColor(character.element)"
-              ></stop>
+              />
               <stop
                 offset="100%"
                 stop-opacity="0"
@@ -879,40 +934,59 @@ function printGameState() {
               />
             </g>
           </g>
+          <!--Player Avatar-->
+          <template v-if="gameState.cameraState.mode === CameraMode.ALLIES">
+            <g
+              class="player-ui"
+              v-for="(character, i) in gameState.playerCharacters"
+              :key="character.name + character.hp + 'avatar'"
+            >
+              <image
+                :href="character.portrait"
+                :height="PLAYER_AVATAR_HEIGHT"
+                :width="PLAYER_AVATAR_WIDTH"
+                :x="playerXPositions[i]"
+                y="0"
+              />
+            </g>
+          </template>
+
           <!--Enemy characters-->
-          <g
-            class="enemy-ui"
-            v-for="(enemy, i) in gameState.enemies"
-            :key="enemy.name + enemy.hp"
-            :data-index="i"
-          >
-            <image
-              :href="enemy.portrait"
-              :height="PROFILE_PIC_HEIGHT"
-              :width="PROFILE_PIC_WIDTH"
-              :x="enemyXPositions[i]"
-              :y="ENEMY_TOP_PADDING"
-            ></image>
-            <rect
-              class="health-bar-outline"
-              :x="enemyXPositions[i]"
-              y="18"
-              :width="PROFILE_PIC_WIDTH"
-              :height="HP_BAR_HEIGHT"
-            ></rect>
-            <rect
-              class="health-bar"
-              :x="enemyXPositions[i] + HP_BAR_OFFSET"
-              :y="20"
-              :width="(enemy.hp / enemy.maxHp) * 76"
-              :height="HP_BAR_HEIGHT - HP_BAR_OFFSET * 2"
-            ></rect>
-          </g>
+          <template v-if="gameState.cameraState.mode === CameraMode.DEFAULT">
+            <g
+              class="enemy-ui"
+              v-for="(enemy, i) in gameState.enemies"
+              :key="enemy.name + enemy.hp"
+              :data-index="i"
+            >
+              <image
+                :href="enemy.portrait"
+                :height="PROFILE_PIC_HEIGHT"
+                :width="PROFILE_PIC_WIDTH"
+                :x="enemyXPositions[i]"
+                :y="ENEMY_TOP_PADDING"
+              />
+              <rect
+                class="health-bar-outline"
+                :x="enemyXPositions[i]"
+                y="18"
+                :width="PROFILE_PIC_WIDTH"
+                :height="HP_BAR_HEIGHT"
+              />
+              <rect
+                class="health-bar"
+                :x="enemyXPositions[i] + HP_BAR_OFFSET"
+                :y="20"
+                :width="(enemy.hp / enemy.maxHp) * 76"
+                :height="HP_BAR_HEIGHT - HP_BAR_OFFSET * 2"
+              />
+            </g>
+          </template>
 
           <!--Timeline-->
           <g class="current-turn">
             <g v-if="gameState.currentTurn?.character">
-              <rect height="20" width="40" stroke="white" fill="grey" x="20" :y="10"></rect>
+              <rect height="20" width="40" stroke="white" fill="grey" x="20" :y="10" />
               <image
                 :href="gameState.currentTurn.character?.portrait"
                 height="20"
@@ -925,14 +999,7 @@ function printGameState() {
               v-for="(subTurn, i) in gameState.currentTurn?.subTurns"
               :key="subTurn.character.name + subTurn.type"
             >
-              <rect
-                height="20"
-                width="40"
-                stroke="white"
-                fill="grey"
-                :x="60 + 40 * i"
-                :y="10"
-              ></rect>
+              <rect height="20" width="40" stroke="white" fill="grey" :x="60 + 40 * i" :y="10" />
               <image
                 :href="subTurn.character.portrait"
                 height="20"
@@ -943,7 +1010,7 @@ function printGameState() {
             </g>
           </g>
           <g v-if="gameState.currentResolvingSubTurn" class="current-subturn">
-            <rect height="20" width="40" stroke="white" fill="grey" x="20" :y="10"></rect>
+            <rect height="20" width="40" stroke="white" fill="grey" x="20" :y="10" />
             <image
               :href="gameState.currentResolvingSubTurn.character?.portrait"
               height="20"
@@ -956,7 +1023,7 @@ function printGameState() {
             v-for="(turn, i) in gameState.queue"
             :key="turn.character?.name ?? '' + turn.timeUntil"
           >
-            <rect height="20" width="40" stroke="white" fill="grey" x="20" :y="i * 30 + 40"></rect>
+            <rect height="20" width="40" stroke="white" fill="grey" x="20" :y="i * 30 + 40" />
             <image
               :href="turn.character?.portrait"
               height="20"
@@ -970,8 +1037,14 @@ function printGameState() {
               v-for="targetMarker in targetMarkers.main"
               :key="targetMarker"
               :transform="`translate(${
-                enemyXPositions[targetMarker] + ENEMY_SIZE / 2
-              }, ${ENEMY_CENTER_Y})`"
+                gameState.cameraState.mode === CameraMode.ALLIES
+                  ? playerXPositions[targetMarker] + PLAYER_AVATAR_WIDTH / 2
+                  : enemyXPositions[targetMarker] + ENEMY_SIZE / 2
+              }, ${
+                gameState.cameraState.mode === CameraMode.ALLIES
+                  ? PLAYER_AVATAR_HEIGHT / 2
+                  : ENEMY_CENTER_Y
+              })`"
             >
               <circle fill="transparent" stroke="rgb(255, 8, 0)" r="20"></circle>
               <line x1="10" y1="00" x2="20" y2="0" stroke="rgb(255, 8, 0)"></line>
