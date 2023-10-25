@@ -37,11 +37,6 @@ const router = createRouter({
       component: ShooterGameView
     },
     {
-      path: '/games/turnbased',
-      name: 'turnbased',
-      component: TurnBasedGameView
-    },
-    {
       path: '/games/danmaku',
       name: 'danmaku',
       component: DanmakuView

@@ -1,219 +1,58 @@
 <script setup lang="ts">
-import { useBreakpoints } from '../util/dimensions'
-import { onMounted, ref, computed, reactive, onUnmounted } from 'vue'
-import mainCharacterImage from '../assets/game/img/mc.png'
-import bailuImage from '../assets/game/img/bailu.png'
-import frostSpawnImage from '../assets/game/img/frostspawn.png'
+import { computed, onMounted, onUnmounted, reactive } from 'vue'
+import bailuAvatar from '../assets/game/img/bailu-avatar.png'
+import bailuBack from '../assets/game/img/bailu-back.png'
+import bailuFront from '../assets/game/img/bailu-front.png'
 import fireShadewalkerImage from '../assets/game/img/fire_shadewalker.png'
-import { Target } from '@/util/shooter/const'
+import frostSpawnImage from '../assets/game/img/frostspawn.png'
+import stelleAvatar from '../assets/game/img/stelle-avatar.png'
+import stelleBack from '../assets/game/img/stelle-back.png'
+import stelleFront from '../assets/game/img/stelle-front.png'
+import { useBreakpoints } from '../util/dimensions'
+import {
+  ALLY_VIEW_TOP_PADDING,
+  BASIC_ATTACK_ENERGY_GAIN,
+  CameraMode,
+  Character,
+  CharacterType,
+  ENEMY_BETWEEN_PADDING,
+  ENEMY_CENTER_Y,
+  ENEMY_SIZE,
+  ENEMY_TOP_PADDING,
+  Elements,
+  Enemy,
+  HIT_ENERGY_REGEN,
+  HP_BAR_HEIGHT,
+  HP_BAR_OFFSET,
+  MAX_SKILLPOINTS,
+  MULTIHIT_DELAY,
+  PLAYER_BETWEEN_PADDING,
+  PLAYER_IMAGE_HEIGHT,
+  PLAYER_IMAGE_WIDTH,
+  PROFILE_PIC_BASE_OFFSET,
+  PROFILE_PIC_HEIGHT,
+  PROFILE_PIC_SIDE_OFFSET,
+  PROFILE_PIC_WIDTH,
+  PlayerButton,
+  PlayerCharacter,
+  SkillEffect,
+  SubTurnType,
+  TIMELINE_DISTANCE,
+  TURN_TIME,
+  TargetType,
+  TurnStateEnum,
+  ULT_GAUGE_BASE_OFFSET,
+  getElementColor,
+  type CameraState,
+  type DamageNumber,
+  type FocusedTarget,
+  type PlayerInput,
+  type SubTurn,
+  type TargetMarkers,
+  type TimelineTurn,
+  type TurnState
+} from '../util/starrail/consts'
 const { type } = useBreakpoints()
-
-const MAX_SKILLPOINTS = 5
-const TURN_TIME = 1000
-const MULTIHIT_DELAY = 300
-
-const HIT_ENERGY_REGEN = 5
-
-const PROFILE_PIC_HEIGHT = 80
-const PROFILE_PIC_WIDTH = 80
-const HP_BAR_HEIGHT = 10
-const HP_BAR_OFFSET = 2
-const PROFILE_PIC_SIDE_OFFSET = 120
-const PROFILE_PIC_BASE_OFFSET = 30
-const ULT_GAUGE_BASE_OFFSET = 100
-const BASIC_ATTACK_ENERGY_GAIN = 5
-
-const PLAYER_AVATAR_HEIGHT = 250
-const PLAYER_AVATAR_WIDTH = 80
-const PLAYER_BETWEEN_PADDING = 40
-
-const ENEMY_SIZE = PROFILE_PIC_WIDTH
-const ENEMY_TOP_PADDING = 30
-const ENEMY_BETWEEN_PADDING = 20
-const ENEMY_CENTER_Y = ENEMY_TOP_PADDING + ENEMY_SIZE / 2
-
-const TIMELINE_DISTANCE = 10000
-
-enum CameraMode {
-  DEFAULT = 'default view',
-  ALLIES = 'allies view'
-}
-
-// focus for now is always friendly character, the one getting hit or the one attacking
-type CameraState = {
-  mode: CameraMode
-  focus: number // For who the main focus of camera is
-}
-
-// Notes: the focus is on player 1 if player 1 has a damage skill of single target.
-// In that case the FocusedTarget variable is who is targeted for a hit but not the focus of camera
-
-enum TurnStateEnum {
-  EMPTY = 'empty',
-  ENEMY_TURN = 'enemy_turn',
-  PLAYER_TURN_DEFAULT = 'default',
-  PLAYER_TURN_SKILL_PENDING = 'skill pending',
-  PLAYER_ULT_PENDING = 'ult pending'
-}
-
-type TurnState = {
-  stateEnum: TurnStateEnum
-  resolvingSubTurn: boolean
-}
-
-enum CharacterType {
-  PLAYER,
-  ENEMY
-}
-
-enum TargetType {
-  SINGLE_ALLY = 'single ally',
-  ALL_ALLIES = 'all allies',
-  SINGLE_ENEMY = 'single enemy',
-  SPLASH_ENEMY = 'splash enemy',
-  ALL_ENEMIES = 'all enemies',
-  RANDOM_ENEMY = 'random enemy'
-}
-
-type FocusedTarget = {
-  mainTarget: number
-  targetType: TargetType
-}
-
-enum SkillEffect {
-  DAMAGE,
-  HEAL
-}
-
-type Skill = {
-  targetType: TargetType
-  modifier: number
-  hits?: number
-  effect: SkillEffect
-}
-
-enum Elements {
-  FIRE = 'fire',
-  ICE = 'ice',
-  LIGHTNING = 'lightning',
-  WIND = 'wind',
-  QUANTUM = 'quantum',
-  IMAGINARY = 'imaginary',
-  PHYSICAL = 'physical'
-}
-
-function getElementColor(element?: Elements) {
-  switch (element) {
-    case Elements.FIRE:
-      return 'rgb(227,43,41)'
-    case Elements.ICE:
-      return 'rgb(42,146,211)'
-    case Elements.LIGHTNING:
-      return 'rgb(186,81,219)'
-    case Elements.WIND:
-      return 'rgb(97,200,150)'
-    case Elements.QUANTUM:
-      return 'rgb(85,73,188)'
-    case Elements.IMAGINARY:
-      return 'rgb(245,223,50)'
-    case Elements.PHYSICAL:
-      return 'rgb(197,197,197)'
-    default:
-      return 'white'
-  }
-}
-
-class Character {
-  type: CharacterType
-  name: string
-  portrait: string
-  maxHp: number
-  hp: number
-  attack: number
-  speed: number
-
-  constructor(
-    characterType: CharacterType,
-    name: string,
-    portrait: string,
-    hp: number,
-    attack: number,
-    speed: number
-  ) {
-    this.type = characterType
-    this.name = name
-    this.portrait = portrait
-    this.maxHp = hp
-    this.hp = hp
-    this.attack = attack
-    this.speed = speed
-  }
-  // check if the player is still alive
-  isAlive() {
-    return this.hp > 0
-  }
-}
-
-class PlayerCharacter extends Character {
-  skill: Skill
-  energy: number
-  maxEnergy: number
-  element: Elements
-  ult: Skill
-  constructor(
-    name: string,
-    portrait: string,
-    hp: number,
-    attack: number,
-    skill: Skill,
-    speed: number,
-    energy: number,
-    maxEnergy: number,
-    ult: Skill,
-    element: Elements
-  ) {
-    super(CharacterType.PLAYER, name, portrait, hp, attack, speed)
-    this.skill = skill
-    this.energy = energy
-    this.maxEnergy = maxEnergy
-    this.ult = ult
-    this.element = element
-  }
-}
-
-class Enemy extends Character {
-  constructor(name: string, portrait: string, hp: number, attack: number, speed: number) {
-    super(CharacterType.ENEMY, name, portrait, hp, attack, speed)
-  }
-}
-
-type TimelineTurn = {
-  character?: Character // A subturn where you ult from player turn, this will be undefined
-  index: number
-  timeUntil: number
-  subTurns: SubTurn[]
-}
-
-// A smaller unit, usually an reaction, in the form of damage to enemy
-type SubTurn = {
-  type: SubTurnType
-  character: Character
-}
-
-enum PlayerButton {
-  ATTACK,
-  SKILL
-}
-
-type PlayerInput = {
-  type: PlayerButton
-  ult?: number // for cut-in ult
-}
-
-enum SubTurnType {
-  REACTION,
-  ULT
-}
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -226,9 +65,10 @@ function getRandomInt(max: number) {
 class CombatManager {
   static async resolveEnemyMove() {
     const enemy = gameState.turnCharacter as Enemy
-    await delay(TURN_TIME)
     const damage = enemy.attack
     const target = getRandomInt(gameState.playerCharacters.length)
+    gameState.cameraState.focus = target
+    await delay(TURN_TIME)
     gameState.playerCharacters[target].hp -= damage
     gameState.playerCharacters[target].energy = Math.min(
       gameState.playerCharacters[target].energy + HIT_ENERGY_REGEN,
@@ -283,6 +123,7 @@ class CombatManager {
           gameState.playerCharacters.forEach((pc) => (pc.hp += player.skill.modifier))
         }
       }
+      gameState.cameraState.mode = CameraMode.DEFAULT
     }
   }
 
@@ -298,7 +139,6 @@ class CombatManager {
   }
 
   static async resolvePlayerUlt() {
-    console.log('resolve ult')
     const player = gameState.turnCharacter as PlayerCharacter
     await delay(TURN_TIME)
     if (player.ult.effect === SkillEffect.DAMAGE) {
@@ -343,6 +183,7 @@ class CombatManager {
           })
         }
       }
+      gameState.cameraState.mode = CameraMode.DEFAULT
     }
   }
 }
@@ -360,6 +201,7 @@ class TurnManager {
     } else {
       // player turn
       const player = turn.character as PlayerCharacter
+      gameState.cameraState.focus = turn.index
       gameState.turnCharacter = player
       gameState.turnState.stateEnum = TurnStateEnum.PLAYER_TURN_DEFAULT
       // Block until an action is taken
@@ -414,7 +256,6 @@ class TurnManager {
               }
               if (gameState.turnState.stateEnum === TurnStateEnum.PLAYER_TURN_DEFAULT) {
                 // Go to skill ready state
-                console.log('go to skill ready state')
                 gameState.turnState.stateEnum = TurnStateEnum.PLAYER_TURN_SKILL_PENDING
                 gameState.focusedTarget.targetType = player.skill.targetType
                 gameState.focusedTarget.mainTarget = gameState.currentTurn.index
@@ -571,9 +412,11 @@ class GameState {
 }
 
 const canvas = { width: 840, height: 360 }
-const mainCharacter = new PlayerCharacter(
+const stelle = new PlayerCharacter(
   'main-character',
-  mainCharacterImage,
+  stelleAvatar,
+  stelleBack,
+  stelleFront,
   100,
   10,
   {
@@ -582,7 +425,7 @@ const mainCharacter = new PlayerCharacter(
     modifier: 1.2
   },
 
-  100,
+  120,
   100,
   100,
   {
@@ -595,7 +438,9 @@ const mainCharacter = new PlayerCharacter(
 )
 const bailu = new PlayerCharacter(
   'bailu',
-  bailuImage,
+  bailuAvatar,
+  bailuBack,
+  bailuFront,
   100,
   10,
   {
@@ -603,7 +448,7 @@ const bailu = new PlayerCharacter(
     effect: SkillEffect.HEAL,
     modifier: 10
   },
-  100,
+  110,
   100,
   100,
   {
@@ -616,12 +461,12 @@ const bailu = new PlayerCharacter(
 )
 const simpleEnemy = new Enemy('frostspawn', frostSpawnImage, 50, 6, 90)
 const simpleEnemy2 = new Enemy('frostspawn2', frostSpawnImage, 50, 8, 90)
-const simpleEnemy3 = new Enemy('frostspawn3', frostSpawnImage, 50, 9, 90)
+const simpleEnemy3 = new Enemy('fireshadewalker', fireShadewalkerImage, 100, 15, 100)
 const simpleEnemy4 = new Enemy('frostspawn4', frostSpawnImage, 50, 7, 90)
 const simpleEnemy5 = new Enemy('frostspawn5', frostSpawnImage, 50, 5, 90)
 const gameState = reactive(
   new GameState(
-    [mainCharacter, bailu],
+    [stelle, bailu],
     [simpleEnemy, simpleEnemy2, simpleEnemy3, simpleEnemy4, simpleEnemy5]
   )
 )
@@ -632,7 +477,7 @@ const playerXPositions = computed<number[]>(() => {
   const space = canvas.width - START_LOCATION
   const sidePadding =
     (space -
-      gameState.playerCharacters.length * (PLAYER_AVATAR_WIDTH + PLAYER_BETWEEN_PADDING) -
+      gameState.playerCharacters.length * (PLAYER_IMAGE_WIDTH + PLAYER_BETWEEN_PADDING) -
       PLAYER_BETWEEN_PADDING) /
     2
   const result: number[] = []
@@ -641,7 +486,7 @@ const playerXPositions = computed<number[]>(() => {
       START_LOCATION +
         sidePadding +
         PLAYER_BETWEEN_PADDING +
-        i * (PLAYER_AVATAR_WIDTH + PLAYER_BETWEEN_PADDING)
+        i * (PLAYER_IMAGE_WIDTH + PLAYER_BETWEEN_PADDING)
     )
   }
   return result
@@ -668,10 +513,6 @@ const enemyXPositions = computed<number[]>(() => {
   return result
 })
 
-type TargetMarkers = {
-  main: number[]
-  sub: number[]
-}
 const targetMarkers = computed<TargetMarkers>(() => {
   const mainTarget = gameState.focusedTarget.mainTarget
   switch (gameState.focusedTarget.targetType) {
@@ -728,12 +569,6 @@ function skillButton() {
   gameState.playerInput = { type: PlayerButton.SKILL }
 }
 
-type DamageNumber = {
-  damage: number
-  x: number
-  y: number
-  type?: Elements
-}
 let damageNumberIndex = 0
 const damageNumbers = reactive(new Map<number, DamageNumber>())
 function makeDamageNumber(
@@ -767,6 +602,14 @@ function onKeyPress(e: KeyboardEvent) {
       break
     }
     case 'd': {
+      if (gameState.cameraState.mode === CameraMode.ALLIES) {
+        const currentFocus = gameState.focusedTarget.mainTarget
+        gameState.focusedTarget.mainTarget = Math.min(
+          currentFocus + 1,
+          gameState.playerCharacters.length - 1
+        )
+        return
+      }
       const currentFocus = gameState.focusedTarget.mainTarget
       gameState.focusedTarget.mainTarget = Math.min(currentFocus + 1, gameState.enemies.length - 1)
       break
@@ -874,7 +717,7 @@ function printGameState() {
             :key="character.name + character.hp"
           >
             <image
-              :href="character.portrait"
+              :href="character.avatar"
               :height="PROFILE_PIC_HEIGHT"
               :width="PROFILE_PIC_WIDTH"
               :x="PROFILE_PIC_BASE_OFFSET + i * PROFILE_PIC_SIDE_OFFSET"
@@ -934,22 +777,33 @@ function printGameState() {
               />
             </g>
           </g>
-          <!--Player Avatar-->
+          <!--Player Ally View-->
           <template v-if="gameState.cameraState.mode === CameraMode.ALLIES">
             <g
               class="player-ui"
               v-for="(character, i) in gameState.playerCharacters"
-              :key="character.name + character.hp + 'avatar'"
+              :key="character.name + character.hp + 'ally'"
             >
               <image
-                :href="character.portrait"
-                :height="PLAYER_AVATAR_HEIGHT"
-                :width="PLAYER_AVATAR_WIDTH"
+                :href="character.frontImage"
+                :height="PLAYER_IMAGE_HEIGHT"
+                :width="PLAYER_IMAGE_WIDTH"
                 :x="playerXPositions[i]"
-                y="0"
+                :y="ALLY_VIEW_TOP_PADDING"
               />
             </g>
           </template>
+
+          <!--Player Default View-->
+          <g v-if="gameState.cameraState.mode === CameraMode.DEFAULT">
+            <image
+              :href="gameState.playerCharacters[gameState.cameraState.focus].backImage"
+              :height="PLAYER_IMAGE_HEIGHT"
+              :width="PLAYER_IMAGE_WIDTH"
+              :x="350"
+              :y="ALLY_VIEW_TOP_PADDING * 2.5"
+            />
+          </g>
 
           <!--Enemy characters-->
           <template v-if="gameState.cameraState.mode === CameraMode.DEFAULT">
@@ -960,7 +814,7 @@ function printGameState() {
               :data-index="i"
             >
               <image
-                :href="enemy.portrait"
+                :href="enemy.avatar"
                 :height="PROFILE_PIC_HEIGHT"
                 :width="PROFILE_PIC_WIDTH"
                 :x="enemyXPositions[i]"
@@ -988,7 +842,7 @@ function printGameState() {
             <g v-if="gameState.currentTurn?.character">
               <rect height="20" width="40" stroke="white" fill="grey" x="20" :y="10" />
               <image
-                :href="gameState.currentTurn.character?.portrait"
+                :href="gameState.currentTurn.character?.avatar"
                 height="20"
                 width="20"
                 x="30"
@@ -1001,7 +855,7 @@ function printGameState() {
             >
               <rect height="20" width="40" stroke="white" fill="grey" :x="60 + 40 * i" :y="10" />
               <image
-                :href="subTurn.character.portrait"
+                :href="subTurn.character.avatar"
                 height="20"
                 width="20"
                 :x="70 + 40 * i"
@@ -1012,7 +866,7 @@ function printGameState() {
           <g v-if="gameState.currentResolvingSubTurn" class="current-subturn">
             <rect height="20" width="40" stroke="white" fill="grey" x="20" :y="10" />
             <image
-              :href="gameState.currentResolvingSubTurn.character?.portrait"
+              :href="gameState.currentResolvingSubTurn.character?.avatar"
               height="20"
               width="20"
               x="30"
@@ -1024,13 +878,7 @@ function printGameState() {
             :key="turn.character?.name ?? '' + turn.timeUntil"
           >
             <rect height="20" width="40" stroke="white" fill="grey" x="20" :y="i * 30 + 40" />
-            <image
-              :href="turn.character?.portrait"
-              height="20"
-              width="20"
-              x="30"
-              :y="i * 30 + 40"
-            />
+            <image :href="turn.character?.avatar" height="20" width="20" x="30" :y="i * 30 + 40" />
           </g>
           <g class="target-crosshair" v-if="gameState.turnCharacter?.type === CharacterType.PLAYER">
             <g
@@ -1038,11 +886,11 @@ function printGameState() {
               :key="targetMarker"
               :transform="`translate(${
                 gameState.cameraState.mode === CameraMode.ALLIES
-                  ? playerXPositions[targetMarker] + PLAYER_AVATAR_WIDTH / 2
+                  ? playerXPositions[targetMarker] + PLAYER_IMAGE_WIDTH / 2
                   : enemyXPositions[targetMarker] + ENEMY_SIZE / 2
               }, ${
                 gameState.cameraState.mode === CameraMode.ALLIES
-                  ? PLAYER_AVATAR_HEIGHT / 2
+                  ? ALLY_VIEW_TOP_PADDING + PLAYER_IMAGE_HEIGHT / 2
                   : ENEMY_CENTER_Y
               })`"
             >
@@ -1193,9 +1041,6 @@ function printGameState() {
 .health-bar-outline {
   fill: transparent;
   stroke: white;
-}
-.character-portrait {
-  fill: white;
 }
 
 .skill-points-container {
