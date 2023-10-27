@@ -83,6 +83,7 @@ class CombatManager {
       if (enemy.toughness <= 0) {
         // a break happened. TODO: Depending on what the element that broke it, apply debuff
         enemy.hp -= BREAK_DAMAGE
+        makeDamageNumber(damage, CharacterType.ENEMY, enemyIdx, element, true)
         const enemyTurnIdx = gameState.queue.findIndex(
           (turnEntry) => turnEntry.character?.name === enemy.name
         )
@@ -676,14 +677,15 @@ function makeDamageNumber(
   damage: number,
   characterType: CharacterType,
   index: number,
-  element?: Elements
+  element?: Elements,
+  differntLocation?: boolean
 ) {
   damageNumberIndex += 1
   if (characterType === CharacterType.ENEMY) {
     const damageNumber = {
       damage,
       x: enemyXPositions.value[index] + ENEMY_SIZE / 2,
-      y: ENEMY_CENTER_Y,
+      y: differntLocation ? ENEMY_CENTER_Y + 10 : ENEMY_CENTER_Y,
       type: element
     }
     damageNumbers.set(damageNumberIndex, damageNumber)
