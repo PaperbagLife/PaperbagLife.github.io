@@ -9,7 +9,7 @@ defineProps<{
 </script>
 
 <template>
-  <g>
+  <g class="timeline">
     <g class="current-turn">
       <g v-if="currentTurn?.character">
         <rect height="20" width="40" stroke="white" fill="grey" x="20" :y="10" />
@@ -36,3 +36,12 @@ defineProps<{
     </g>
   </g>
 </template>
+<style lang="scss" scoped>
+.timeline {
+  g,
+  rect,
+  image {
+    transition: y 1s;
+  }
+}
+</style>

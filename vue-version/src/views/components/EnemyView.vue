@@ -1,13 +1,17 @@
 <script setup lang="ts">
+import { getElementColor } from '@/util/starrail/utils'
 import type { Enemy } from '../../util/starrail/consts'
 import {
-  HP_BAR_HEIGHT,
-  HP_BAR_OFFSET,
   PROFILE_PIC_HEIGHT,
   ENEMY_TOP_PADDING,
   PROFILE_PIC_WIDTH
 } from '../../util/starrail/consts'
 
+const ENEMY_HP_BAR_WIDTH = 48
+const BOSS_HP_WIDTH = 100
+const ENEMY_HP_TOP_OFFSET = 20
+const ENEMY_HP_BAR_HEIGHT = 6
+const ENEMY_TOUGHNESS_BAR_HEIGHT = 4
 defineProps<{
   enemies: Enemy[]
   enemyXPositions: number[]
@@ -25,31 +29,62 @@ defineProps<{
     />
     <rect
       class="health-bar-outline"
-      :x="enemyXPositions[i]"
-      y="18"
-      :width="PROFILE_PIC_WIDTH"
-      :height="HP_BAR_HEIGHT"
+      :x="enemyXPositions[i] + (PROFILE_PIC_WIDTH - ENEMY_HP_BAR_WIDTH) / 2"
+      :y="ENEMY_HP_TOP_OFFSET"
+      :width="ENEMY_HP_BAR_WIDTH"
+      :height="ENEMY_HP_BAR_HEIGHT"
     />
     <rect
       class="health-bar"
-      :x="enemyXPositions[i] + HP_BAR_OFFSET"
-      :y="20"
-      :width="(enemy.hp / enemy.maxHp) * 76"
-      :height="HP_BAR_HEIGHT - HP_BAR_OFFSET * 2"
+      :x="enemyXPositions[i] + (PROFILE_PIC_WIDTH - ENEMY_HP_BAR_WIDTH) / 2"
+      :y="ENEMY_HP_TOP_OFFSET"
+      :width="(enemy.hp / enemy.maxHp) * ENEMY_HP_BAR_WIDTH"
+      :height="ENEMY_HP_BAR_HEIGHT"
     />
+    <rect
+      class="toughness-bar-outline"
+      :x="enemyXPositions[i] + (PROFILE_PIC_WIDTH - ENEMY_HP_BAR_WIDTH) / 2"
+      :y="ENEMY_HP_TOP_OFFSET - ENEMY_TOUGHNESS_BAR_HEIGHT"
+      :width="ENEMY_HP_BAR_WIDTH"
+      :height="ENEMY_TOUGHNESS_BAR_HEIGHT"
+    />
+    <rect
+      v-if="enemy.toughness > 0"
+      class="toughness-bar"
+      :x="enemyXPositions[i] + (PROFILE_PIC_WIDTH - ENEMY_HP_BAR_WIDTH) / 2"
+      :y="ENEMY_HP_TOP_OFFSET - ENEMY_TOUGHNESS_BAR_HEIGHT"
+      :width="(enemy.toughness / enemy.maxToughness) * ENEMY_HP_BAR_WIDTH"
+      :height="ENEMY_TOUGHNESS_BAR_HEIGHT"
+    />
+    <circle
+      class="weakness-icon"
+      v-for="(weak, weakIdx) in enemy.weakness"
+      :key="weak"
+      :cx="enemyXPositions[i] - weakIdx * 10 + 60"
+      :cy="ENEMY_HP_TOP_OFFSET - 8"
+      :r="3.5"
+      :style="{ '--color': getElementColor(weak) }"
+    ></circle>
   </g>
 </template>
 
 <style lang="scss" scoped>
 .enemy-ui {
+  .weakness-icon {
+    fill: var(--color);
+  }
+  rect {
+    stroke: black;
+    stroke-width: 0.3px;
+  }
   .health-bar {
     fill: rgb(190, 82, 61);
-    stroke: black;
   }
-}
-
-.health-bar-outline {
-  fill: transparent;
-  stroke: white;
+  .health-bar-outline {
+    fill: black;
+  }
+  .toughness-bar {
+    fill: white;
+  }
 }
 </style>

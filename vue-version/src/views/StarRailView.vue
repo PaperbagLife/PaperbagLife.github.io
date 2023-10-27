@@ -3,6 +3,7 @@ import { computed, onMounted, onUnmounted, reactive } from 'vue'
 import bailuAvatar from '../assets/game/img/bailu-avatar.png'
 import bailuBack from '../assets/game/img/bailu-back.png'
 import bailuFront from '../assets/game/img/bailu-front.png'
+import flameSpawnImage from '../assets/game/img/flamespawn.png'
 import fireShadewalkerImage from '../assets/game/img/fire_shadewalker.png'
 import frostSpawnImage from '../assets/game/img/frostspawn.png'
 import stelleAvatar from '../assets/game/img/stelle-avatar.png'
@@ -48,10 +49,16 @@ import TargetMarkerComponent from './components/TargetMarkerComponent.vue'
 import TimelineComponent from './components/TimelineComponent.vue'
 const { type } = useBreakpoints()
 
+const BREAK_DAMAGE = 20
+const BREAK_DELAY = 50
+
 // Combat, Damage related logic
 class CombatManager {
   static async resolveEnemyMove() {
     const enemy = gameState.turnCharacter as Enemy
+    if (enemy.toughness <= 0) {
+      enemy.toughness = enemy.maxToughness
+    }
     const damage = enemy.attack
     const target = getRandomInt(gameState.playerCharacters.length)
     gameState.cameraState.focus = target
@@ -61,6 +68,32 @@ class CombatManager {
       gameState.playerCharacters[target].energy + HIT_ENERGY_REGEN,
       gameState.playerCharacters[target].maxEnergy
     )
+  }
+  static resolveDamageOnEnemy(
+    enemyIdx: number,
+    damage: number,
+    breakEfficiency: number,
+    element: Elements
+  ) {
+    const enemy = gameState.enemies[enemyIdx]
+    enemy.hp -= damage
+    makeDamageNumber(damage, CharacterType.ENEMY, enemyIdx, element)
+    if (enemy.weakness.includes(element) && enemy.toughness != 0) {
+      enemy.toughness -= breakEfficiency
+      if (enemy.toughness <= 0) {
+        // a break happened. TODO: Depending on what the element that broke it, apply debuff
+        enemy.hp -= BREAK_DAMAGE
+        const enemyTurnIdx = gameState.queue.findIndex(
+          (turnEntry) => turnEntry.character?.name === enemy.name
+        )
+        if (enemyTurnIdx === -1) {
+          console.log('impossible, no enemy turn on timeline')
+          return
+        }
+        gameState.queue[enemyTurnIdx].timeUntil += BREAK_DELAY
+        gameState.queue.sort((a, b) => a.timeUntil - b.timeUntil)
+      }
+    }
   }
   static async resolvePlayerSkill() {
     const player = gameState.turnCharacter as PlayerCharacter
@@ -73,20 +106,26 @@ class CombatManager {
       // Depending on the type of the skill do differnt calculations here
       switch (player.skill.targetType) {
         case TargetType.SINGLE_ENEMY: {
-          gameState.enemies[target].hp -= damage
-          makeDamageNumber(damage, CharacterType.ENEMY, target, player.element)
+          this.resolveDamageOnEnemy(target, damage, player.skill.breakEfficiency, player.element)
           break
         }
         case TargetType.SPLASH_ENEMY: {
-          gameState.enemies[target].hp -= damage
-          makeDamageNumber(damage, CharacterType.ENEMY, target, player.element)
+          this.resolveDamageOnEnemy(target, damage, player.skill.breakEfficiency, player.element)
           if (target > 0) {
-            gameState.enemies[target - 1].hp -= damage
-            makeDamageNumber(damage, CharacterType.ENEMY, target - 1, player.element)
+            this.resolveDamageOnEnemy(
+              target - 1,
+              damage,
+              player.skill.breakEfficiency,
+              player.element
+            )
           }
           if (target < gameState.enemies.length - 1) {
-            gameState.enemies[target + 1].hp -= damage
-            makeDamageNumber(damage, CharacterType.ENEMY, target + 1, player.element)
+            this.resolveDamageOnEnemy(
+              target + 1,
+              damage,
+              player.skill.breakEfficiency,
+              player.element
+            )
           }
           break
         }
@@ -94,8 +133,12 @@ class CombatManager {
         case TargetType.RANDOM_ENEMY: {
           for (let i = 0; i < (player.skill.hits ?? 1); i += 1) {
             const enemyIdx = getRandomInt(gameState.enemies.length)
-            gameState.enemies[enemyIdx].hp -= damage
-            makeDamageNumber(damage, CharacterType.ENEMY, enemyIdx, player.element)
+            this.resolveDamageOnEnemy(
+              enemyIdx,
+              damage,
+              player.skill.breakEfficiency,
+              player.element
+            )
           }
         }
       }
@@ -118,6 +161,7 @@ class CombatManager {
       }
       gameState.cameraState.mode = CameraMode.DEFAULT
     }
+    await delay(1000)
   }
 
   static async resolvePlayerAttack() {
@@ -127,8 +171,8 @@ class CombatManager {
     const damage = player.attack
     const target = gameState.focusedTarget.mainTarget
     // Assume basic attack always single target (TODO p2: change this paradigm later)
-    gameState.enemies[target].hp -= damage
-    makeDamageNumber(damage, CharacterType.ENEMY, target, player.element)
+    this.resolveDamageOnEnemy(target, damage, 1, player.element)
+    await delay(1000)
   }
 
   static async resolvePlayerUlt() {
@@ -182,6 +226,7 @@ class CombatManager {
       }
       gameState.cameraState.mode = CameraMode.DEFAULT
     }
+    await delay(1000)
     player.energy += 5
   }
 }
@@ -432,7 +477,8 @@ const stelle = new PlayerCharacter(
   {
     targetType: TargetType.SPLASH_ENEMY,
     effect: SkillEffect.DAMAGE,
-    modifier: 1.2
+    modifier: 1.2,
+    breakEfficiency: 2
   },
 
   120,
@@ -442,7 +488,8 @@ const stelle = new PlayerCharacter(
     targetType: TargetType.RANDOM_ENEMY,
     hits: 3,
     effect: SkillEffect.DAMAGE,
-    modifier: 2
+    modifier: 2,
+    breakEfficiency: 1
   },
   Elements.PHYSICAL
 )
@@ -456,7 +503,8 @@ const bailu = new PlayerCharacter(
   {
     targetType: TargetType.SINGLE_ALLY,
     effect: SkillEffect.HEAL,
-    modifier: 10
+    modifier: 10,
+    breakEfficiency: 0
   },
   110,
   100,
@@ -465,19 +513,60 @@ const bailu = new PlayerCharacter(
     targetType: TargetType.ALL_ALLIES,
     hits: 3,
     effect: SkillEffect.HEAL,
-    modifier: 20
+    modifier: 20,
+    breakEfficiency: 0
   },
   Elements.LIGHTNING
 )
-const simpleEnemy = new Enemy('frostspawn', frostSpawnImage, 50, 6, 90)
-const simpleEnemy2 = new Enemy('frostspawn2', frostSpawnImage, 50, 8, 90)
-const simpleEnemy3 = new Enemy('fireshadewalker', fireShadewalkerImage, 100, 15, 100)
-const simpleEnemy4 = new Enemy('frostspawn4', frostSpawnImage, 50, 7, 90)
-const simpleEnemy5 = new Enemy('frostspawn5', frostSpawnImage, 50, 5, 90)
+const frostSpawn = new Enemy(
+  'frostspawn',
+  frostSpawnImage,
+  50,
+  6,
+  90,
+  [Elements.FIRE, Elements.WIND],
+  1
+)
+const frostSpawn2 = new Enemy(
+  'frostspawn2',
+  frostSpawnImage,
+  50,
+  8,
+  90,
+  [Elements.FIRE, Elements.WIND],
+  1
+)
+const fireShadeWalker = new Enemy(
+  'fireshadewalker',
+  fireShadewalkerImage,
+  100,
+  15,
+  100,
+  [Elements.ICE, Elements.WIND, Elements.IMAGINARY],
+  2
+)
+const frostSpawn4 = new Enemy(
+  'frostspawn4',
+  frostSpawnImage,
+  50,
+  7,
+  90,
+  [Elements.FIRE, Elements.WIND],
+  1
+)
+const flameSpawn = new Enemy(
+  'flameSpawn',
+  flameSpawnImage,
+  50,
+  5,
+  90,
+  [Elements.ICE, Elements.PHYSICAL],
+  1
+)
 const gameState = reactive(
   new GameState(
     [stelle, bailu],
-    [simpleEnemy, simpleEnemy2, simpleEnemy3, simpleEnemy4, simpleEnemy5]
+    [flameSpawn, frostSpawn2, fireShadeWalker, frostSpawn4, frostSpawn]
   )
 )
 const uiElements = reactive(new UIElements())
@@ -694,7 +783,7 @@ function printGameState() {
 <template>
   <main :class="type">
     <div class="col mt-2 d-flex justify-content-center">
-      <div class="game-viewport">
+      <div class="game-viewport" :style="{ '--width': canvas.width, '--height': canvas.height }">
         <div class="skill-points-container">
           <div class="no-skill-point-tip" v-if="uiElements.show0SkillPoint">
             Not enough skill points
@@ -722,11 +811,13 @@ function printGameState() {
           </button>
         </div>
         <svg
+          class="game-svg"
           :height="canvas.height"
           @touchend="onGameTouch"
           @mouseup="onGameTouch"
           :width="canvas.width"
         >
+          <rect class="background" :height="canvas.height + 10" :width="canvas.width"></rect>
           <PlayerView
             :player-characters="gameState.playerCharacters"
             :camera-state="gameState.cameraState"
@@ -801,8 +892,17 @@ function printGameState() {
   background-color: black;
   border: 2px solid #66ccff;
   border-radius: 4px;
-  width: var(width);
-  height: var(height);
+  width: var(--width);
+  height: var(--height);
+  overflow: hidden;
+}
+
+.game-svg {
+  overflow: visible;
+}
+
+.background {
+  fill: grey;
 }
 
 .no-skill-point-tip {

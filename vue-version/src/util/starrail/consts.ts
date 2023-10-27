@@ -93,6 +93,7 @@ export type Skill = {
   targetType: TargetType
   modifier: number
   hits?: number
+  breakEfficiency: number
   effect: SkillEffect
 }
 
@@ -171,8 +172,22 @@ export class PlayerCharacter extends Character {
 }
 
 export class Enemy extends Character {
-  constructor(name: string, avatar: string, hp: number, attack: number, speed: number) {
+  weakness: Elements[]
+  toughness: number
+  maxToughness: number
+  constructor(
+    name: string,
+    avatar: string,
+    hp: number,
+    attack: number,
+    speed: number,
+    weakness: Elements[],
+    toughness: number
+  ) {
     super(CharacterType.ENEMY, name, avatar, hp, attack, speed)
+    this.weakness = weakness
+    this.maxToughness = toughness
+    this.toughness = toughness
   }
 }
 
