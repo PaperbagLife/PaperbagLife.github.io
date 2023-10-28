@@ -4,11 +4,11 @@ export const MULTIHIT_DELAY = 300
 
 export const HIT_ENERGY_REGEN = 5
 
-export const PROFILE_PIC_HEIGHT = 80
-export const PROFILE_PIC_WIDTH = 80
+export const PROFILE_PIC_HEIGHT = 70
+export const PROFILE_PIC_WIDTH = 70
 export const HP_BAR_HEIGHT = 10
 export const HP_BAR_OFFSET = 2
-export const PROFILE_PIC_SIDE_OFFSET = 120
+export const PROFILE_PIC_SIDE_OFFSET = 110
 export const PROFILE_PIC_BASE_OFFSET = 30
 export const ULT_GAUGE_BASE_OFFSET = 100
 export const BASIC_ATTACK_ENERGY_GAIN = 5

@@ -14,6 +14,8 @@ import {
   ULT_GAUGE_BASE_OFFSET
 } from '../../util/starrail/consts'
 
+const BASE_HEIGHT = 270
+
 import { getElementColor } from '../../util/starrail/utils'
 
 defineProps<{
@@ -35,19 +37,19 @@ defineProps<{
         :height="PROFILE_PIC_HEIGHT"
         :width="PROFILE_PIC_WIDTH"
         :x="PROFILE_PIC_BASE_OFFSET + i * PROFILE_PIC_SIDE_OFFSET"
-        y="250"
+        :y="BASE_HEIGHT"
       />
       <rect
         class="health-bar-outline"
         :x="PROFILE_PIC_BASE_OFFSET + i * PROFILE_PIC_SIDE_OFFSET"
-        y="330"
+        :y="BASE_HEIGHT + 30"
         :width="PROFILE_PIC_WIDTH"
         :height="HP_BAR_HEIGHT"
       />
       <rect
         class="health-bar"
         :x="PROFILE_PIC_BASE_OFFSET + HP_BAR_OFFSET + i * PROFILE_PIC_SIDE_OFFSET"
-        y="332"
+        :y="BASE_HEIGHT + PROFILE_PIC_HEIGHT"
         :width="(character.hp / character.maxHp) * (PROFILE_PIC_WIDTH - HP_BAR_OFFSET * 2)"
         :height="HP_BAR_HEIGHT - 2 * HP_BAR_OFFSET"
       />
@@ -67,14 +69,14 @@ defineProps<{
       <g class="ult-circle" :data-index="i">
         <circle
           :cx="ULT_GAUGE_BASE_OFFSET + i * PROFILE_PIC_SIDE_OFFSET"
-          cy="290"
-          r="30"
+          :cy="BASE_HEIGHT + 40"
+          r="25"
           fill="black"
         />
         <circle
           :cx="ULT_GAUGE_BASE_OFFSET + i * PROFILE_PIC_SIDE_OFFSET"
-          cy="290"
-          r="30"
+          :cy="BASE_HEIGHT + 40"
+          r="25"
           :fill="`url(#${character.name}energy-gradient)`"
           stroke="grey"
           stroke-width="1"

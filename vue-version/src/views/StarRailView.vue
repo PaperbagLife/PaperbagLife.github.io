@@ -3,6 +3,9 @@ import { computed, onMounted, onUnmounted, reactive } from 'vue'
 import bailuAvatar from '../assets/game/img/bailu-avatar.png'
 import bailuBack from '../assets/game/img/bailu-back.png'
 import bailuFront from '../assets/game/img/bailu-front.png'
+import marchFront from '../assets/game/img/march-front.png'
+import marchAvatar from '../assets/game/img/march-avatar.png'
+import marchBack from '../assets/game/img/march-back.png'
 import flameSpawnImage from '../assets/game/img/flamespawn.png'
 import fireShadewalkerImage from '../assets/game/img/fire_shadewalker.png'
 import frostSpawnImage from '../assets/game/img/frostspawn.png'
@@ -92,7 +95,7 @@ class CombatManager {
           return
         }
         gameState.queue[enemyTurnIdx].timeUntil += BREAK_DELAY
-        gameState.queue.sort((a, b) => a.timeUntil - b.timeUntil)
+        Timeline.sortTimeline()
       }
     }
   }
@@ -198,13 +201,17 @@ class CombatManager {
           }
           break
         }
-        case TargetType.ALL_ENEMIES:
+        case TargetType.ALL_ENEMIES: {
+          gameState.enemies.forEach((enemy, i) => {
+            this.resolveDamageOnEnemy(i, damage, player.ult.breakEfficiency, player.element)
+          })
+          break
+        }
         case TargetType.RANDOM_ENEMY: {
           for (let i = 0; i < (player.ult.hits ?? 1); i += 1) {
             const enemyIdx = getRandomInt(gameState.enemies.length)
             await delay(MULTIHIT_DELAY)
-            gameState.enemies[enemyIdx].hp -= damage
-            makeDamageNumber(damage, CharacterType.ENEMY, enemyIdx, player.element)
+            this.resolveDamageOnEnemy(enemyIdx, damage, player.ult.breakEfficiency, player.element)
           }
         }
       }
@@ -351,6 +358,9 @@ class TurnManager {
         let ultFired = false
         // Adjust camera state
         const player = gameState.turnCharacter as PlayerCharacter
+        gameState.cameraState.focus = gameState.playerCharacters.findIndex(
+          (c) => c.name === player.name
+        )
         if (
           player.ult.targetType === TargetType.ALL_ALLIES ||
           player.ult.targetType === TargetType.SINGLE_ALLY
@@ -379,6 +389,9 @@ class UIElements {
 
 // Class for organizing functions to do with timeline
 class Timeline {
+  static sortTimeline() {
+    gameState.queue.sort((a, b) => a.timeUntil - b.timeUntil)
+  }
   static enqueue(character: Character, index: number) {
     gameState.queue.push({
       character,
@@ -443,11 +456,12 @@ class GameState {
     this.queue = []
     this.playerCharacters = playerCharacters
     this.enemies = enemies
-    this.skillPoints = 1
+    this.skillPoints = 3
   }
   async initGame() {
     this.playerCharacters.forEach((char, i) => Timeline.enqueue(char, i))
     this.enemies.forEach((char, i) => Timeline.enqueue(char, i))
+    Timeline.sortTimeline()
     while (!this.gameOver) {
       const nextTurn = Timeline.getNextTurn()
       if (!nextTurn) {
@@ -519,6 +533,33 @@ const bailu = new PlayerCharacter(
   },
   Elements.LIGHTNING
 )
+
+const march = new PlayerCharacter(
+  'march',
+  marchAvatar,
+  marchBack,
+  marchFront,
+  100,
+  10,
+  {
+    targetType: TargetType.SPLASH_ENEMY,
+    effect: SkillEffect.DAMAGE,
+    modifier: 1.2,
+    breakEfficiency: 2
+  },
+
+  130,
+  100,
+  100,
+  {
+    targetType: TargetType.ALL_ENEMIES,
+    effect: SkillEffect.DAMAGE,
+    modifier: 2,
+    breakEfficiency: 2
+  },
+  Elements.ICE
+)
+
 const frostSpawn = new Enemy(
   'frostspawn',
   frostSpawnImage,
@@ -566,7 +607,7 @@ const flameSpawn = new Enemy(
 )
 const gameState = reactive(
   new GameState(
-    [stelle, bailu],
+    [stelle, bailu, march],
     [flameSpawn, frostSpawn2, fireShadeWalker, frostSpawn4, frostSpawn]
   )
 )
@@ -593,7 +634,7 @@ const playerXPositions = computed<number[]>(() => {
 })
 
 const enemyXPositions = computed<number[]>(() => {
-  const START_LOCATION = 200
+  const START_LOCATION = 350
   const space = canvas.width - START_LOCATION
 
   const sidePadding =
@@ -963,5 +1004,6 @@ function printGameState() {
   bottom: 20px;
   right: 25%;
   color: white;
+  z-index: 1;
 }
 </style>
