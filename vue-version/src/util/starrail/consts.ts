@@ -170,6 +170,7 @@ export class PlayerCharacter extends Character {
   frontImage: string
   shield: number
   passiveCount?: number
+  passiveMax?: number
   constructor(
     name: string,
     avatar: string,
@@ -195,8 +196,9 @@ export class PlayerCharacter extends Character {
     this.maxEnergy = maxEnergy
     this.ult = ult
     this.element = element
-    this.passiveCount = passiveCount
+    this.passiveCount = 1
     this.shield = 10
+    this.passiveMax = passiveCount
   }
 }
 

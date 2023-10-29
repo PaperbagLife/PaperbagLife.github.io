@@ -51,8 +51,21 @@ defineProps<{
         :x="PROFILE_PIC_BASE_OFFSET + i * PROFILE_PIC_SIDE_OFFSET"
         :y="BASE_HEIGHT"
       />
-      <g v-if="character.passiveCount">
+      <g v-if="character.passiveCount && character.passiveMax">
         <circle
+          class="depleted"
+          v-for="idx in Array.from({ length: character.passiveMax }, (_, index) => index)"
+          :key="idx"
+          :cx="
+            PROFILE_PIC_BASE_OFFSET +
+            i * PROFILE_PIC_SIDE_OFFSET +
+            5 +
+            (PASSIVE_RADIUS * 2 + 2) * idx
+          "
+          :cy="BASE_HEIGHT + PROFILE_PIC_HEIGHT + 10"
+          :r="PASSIVE_RADIUS" />
+        <circle
+          class="active"
           v-for="idx in Array.from({ length: character.passiveCount }, (_, index) => index)"
           :key="idx"
           :cx="
@@ -180,6 +193,11 @@ defineProps<{
     fill: black;
     stroke-width: 0.3px;
     opacity: 0.7;
+  }
+
+  .depleted {
+    fill: black;
+    stroke: white;
   }
 }
 .health-bar-outline {
