@@ -7,7 +7,7 @@ export function getRandomInt(max: number) {
 
 export function range(size: number) {
   const result = []
-  for (let i = 0; i <= size; i += 1) {
+  for (let i = 0; i < size; i += 1) {
     result.push(i)
   }
   return result
