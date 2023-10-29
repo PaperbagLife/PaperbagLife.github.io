@@ -45,7 +45,7 @@ import {
   type TimelineTurn,
   type TurnState
 } from '../util/starrail/consts'
-import { delay, getElementColor, getRandomInt } from '../util/starrail/utils'
+import { delay, getElementColor, getRandomInt, range } from '../util/starrail/utils'
 import EnemyView from './components/EnemyView.vue'
 import PlayerView from './components/PlayerView.vue'
 import TargetMarkerComponent from './components/TargetMarkerComponent.vue'
@@ -64,10 +64,13 @@ class CombatManager {
     // Ask for subturn
     gameState.playerCharacters.forEach((pc) => {
       if (!pc.reaction) return
-      const subTurn = pc.reaction('hit-shield')
-      if (subTurn != null) {
-        subTurns.push(subTurn)
+      if (player.shield > 0) {
+        const subTurn = pc.reaction('hit-shield')
+        if (subTurn != null) {
+          subTurns.push(subTurn)
+        }
       }
+      // More trigger conditions, I guess
     })
     if (damage > player.shield) {
       postShieldDamage = damage - player.shield
@@ -738,7 +741,7 @@ const targetMarkers = computed<TargetMarkers>(() => {
       return { main: [gameState.focusedTarget.mainTarget], sub: [] }
     case TargetType.ALL_ALLIES: {
       return {
-        main: Array.from({ length: gameState.playerCharacters.length }, (_, index) => index),
+        main: range(gameState.playerCharacters.length),
         sub: []
       }
     }
@@ -757,7 +760,7 @@ const targetMarkers = computed<TargetMarkers>(() => {
     case TargetType.ALL_ENEMIES:
     case TargetType.RANDOM_ENEMY: {
       return {
-        main: Array.from({ length: gameState.enemies.length }, (_, index) => index),
+        main: range(gameState.enemies.length),
         sub: []
       }
     }

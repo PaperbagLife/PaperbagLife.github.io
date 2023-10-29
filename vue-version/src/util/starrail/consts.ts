@@ -7,7 +7,6 @@ export const HIT_ENERGY_REGEN = 5
 export const PROFILE_PIC_HEIGHT = 70
 export const PROFILE_PIC_WIDTH = 70
 export const HP_BAR_HEIGHT = 4
-export const HP_BAR_OFFSET = 2
 export const PROFILE_PIC_SIDE_OFFSET = 110
 export const PROFILE_PIC_BASE_OFFSET = 30
 export const ULT_GAUGE_BASE_OFFSET = 100
@@ -196,8 +195,8 @@ export class PlayerCharacter extends Character {
     this.maxEnergy = maxEnergy
     this.ult = ult
     this.element = element
-    this.passiveCount = 1
-    this.shield = 10
+    this.passiveCount = passiveCount
+    this.shield = 0
     this.passiveMax = passiveCount
   }
 }

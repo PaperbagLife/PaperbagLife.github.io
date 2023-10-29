@@ -3,7 +3,6 @@ import type { CameraState, PlayerCharacter } from '../../util/starrail/consts'
 import {
   CameraMode,
   HP_BAR_HEIGHT,
-  HP_BAR_OFFSET,
   PROFILE_PIC_BASE_OFFSET,
   PLAYER_IMAGE_HEIGHT,
   PLAYER_IMAGE_WIDTH,
@@ -18,7 +17,7 @@ const BASE_HEIGHT = 270
 const SHIELD_BAR_OFFSET = 0.75
 const PASSIVE_RADIUS = 2
 
-import { getElementColor } from '../../util/starrail/utils'
+import { getElementColor, range } from '../../util/starrail/utils'
 
 defineProps<{
   playerCharacters: PlayerCharacter[]
@@ -51,10 +50,10 @@ defineProps<{
         :x="PROFILE_PIC_BASE_OFFSET + i * PROFILE_PIC_SIDE_OFFSET"
         :y="BASE_HEIGHT"
       />
-      <g v-if="character.passiveCount && character.passiveMax">
+      <g v-if="character.passiveMax && character.passiveCount !== undefined">
         <circle
           class="depleted"
-          v-for="idx in Array.from({ length: character.passiveMax }, (_, index) => index)"
+          v-for="idx in range(character.passiveMax)"
           :key="idx"
           :cx="
             PROFILE_PIC_BASE_OFFSET +
@@ -66,7 +65,7 @@ defineProps<{
           :r="PASSIVE_RADIUS" />
         <circle
           class="active"
-          v-for="idx in Array.from({ length: character.passiveCount }, (_, index) => index)"
+          v-for="idx in range(character.passiveCount)"
           :key="idx"
           :cx="
             PROFILE_PIC_BASE_OFFSET +

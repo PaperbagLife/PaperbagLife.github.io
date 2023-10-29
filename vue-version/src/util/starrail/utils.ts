@@ -5,6 +5,14 @@ export function getRandomInt(max: number) {
   return Math.floor(Math.random() * max)
 }
 
+export function range(size: number) {
+  const result = []
+  for (let i = 0; i <= size; i += 1) {
+    result.push(i)
+  }
+  return result
+}
+
 export function getElementColor(element?: Elements) {
   switch (element) {
     case Elements.FIRE:
