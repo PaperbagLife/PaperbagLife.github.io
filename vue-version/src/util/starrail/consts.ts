@@ -6,7 +6,7 @@ export const HIT_ENERGY_REGEN = 5
 
 export const PROFILE_PIC_HEIGHT = 70
 export const PROFILE_PIC_WIDTH = 70
-export const HP_BAR_HEIGHT = 10
+export const HP_BAR_HEIGHT = 4
 export const HP_BAR_OFFSET = 2
 export const PROFILE_PIC_SIDE_OFFSET = 110
 export const PROFILE_PIC_BASE_OFFSET = 30
@@ -17,7 +17,7 @@ export const PLAYER_IMAGE_HEIGHT = 250
 export const PLAYER_IMAGE_WIDTH = 80
 export const PLAYER_BETWEEN_PADDING = 40
 
-export const ALLY_VIEW_TOP_PADDING = 50
+export const ALLY_VIEW_TOP_PADDING = 20
 
 export const ENEMY_SIZE = PROFILE_PIC_WIDTH
 export const ENEMY_TOP_PADDING = 30
@@ -86,14 +86,19 @@ export type FocusedTarget = {
 
 export enum SkillEffect {
   DAMAGE,
-  HEAL
+  HEAL,
+  SHIELD
 }
-
+// For now we assume scaling goes as follows:
+// Damage <- attack
+// Heal <- flat amount
+// Shield <- flat amount
+// Not the cleanest but oh well
 export type Skill = {
   targetType: TargetType
   modifier: number
   hits?: number
-  breakEfficiency: number
+  breakEfficiency?: number
   effect: SkillEffect
 }
 
@@ -115,6 +120,8 @@ export class Character {
   hp: number
   attack: number
   speed: number
+  reactionFunction?: (trigger: string, self: Character) => SubTurn | null
+  turnEndFunction?: (self: Character) => void
 
   constructor(
     characterType: CharacterType,
@@ -122,7 +129,9 @@ export class Character {
     avatar: string,
     hp: number,
     attack: number,
-    speed: number
+    speed: number,
+    reactionFunction?: (trigger: string, self: Character) => SubTurn | null,
+    turnEndFunction?: (self: Character) => void
   ) {
     this.type = characterType
     this.name = name
@@ -131,10 +140,23 @@ export class Character {
     this.hp = hp
     this.attack = attack
     this.speed = speed
+    this.reactionFunction = reactionFunction
+    this.turnEndFunction = turnEndFunction
   }
   // check if the player is still alive
   isAlive() {
     return this.hp > 0
+  }
+  reaction(trigger: string) {
+    if (this.reactionFunction) {
+      return this.reactionFunction(trigger, this)
+    }
+    return null
+  }
+  turnEnd() {
+    if (this.turnEndFunction) {
+      this.turnEndFunction(this)
+    }
   }
 }
 
@@ -146,6 +168,8 @@ export class PlayerCharacter extends Character {
   ult: Skill
   backImage: string
   frontImage: string
+  shield: number
+  passiveCount?: number
   constructor(
     name: string,
     avatar: string,
@@ -158,9 +182,12 @@ export class PlayerCharacter extends Character {
     energy: number,
     maxEnergy: number,
     ult: Skill,
-    element: Elements
+    element: Elements,
+    passiveCount?: number,
+    reactionFunction?: (trigger: string, self: Character) => SubTurn | null,
+    turnEndFunction?: (self: Character) => void
   ) {
-    super(CharacterType.PLAYER, name, avatar, hp, attack, speed)
+    super(CharacterType.PLAYER, name, avatar, hp, attack, speed, reactionFunction, turnEndFunction)
     this.skill = skill
     this.backImage = backImage
     this.frontImage = frontImage
@@ -168,6 +195,8 @@ export class PlayerCharacter extends Character {
     this.maxEnergy = maxEnergy
     this.ult = ult
     this.element = element
+    this.passiveCount = passiveCount
+    this.shield = 10
   }
 }
 
@@ -202,6 +231,7 @@ export type TimelineTurn = {
 export type SubTurn = {
   type: SubTurnType
   character: Character
+  damage?: number
 }
 
 export enum PlayerButton {

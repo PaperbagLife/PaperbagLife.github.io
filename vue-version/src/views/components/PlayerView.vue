@@ -15,6 +15,7 @@ import {
 } from '../../util/starrail/consts'
 
 const BASE_HEIGHT = 270
+const SHIELD_BAR_OFFSET = 0.75
 
 import { getElementColor } from '../../util/starrail/utils'
 
@@ -27,6 +28,16 @@ defineProps<{
 
 <template>
   <g>
+    <!--Player Default View-->
+    <g v-if="cameraState.mode === CameraMode.DEFAULT">
+      <image
+        :href="playerCharacters[cameraState.focus].backImage"
+        :height="PLAYER_IMAGE_HEIGHT"
+        :width="PLAYER_IMAGE_WIDTH"
+        :x="150"
+        :y="ALLY_VIEW_TOP_PADDING"
+      />
+    </g>
     <g
       class="player-ui"
       v-for="(character, i) in playerCharacters"
@@ -39,20 +50,50 @@ defineProps<{
         :x="PROFILE_PIC_BASE_OFFSET + i * PROFILE_PIC_SIDE_OFFSET"
         :y="BASE_HEIGHT"
       />
-      <rect
-        class="health-bar-outline"
-        :x="PROFILE_PIC_BASE_OFFSET + i * PROFILE_PIC_SIDE_OFFSET"
-        :y="BASE_HEIGHT + 30"
-        :width="PROFILE_PIC_WIDTH"
-        :height="HP_BAR_HEIGHT"
-      />
-      <rect
-        class="health-bar"
-        :x="PROFILE_PIC_BASE_OFFSET + HP_BAR_OFFSET + i * PROFILE_PIC_SIDE_OFFSET"
-        :y="BASE_HEIGHT + PROFILE_PIC_HEIGHT"
-        :width="(character.hp / character.maxHp) * (PROFILE_PIC_WIDTH - HP_BAR_OFFSET * 2)"
-        :height="HP_BAR_HEIGHT - 2 * HP_BAR_OFFSET"
-      />
+      <g class="bar" :style="{ transform: `translate(0, ${SHIELD_BAR_OFFSET * 2}px)` }"
+        ><rect
+          class="health-bar-outline"
+          :x="PROFILE_PIC_BASE_OFFSET + i * PROFILE_PIC_SIDE_OFFSET"
+          :y="BASE_HEIGHT + PROFILE_PIC_HEIGHT"
+          :width="PROFILE_PIC_WIDTH"
+          :height="HP_BAR_HEIGHT" />
+        <rect
+          class="health-bar"
+          :x="PROFILE_PIC_BASE_OFFSET + i * PROFILE_PIC_SIDE_OFFSET"
+          :y="BASE_HEIGHT + PROFILE_PIC_HEIGHT"
+          :width="(character.hp / character.maxHp) * PROFILE_PIC_WIDTH"
+          :height="HP_BAR_HEIGHT" />
+        <g v-if="character.shield > 0">
+          <line
+            class="shield-bar"
+            :x1="PROFILE_PIC_BASE_OFFSET + i * PROFILE_PIC_SIDE_OFFSET - SHIELD_BAR_OFFSET"
+            :y1="BASE_HEIGHT + PROFILE_PIC_HEIGHT - SHIELD_BAR_OFFSET * 2"
+            :y2="BASE_HEIGHT + PROFILE_PIC_HEIGHT + HP_BAR_HEIGHT + SHIELD_BAR_OFFSET * 2"
+            :x2="PROFILE_PIC_BASE_OFFSET + i * PROFILE_PIC_SIDE_OFFSET - SHIELD_BAR_OFFSET"
+          />
+          <line
+            class="shield-bar"
+            :x1="PROFILE_PIC_BASE_OFFSET + i * PROFILE_PIC_SIDE_OFFSET - SHIELD_BAR_OFFSET"
+            :y1="BASE_HEIGHT + PROFILE_PIC_HEIGHT - SHIELD_BAR_OFFSET"
+            :y2="BASE_HEIGHT + PROFILE_PIC_HEIGHT - SHIELD_BAR_OFFSET"
+            :x2="
+              PROFILE_PIC_BASE_OFFSET +
+              i * PROFILE_PIC_SIDE_OFFSET +
+              (character.shield / character.maxHp) * PROFILE_PIC_WIDTH
+            "
+          />
+          <line
+            class="shield-bar"
+            :x1="PROFILE_PIC_BASE_OFFSET + i * PROFILE_PIC_SIDE_OFFSET - SHIELD_BAR_OFFSET"
+            :y1="BASE_HEIGHT + PROFILE_PIC_HEIGHT + HP_BAR_HEIGHT + SHIELD_BAR_OFFSET"
+            :y2="BASE_HEIGHT + PROFILE_PIC_HEIGHT + HP_BAR_HEIGHT + SHIELD_BAR_OFFSET"
+            :x2="
+              PROFILE_PIC_BASE_OFFSET +
+              i * PROFILE_PIC_SIDE_OFFSET +
+              (character.shield / character.maxHp) * PROFILE_PIC_WIDTH
+            "
+          /> </g
+      ></g>
       <linearGradient :id="character.name + 'energy-gradient'" x1="0.5" y1="1" x2="0.5" y2="0">
         <stop
           :offset="`${(character.energy / character.maxEnergy) * 100}%`"
@@ -99,17 +140,6 @@ defineProps<{
         />
       </g>
     </template>
-
-    <!--Player Default View-->
-    <g v-if="cameraState.mode === CameraMode.DEFAULT">
-      <image
-        :href="playerCharacters[cameraState.focus].backImage"
-        :height="PLAYER_IMAGE_HEIGHT"
-        :width="PLAYER_IMAGE_WIDTH"
-        :x="350"
-        :y="ALLY_VIEW_TOP_PADDING * 2.5"
-      />
-    </g>
   </g>
 </template>
 
@@ -119,9 +149,21 @@ defineProps<{
 }
 
 .player-ui {
+  .shield-bar {
+    fill: none;
+    stroke: white;
+    stroke-width: 1.5px;
+  }
   .health-bar {
     fill: rgb(100, 248, 250);
     stroke: black;
+    stroke-width: 0.3px;
+  }
+
+  .health-bar-outline {
+    fill: black;
+    stroke-width: 0.3px;
+    opacity: 0.7;
   }
 }
 .health-bar-outline {

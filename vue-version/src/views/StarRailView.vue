@@ -57,32 +57,40 @@ const BREAK_DELAY = 50
 
 // Combat, Damage related logic
 class CombatManager {
-  static async resolveEnemyMove() {
-    const enemy = gameState.turnCharacter as Enemy
-    if (enemy.toughness <= 0) {
-      enemy.toughness = enemy.maxToughness
+  static resolveDamageOnPlayer(playerIdx: number, damage: number) {
+    const subTurns: SubTurn[] = []
+    const player = gameState.playerCharacters[playerIdx]
+    let postShieldDamage = 0
+    // Ask for subturn
+    gameState.playerCharacters.forEach((pc) => {
+      if (!pc.reaction) return
+      const subTurn = pc.reaction('hit-shield')
+      if (subTurn != null) {
+        subTurns.push(subTurn)
+      }
+    })
+    if (damage > player.shield) {
+      postShieldDamage = damage - player.shield
+      player.shield = 0
+    } else {
+      player.shield -= damage
     }
-    const damage = enemy.attack
-    const target = getRandomInt(gameState.playerCharacters.length)
-    gameState.cameraState.focus = target
-    await delay(TURN_TIME)
-    gameState.playerCharacters[target].hp -= damage
-    gameState.playerCharacters[target].energy = Math.min(
-      gameState.playerCharacters[target].energy + HIT_ENERGY_REGEN,
-      gameState.playerCharacters[target].maxEnergy
-    )
+    player.hp -= postShieldDamage
+    player.energy = Math.min(player.energy + HIT_ENERGY_REGEN, player.maxEnergy)
+    return subTurns
   }
   static resolveDamageOnEnemy(
     enemyIdx: number,
     damage: number,
-    breakEfficiency: number,
-    element: Elements
+    element: Elements,
+    breakEfficiency?: number
   ) {
+    // breakEfficiency only missing if skill is heal or shield
     const enemy = gameState.enemies[enemyIdx]
     enemy.hp -= damage
     makeDamageNumber(damage, CharacterType.ENEMY, enemyIdx, element)
     if (enemy.weakness.includes(element) && enemy.toughness != 0) {
-      enemy.toughness -= breakEfficiency
+      enemy.toughness -= breakEfficiency ?? 1
       if (enemy.toughness <= 0) {
         // a break happened. TODO: Depending on what the element that broke it, apply debuff
         enemy.hp -= BREAK_DAMAGE
@@ -99,6 +107,18 @@ class CombatManager {
       }
     }
   }
+  static async resolveEnemyMove() {
+    const enemy = gameState.turnCharacter as Enemy
+    if (enemy.toughness <= 0) {
+      enemy.toughness = enemy.maxToughness
+    }
+    const damage = enemy.attack
+    const target = getRandomInt(gameState.playerCharacters.length)
+    gameState.cameraState.focus = target
+    await delay(TURN_TIME)
+    return this.resolveDamageOnPlayer(target, damage)
+  }
+
   static async resolvePlayerSkill() {
     const player = gameState.turnCharacter as PlayerCharacter
     await delay(TURN_TIME)
@@ -110,25 +130,26 @@ class CombatManager {
       // Depending on the type of the skill do differnt calculations here
       switch (player.skill.targetType) {
         case TargetType.SINGLE_ENEMY: {
-          this.resolveDamageOnEnemy(target, damage, player.skill.breakEfficiency, player.element)
+          this.resolveDamageOnEnemy(target, damage, player.element, player.skill.breakEfficiency)
           break
         }
         case TargetType.SPLASH_ENEMY: {
-          this.resolveDamageOnEnemy(target, damage, player.skill.breakEfficiency, player.element)
+          this.resolveDamageOnEnemy(target, damage, player.element, player.skill.breakEfficiency)
           if (target > 0) {
             this.resolveDamageOnEnemy(
               target - 1,
               damage,
-              player.skill.breakEfficiency,
-              player.element
+
+              player.element,
+              player.skill.breakEfficiency
             )
           }
           if (target < gameState.enemies.length - 1) {
             this.resolveDamageOnEnemy(
               target + 1,
               damage,
-              player.skill.breakEfficiency,
-              player.element
+              player.element,
+              player.skill.breakEfficiency
             )
           }
           break
@@ -140,8 +161,8 @@ class CombatManager {
             this.resolveDamageOnEnemy(
               enemyIdx,
               damage,
-              player.skill.breakEfficiency,
-              player.element
+              player.element,
+              player.skill.breakEfficiency
             )
           }
         }
@@ -164,7 +185,20 @@ class CombatManager {
         }
       }
       gameState.cameraState.mode = CameraMode.DEFAULT
+    } else if (player.skill.effect === SkillEffect.SHIELD) {
+      switch (player.skill.targetType) {
+        case TargetType.SINGLE_ALLY: {
+          const target = gameState.focusedTarget.mainTarget
+          gameState.playerCharacters[target].shield += player.skill.modifier
+          break
+        }
+        case TargetType.ALL_ALLIES: {
+          gameState.playerCharacters.forEach((pc) => (pc.shield += player.skill.modifier))
+        }
+      }
+      gameState.cameraState.mode = CameraMode.DEFAULT
     }
+    player.energy += 30
     await delay(1000)
   }
 
@@ -175,7 +209,7 @@ class CombatManager {
     const damage = player.attack
     const target = gameState.focusedTarget.mainTarget
     // Assume basic attack always single target (TODO p2: change this paradigm later)
-    this.resolveDamageOnEnemy(target, damage, 1, player.element)
+    this.resolveDamageOnEnemy(target, damage, player.element, 1)
     await delay(1000)
   }
 
@@ -202,8 +236,8 @@ class CombatManager {
           break
         }
         case TargetType.ALL_ENEMIES: {
-          gameState.enemies.forEach((enemy, i) => {
-            this.resolveDamageOnEnemy(i, damage, player.ult.breakEfficiency, player.element)
+          gameState.enemies.forEach((_, i) => {
+            this.resolveDamageOnEnemy(i, damage, player.element, player.ult.breakEfficiency)
           })
           break
         }
@@ -211,7 +245,7 @@ class CombatManager {
           for (let i = 0; i < (player.ult.hits ?? 1); i += 1) {
             const enemyIdx = getRandomInt(gameState.enemies.length)
             await delay(MULTIHIT_DELAY)
-            this.resolveDamageOnEnemy(enemyIdx, damage, player.ult.breakEfficiency, player.element)
+            this.resolveDamageOnEnemy(enemyIdx, damage, player.element, player.ult.breakEfficiency)
           }
         }
       }
@@ -233,6 +267,18 @@ class CombatManager {
         }
       }
       gameState.cameraState.mode = CameraMode.DEFAULT
+    } else if (player.skill.effect === SkillEffect.SHIELD) {
+      switch (player.skill.targetType) {
+        case TargetType.SINGLE_ALLY: {
+          const target = gameState.focusedTarget.mainTarget
+          gameState.playerCharacters[target].shield += player.skill.modifier
+          break
+        }
+        case TargetType.ALL_ALLIES: {
+          gameState.playerCharacters.forEach((pc) => (pc.shield += player.skill.modifier))
+        }
+      }
+      gameState.cameraState.mode = CameraMode.DEFAULT
     }
     await delay(1000)
     player.energy += 5
@@ -245,12 +291,15 @@ class TurnManager {
     gameState.currentTurn = turn
     gameState.focusedTarget.targetType = TargetType.SINGLE_ENEMY
     gameState.currentResolvingSubTurn = null
+    let enemyIdx = -1
     if (!turn.character) return
     if (turn.character.type === CharacterType.ENEMY) {
       const enemy = turn.character as Enemy
       gameState.turnState = { resolvingSubTurn: false, stateEnum: TurnStateEnum.ENEMY_TURN }
       gameState.turnCharacter = enemy
-      await CombatManager.resolveEnemyMove()
+      enemyIdx = turn.index
+      const subTurns = await CombatManager.resolveEnemyMove()
+      gameState.currentTurn.subTurns.push(...subTurns)
     } else {
       // player turn
       const player = turn.character as PlayerCharacter
@@ -336,6 +385,7 @@ class TurnManager {
 
     if (!gameState.currentTurn) return
     if (gameState.turnCharacter) {
+      gameState.turnCharacter.turnEnd()
       Timeline.enqueue(gameState.turnCharacter, turn.index)
     }
     gameState.turnCharacter = null
@@ -351,7 +401,22 @@ class TurnManager {
       gameState.currentResolvingSubTurn = currentSubTurn
       gameState.turnCharacter = currentSubTurn.character
       if (currentSubTurn.type === SubTurnType.REACTION) {
-        // TODO: Reaction subturns
+        gameState.cameraState.focus = gameState.playerCharacters.findIndex(
+          (c) => c.name === gameState.turnCharacter?.name
+        )
+        // Assume only player can have reactions
+        gameState.focusedTarget.mainTarget = enemyIdx
+        const reactPlayer = gameState.turnCharacter as PlayerCharacter
+        await delay(500)
+        if (currentSubTurn.damage && enemyIdx !== -1) {
+          CombatManager.resolveDamageOnEnemy(
+            enemyIdx,
+            currentSubTurn.damage,
+            reactPlayer.element,
+            1
+          )
+        }
+        await delay(500)
       }
       if (currentSubTurn.type === SubTurnType.ULT) {
         gameState.turnState.stateEnum = TurnStateEnum.PLAYER_ULT_PENDING
@@ -518,8 +583,7 @@ const bailu = new PlayerCharacter(
   {
     targetType: TargetType.SINGLE_ALLY,
     effect: SkillEffect.HEAL,
-    modifier: 10,
-    breakEfficiency: 0
+    modifier: 10
   },
   110,
   100,
@@ -528,8 +592,7 @@ const bailu = new PlayerCharacter(
     targetType: TargetType.ALL_ALLIES,
     hits: 3,
     effect: SkillEffect.HEAL,
-    modifier: 20,
-    breakEfficiency: 0
+    modifier: 20
   },
   Elements.LIGHTNING
 )
@@ -542,10 +605,9 @@ const march = new PlayerCharacter(
   100,
   10,
   {
-    targetType: TargetType.SPLASH_ENEMY,
-    effect: SkillEffect.DAMAGE,
-    modifier: 1.2,
-    breakEfficiency: 2
+    targetType: TargetType.SINGLE_ALLY,
+    effect: SkillEffect.SHIELD,
+    modifier: 20
   },
 
   130,
@@ -557,7 +619,22 @@ const march = new PlayerCharacter(
     modifier: 2,
     breakEfficiency: 2
   },
-  Elements.ICE
+  Elements.ICE,
+  2,
+  (trigger: string, self: Character) => {
+    if (trigger === 'hit-shield') {
+      const pc = self as PlayerCharacter
+      // Retaliate
+      if (pc.passiveCount && pc.passiveCount > 0) {
+        pc.passiveCount -= 1
+        return { type: SubTurnType.REACTION, character: self, damage: 5 }
+      }
+    }
+    return null
+  },
+  (self: Character) => {
+    ;(self as PlayerCharacter).passiveCount = 2
+  }
 )
 
 const frostSpawn = new Enemy(
