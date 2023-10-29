@@ -16,6 +16,7 @@ import {
 
 const BASE_HEIGHT = 270
 const SHIELD_BAR_OFFSET = 0.75
+const PASSIVE_RADIUS = 2
 
 import { getElementColor } from '../../util/starrail/utils'
 
@@ -50,6 +51,21 @@ defineProps<{
         :x="PROFILE_PIC_BASE_OFFSET + i * PROFILE_PIC_SIDE_OFFSET"
         :y="BASE_HEIGHT"
       />
+      <g v-if="character.passiveCount">
+        <circle
+          v-for="idx in Array.from({ length: character.passiveCount }, (_, index) => index)"
+          :key="idx"
+          :cx="
+            PROFILE_PIC_BASE_OFFSET +
+            i * PROFILE_PIC_SIDE_OFFSET +
+            5 +
+            (PASSIVE_RADIUS * 2 + 2) * idx
+          "
+          :cy="BASE_HEIGHT + PROFILE_PIC_HEIGHT + 10"
+          :r="PASSIVE_RADIUS"
+          :fill="getElementColor(character.element)"
+      /></g>
+
       <g class="bar" :style="{ transform: `translate(0, ${SHIELD_BAR_OFFSET * 2}px)` }"
         ><rect
           class="health-bar-outline"
