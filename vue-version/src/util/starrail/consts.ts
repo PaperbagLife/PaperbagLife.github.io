@@ -1,5 +1,9 @@
+export const GAME_HEIGHT = 360
+export const GAME_WIDTH = 840
+export const PLAYER_DEFAULT_X_POSITION = 150
+
 export const MAX_SKILLPOINTS = 5
-export const TURN_TIME = 1000
+export const TURN_TIME = 5000
 export const MULTIHIT_DELAY = 300
 
 export const HIT_ENERGY_REGEN = 5
@@ -69,6 +73,17 @@ export enum CharacterType {
   ENEMY
 }
 
+export enum AttackType {
+  MELEE = 'melee',
+  RANGED = 'ranged'
+}
+
+export enum PlayerTurnAction {
+  ATTACK = 'attacking',
+  SKILL = 'using skill',
+  ULT = 'ulting'
+}
+
 export enum TargetType {
   SINGLE_ALLY = 'single ally',
   ALL_ALLIES = 'all allies',
@@ -95,6 +110,7 @@ export enum SkillEffect {
 // Not the cleanest but oh well
 export type Skill = {
   targetType: TargetType
+  attackType?: AttackType
   modifier: number
   hits?: number
   breakEfficiency?: number
@@ -113,6 +129,7 @@ export enum Elements {
 
 export class Character {
   type: CharacterType
+  element: Elements
   name: string
   avatar: string
   maxHp: number
@@ -124,6 +141,7 @@ export class Character {
 
   constructor(
     characterType: CharacterType,
+    element: Elements,
     name: string,
     avatar: string,
     hp: number,
@@ -133,6 +151,7 @@ export class Character {
     turnEndFunction?: (self: Character) => void
   ) {
     this.type = characterType
+    this.element = element
     this.name = name
     this.avatar = avatar
     this.maxHp = hp
@@ -163,15 +182,17 @@ export class PlayerCharacter extends Character {
   skill: Skill
   energy: number
   maxEnergy: number
-  element: Elements
   ult: Skill
   backImage: string
   frontImage: string
   shield: number
   passiveCount?: number
   passiveMax?: number
+  attackType: AttackType
   constructor(
     name: string,
+    element: Elements,
+    attackType: AttackType,
     avatar: string,
     backImage: string,
     frontImage: string,
@@ -182,13 +203,23 @@ export class PlayerCharacter extends Character {
     energy: number,
     maxEnergy: number,
     ult: Skill,
-    element: Elements,
     passiveCount?: number,
     reactionFunction?: (trigger: string, self: Character) => SubTurn | null,
     turnEndFunction?: (self: Character) => void
   ) {
-    super(CharacterType.PLAYER, name, avatar, hp, attack, speed, reactionFunction, turnEndFunction)
+    super(
+      CharacterType.PLAYER,
+      element,
+      name,
+      avatar,
+      hp,
+      attack,
+      speed,
+      reactionFunction,
+      turnEndFunction
+    )
     this.skill = skill
+    this.attackType = attackType
     this.backImage = backImage
     this.frontImage = frontImage
     this.energy = energy
@@ -207,6 +238,7 @@ export class Enemy extends Character {
   maxToughness: number
   constructor(
     name: string,
+    element: Elements,
     avatar: string,
     hp: number,
     attack: number,
@@ -214,7 +246,7 @@ export class Enemy extends Character {
     weakness: Elements[],
     toughness: number
   ) {
-    super(CharacterType.ENEMY, name, avatar, hp, attack, speed)
+    super(CharacterType.ENEMY, element, name, avatar, hp, attack, speed)
     this.weakness = weakness
     this.maxToughness = toughness
     this.toughness = toughness

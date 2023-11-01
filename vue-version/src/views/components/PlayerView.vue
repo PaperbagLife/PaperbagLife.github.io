@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import type { CameraState, PlayerCharacter } from '../../util/starrail/consts'
+import { watch, ref } from 'vue'
+import {
+  PlayerTurnAction,
+  type CameraState,
+  type PlayerCharacter,
+  TargetType,
+  AttackType,
+  GAME_HEIGHT
+} from '../../util/starrail/consts'
 import {
   CameraMode,
   HP_BAR_HEIGHT,
@@ -10,7 +18,8 @@ import {
   PROFILE_PIC_SIDE_OFFSET,
   ALLY_VIEW_TOP_PADDING,
   PROFILE_PIC_WIDTH,
-  ULT_GAUGE_BASE_OFFSET
+  ULT_GAUGE_BASE_OFFSET,
+  PLAYER_DEFAULT_X_POSITION
 } from '../../util/starrail/consts'
 
 const BASE_HEIGHT = 270
@@ -19,11 +28,82 @@ const PASSIVE_RADIUS = 2
 
 import { getElementColor, range } from '../../util/starrail/utils'
 
-defineProps<{
+const props = defineProps<{
   playerCharacters: PlayerCharacter[]
   cameraState: CameraState
   playerXPositions: number[]
+  playerAttackTarget: number | null
+  playerTurnAction: PlayerTurnAction | null
 }>()
+
+// used to keep track of projectile transforms
+type Projectile = {
+  x: number
+  y: number
+  color: string
+  id: number
+}
+
+let projectileID = 0
+const projectiles = ref<Projectile[]>([])
+
+const meleeAttackTransform = ref('')
+
+watch(
+  () => props.playerAttackTarget,
+  () => {
+    if (props.playerAttackTarget == null) {
+      projectiles.value = []
+      return
+    } else {
+      const player = props.playerCharacters[props.cameraState.focus]
+      const target =
+        props.playerTurnAction === PlayerTurnAction.ATTACK
+          ? TargetType.SINGLE_ENEMY
+          : props.playerTurnAction === PlayerTurnAction.SKILL
+          ? player.skill.targetType
+          : player.ult.targetType
+      const attackType =
+        props.playerTurnAction === PlayerTurnAction.ATTACK
+          ? player.attackType
+          : props.playerTurnAction === PlayerTurnAction.SKILL
+          ? player.skill.attackType
+          : player.ult.attackType
+
+      if (!attackType) return
+      if (target === TargetType.ALL_ALLIES || target === TargetType.SINGLE_ALLY) {
+        return
+      }
+      // These should be all damaging spells, etc
+      switch (attackType) {
+        case AttackType.MELEE:
+        case AttackType.RANGED: {
+          // make projectiles
+          switch (target) {
+            case TargetType.SINGLE_ENEMY: {
+              projectileID += 1
+              const projectile: Projectile = {
+                x: PLAYER_DEFAULT_X_POSITION + PLAYER_IMAGE_WIDTH,
+                y: GAME_HEIGHT / 2,
+                color: getElementColor(player.element),
+                id: projectileID
+              }
+              projectiles.value = [projectile]
+              // need enemyXposition here lol rip
+              setTimeout(() => {
+                projectiles.value[0].x += 400
+              }, 100)
+              break
+            }
+            case TargetType.SPLASH_ENEMY:
+            case TargetType.ALL_ENEMIES:
+            case TargetType.RANDOM_ENEMY:
+          }
+        }
+      }
+    }
+  }
+)
 </script>
 
 <template>
@@ -34,8 +114,18 @@ defineProps<{
         :href="playerCharacters[cameraState.focus].backImage"
         :height="PLAYER_IMAGE_HEIGHT"
         :width="PLAYER_IMAGE_WIDTH"
-        :x="150"
+        :x="PLAYER_DEFAULT_X_POSITION"
         :y="ALLY_VIEW_TOP_PADDING"
+      />
+    </g>
+    <g>
+      <circle
+        class="projectile"
+        v-for="projectile in projectiles"
+        :key="projectile.id"
+        :style="{ transform: `translate(${projectile.x}px, ${projectile.y}px)` }"
+        :r="5"
+        :fill="projectile.color"
       />
     </g>
     <g
@@ -174,6 +264,10 @@ defineProps<{
 <style lang="scss" scoped>
 .ult-circle {
   opacity: 80%;
+}
+
+.projectile {
+  transition: transform 0.5s;
 }
 
 .player-ui {

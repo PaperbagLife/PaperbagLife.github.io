@@ -1,10 +1,13 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { getElementColor } from '@/util/starrail/utils'
 import type { Enemy } from '../../util/starrail/consts'
 import {
   PROFILE_PIC_HEIGHT,
   ENEMY_TOP_PADDING,
-  PROFILE_PIC_WIDTH
+  PROFILE_PIC_WIDTH,
+  GAME_HEIGHT,
+  PLAYER_DEFAULT_X_POSITION
 } from '../../util/starrail/consts'
 
 const ENEMY_HP_BAR_WIDTH = 48
@@ -12,18 +15,39 @@ const BOSS_HP_WIDTH = 100
 const ENEMY_HP_TOP_OFFSET = 20
 const ENEMY_HP_BAR_HEIGHT = 6
 const ENEMY_TOUGHNESS_BAR_HEIGHT = 4
-defineProps<{
+const props = defineProps<{
   enemies: Enemy[]
   enemyXPositions: number[]
+  attackingEnemy: number | null
 }>()
+
+const attackingTransform = computed(() => {
+  if (props.attackingEnemy == null) {
+    return ''
+  }
+
+  return `translate(${PLAYER_DEFAULT_X_POSITION - props.enemyXPositions[props.attackingEnemy]}px, ${
+    GAME_HEIGHT / 2 - ENEMY_TOP_PADDING - PROFILE_PIC_HEIGHT
+  }px)`
+})
 </script>
 
 <template>
   <g class="enemy-ui" v-for="(enemy, i) in enemies" :key="enemy.name + enemy.hp" :data-index="i">
     <image
+      class="enemy-image"
+      :style="{
+        transform: attackingEnemy != null && i === attackingEnemy ? attackingTransform : ''
+      }"
       :href="enemy.avatar"
-      :height="PROFILE_PIC_HEIGHT"
-      :width="PROFILE_PIC_WIDTH"
+      :height="
+        attackingEnemy != null && i === attackingEnemy
+          ? PROFILE_PIC_HEIGHT * 1.5
+          : PROFILE_PIC_HEIGHT
+      "
+      :width="
+        attackingEnemy != null && i === attackingEnemy ? PROFILE_PIC_WIDTH * 1.5 : PROFILE_PIC_WIDTH
+      "
       :x="enemyXPositions[i]"
       :y="ENEMY_TOP_PADDING"
     />
@@ -70,6 +94,9 @@ defineProps<{
 
 <style lang="scss" scoped>
 .enemy-ui {
+  .enemy-image {
+    transition: all 1s;
+  }
   .weakness-icon {
     fill: var(--color);
   }

@@ -3,17 +3,20 @@ import { computed, onMounted, onUnmounted, reactive } from 'vue'
 import bailuAvatar from '../assets/game/img/bailu-avatar.png'
 import bailuBack from '../assets/game/img/bailu-back.png'
 import bailuFront from '../assets/game/img/bailu-front.png'
-import marchFront from '../assets/game/img/march-front.png'
+import fireShadewalkerImage from '../assets/game/img/fire_shadewalker.png'
+import flameSpawnImage from '../assets/game/img/flamespawn.png'
+import frostSpawnImage from '../assets/game/img/frostspawn.png'
 import marchAvatar from '../assets/game/img/march-avatar.png'
 import marchBack from '../assets/game/img/march-back.png'
-import flameSpawnImage from '../assets/game/img/flamespawn.png'
-import fireShadewalkerImage from '../assets/game/img/fire_shadewalker.png'
-import frostSpawnImage from '../assets/game/img/frostspawn.png'
+import marchFront from '../assets/game/img/march-front.png'
 import stelleAvatar from '../assets/game/img/stelle-avatar.png'
 import stelleBack from '../assets/game/img/stelle-back.png'
 import stelleFront from '../assets/game/img/stelle-front.png'
 import { useBreakpoints } from '../util/dimensions'
 import {
+  ALLY_VIEW_TOP_PADDING,
+  AttackType,
+  PlayerTurnAction,
   BASIC_ATTACK_ENERGY_GAIN,
   CameraMode,
   Character,
@@ -23,10 +26,13 @@ import {
   ENEMY_SIZE,
   Elements,
   Enemy,
+  GAME_HEIGHT,
+  GAME_WIDTH,
   HIT_ENERGY_REGEN,
   MAX_SKILLPOINTS,
   MULTIHIT_DELAY,
   PLAYER_BETWEEN_PADDING,
+  PLAYER_DEFAULT_X_POSITION,
   PLAYER_IMAGE_WIDTH,
   PlayerButton,
   PlayerCharacter,
@@ -57,6 +63,13 @@ const BREAK_DELAY = 50
 
 // Combat, Damage related logic
 class CombatManager {
+  static enemyAttackAnimation(idx: number, element: Elements, damage: number) {
+    gameState.attackingEnemy = idx
+    setTimeout(() => {
+      gameState.attackingEnemy = null
+      makeDamageNumber(damage, CharacterType.PLAYER, 0, element)
+    }, TURN_TIME / 2)
+  }
   static resolveDamageOnPlayer(playerIdx: number, damage: number) {
     const subTurns: SubTurn[] = []
     const player = gameState.playerCharacters[playerIdx]
@@ -118,6 +131,7 @@ class CombatManager {
     const damage = enemy.attack
     const target = getRandomInt(gameState.playerCharacters.length)
     gameState.cameraState.focus = target
+    this.enemyAttackAnimation(findCharacterIndex(enemy), enemy.element, damage)
     await delay(TURN_TIME)
     return this.resolveDamageOnPlayer(target, damage)
   }
@@ -202,18 +216,23 @@ class CombatManager {
       gameState.cameraState.mode = CameraMode.DEFAULT
     }
     player.energy += 30
-    await delay(1000)
+    await delay(TURN_TIME)
   }
 
   static async resolvePlayerAttack() {
     const player = gameState.turnCharacter as PlayerCharacter
+    await delay(200) // animation delay??
+    gameState.playerAttackTarget = gameState.focusedTarget.mainTarget
+    gameState.playerTurnAction = PlayerTurnAction.ATTACK
     await delay(TURN_TIME)
     player.energy = Math.min(player.energy + BASIC_ATTACK_ENERGY_GAIN, player.maxEnergy)
     const damage = player.attack
     const target = gameState.focusedTarget.mainTarget
     // Assume basic attack always single target (TODO p2: change this paradigm later)
     this.resolveDamageOnEnemy(target, damage, player.element, 1)
-    await delay(1000)
+    await delay(TURN_TIME)
+    gameState.playerAttackTarget = null
+    gameState.playerTurnAction = null
   }
 
   static async resolvePlayerUlt() {
@@ -283,7 +302,7 @@ class CombatManager {
       }
       gameState.cameraState.mode = CameraMode.DEFAULT
     }
-    await delay(1000)
+    await delay(TURN_TIME)
     player.energy += 5
   }
 }
@@ -404,9 +423,7 @@ class TurnManager {
       gameState.currentResolvingSubTurn = currentSubTurn
       gameState.turnCharacter = currentSubTurn.character
       if (currentSubTurn.type === SubTurnType.REACTION) {
-        gameState.cameraState.focus = gameState.playerCharacters.findIndex(
-          (c) => c.name === gameState.turnCharacter?.name
-        )
+        gameState.cameraState.focus = findCharacterIndex(gameState.turnCharacter)
         // Assume only player can have reactions
         gameState.focusedTarget.mainTarget = enemyIdx
         const reactPlayer = gameState.turnCharacter as PlayerCharacter
@@ -506,6 +523,9 @@ class GameState {
   turnState: TurnState = { stateEnum: TurnStateEnum.EMPTY, resolvingSubTurn: false }
   turnCharacter: Character | null = null
   queue: TimelineTurn[]
+  attackingEnemy: number | null = null
+  playerAttackTarget: number | null = null
+  playerTurnAction: PlayerTurnAction | null = null
   playerCharacters: PlayerCharacter[]
   enemies: Enemy[]
   skillPoints: number
@@ -549,9 +569,19 @@ class GameState {
   }
 }
 
-const canvas = { width: 840, height: 360 }
+// TODO: Move gameState to global state and move this to util
+function findCharacterIndex(character: Character) {
+  if (character.type === CharacterType.ENEMY) {
+    return gameState.enemies.findIndex((e) => e.name === character.name)
+  }
+  return gameState.playerCharacters.findIndex((c) => c.name === character.name)
+}
+
+const canvas = { width: GAME_WIDTH, height: GAME_HEIGHT }
 const stelle = new PlayerCharacter(
   'main-character',
+  Elements.PHYSICAL,
+  AttackType.MELEE,
   stelleAvatar,
   stelleBack,
   stelleFront,
@@ -560,6 +590,7 @@ const stelle = new PlayerCharacter(
   {
     targetType: TargetType.SPLASH_ENEMY,
     effect: SkillEffect.DAMAGE,
+    attackType: AttackType.MELEE,
     modifier: 1.2,
     breakEfficiency: 2
   },
@@ -571,13 +602,15 @@ const stelle = new PlayerCharacter(
     targetType: TargetType.RANDOM_ENEMY,
     hits: 3,
     effect: SkillEffect.DAMAGE,
+    attackType: AttackType.RANGED,
     modifier: 2,
     breakEfficiency: 1
-  },
-  Elements.PHYSICAL
+  }
 )
 const bailu = new PlayerCharacter(
   'bailu',
+  Elements.LIGHTNING,
+  AttackType.MELEE,
   bailuAvatar,
   bailuBack,
   bailuFront,
@@ -596,12 +629,13 @@ const bailu = new PlayerCharacter(
     hits: 3,
     effect: SkillEffect.HEAL,
     modifier: 20
-  },
-  Elements.LIGHTNING
+  }
 )
 
 const march = new PlayerCharacter(
   'march',
+  Elements.ICE,
+  AttackType.RANGED,
   marchAvatar,
   marchBack,
   marchFront,
@@ -619,10 +653,10 @@ const march = new PlayerCharacter(
   {
     targetType: TargetType.ALL_ENEMIES,
     effect: SkillEffect.DAMAGE,
+    attackType: AttackType.RANGED,
     modifier: 2,
     breakEfficiency: 2
   },
-  Elements.ICE,
   2,
   (trigger: string, self: Character) => {
     if (trigger === 'hit-shield') {
@@ -642,6 +676,7 @@ const march = new PlayerCharacter(
 
 const frostSpawn = new Enemy(
   'frostspawn',
+  Elements.ICE,
   frostSpawnImage,
   50,
   6,
@@ -651,6 +686,8 @@ const frostSpawn = new Enemy(
 )
 const frostSpawn2 = new Enemy(
   'frostspawn2',
+  Elements.ICE,
+
   frostSpawnImage,
   50,
   8,
@@ -660,6 +697,7 @@ const frostSpawn2 = new Enemy(
 )
 const fireShadeWalker = new Enemy(
   'fireshadewalker',
+  Elements.FIRE,
   fireShadewalkerImage,
   100,
   15,
@@ -669,6 +707,7 @@ const fireShadeWalker = new Enemy(
 )
 const frostSpawn4 = new Enemy(
   'frostspawn4',
+  Elements.ICE,
   frostSpawnImage,
   50,
   7,
@@ -678,6 +717,7 @@ const frostSpawn4 = new Enemy(
 )
 const flameSpawn = new Enemy(
   'flameSpawn',
+  Elements.FIRE,
   flameSpawnImage,
   50,
   5,
@@ -798,23 +838,29 @@ function makeDamageNumber(
   damage: number,
   characterType: CharacterType,
   index: number,
-  element?: Elements,
+  element: Elements,
   differntLocation?: boolean
 ) {
   damageNumberIndex += 1
-  if (characterType === CharacterType.ENEMY) {
-    const damageNumber = {
-      damage,
-      x: enemyXPositions.value[index] + ENEMY_SIZE / 2,
-      y: differntLocation ? ENEMY_CENTER_Y + 10 : ENEMY_CENTER_Y,
-      type: element
-    }
-    damageNumbers.set(damageNumberIndex, damageNumber)
-    const thisIdx = damageNumberIndex
-    setTimeout(() => {
-      damageNumbers.delete(thisIdx)
-    }, 400)
+  const damageNumber = {
+    damage,
+    x:
+      characterType === CharacterType.ENEMY
+        ? enemyXPositions.value[index] + ENEMY_SIZE / 2
+        : PLAYER_DEFAULT_X_POSITION + PLAYER_IMAGE_WIDTH / 2,
+    y:
+      characterType === CharacterType.ENEMY
+        ? differntLocation
+          ? ENEMY_CENTER_Y + 10
+          : ENEMY_CENTER_Y
+        : ALLY_VIEW_TOP_PADDING * 3,
+    type: element
   }
+  damageNumbers.set(damageNumberIndex, damageNumber)
+  const thisIdx = damageNumberIndex
+  setTimeout(() => {
+    damageNumbers.delete(thisIdx)
+  }, 700)
 }
 
 // Function to handle keyboard input
@@ -866,6 +912,9 @@ function onKeyPress(e: KeyboardEvent) {
     case '4': {
       Timeline.ult(3)
       break
+    }
+    case 'p': {
+      gameState.queue.shift()
     }
   }
 }
@@ -945,11 +994,14 @@ function printGameState() {
             :player-characters="gameState.playerCharacters"
             :camera-state="gameState.cameraState"
             :player-x-positions="playerXPositions"
+            :player-turn-action="gameState.playerTurnAction"
+            :player-attack-target="gameState.playerAttackTarget"
           />
 
           <!--Enemy characters-->
           <EnemyView
             v-if="gameState.cameraState.mode === CameraMode.DEFAULT"
+            :attacking-enemy="gameState.attackingEnemy"
             :enemies="gameState.enemies"
             :enemy-x-positions="enemyXPositions"
           />
@@ -1077,6 +1129,7 @@ function printGameState() {
 .damage-numbers {
   text-anchor: middle;
   font-size: 30px;
+  transition: all 1s;
 }
 
 .skill-points-container {

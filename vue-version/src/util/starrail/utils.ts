@@ -1,4 +1,4 @@
-import { Elements } from './consts'
+import { Character, Elements } from './consts'
 export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 export function getRandomInt(max: number) {
   max = Math.floor(max)
