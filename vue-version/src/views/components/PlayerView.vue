@@ -6,7 +6,11 @@ import {
   type PlayerCharacter,
   TargetType,
   AttackType,
-  GAME_HEIGHT
+  GAME_HEIGHT,
+  ENEMY_SIZE,
+  ENEMY_TOP_PADDING,
+  ENEMY_CENTER_Y,
+  TURN_TIME
 } from '../../util/starrail/consts'
 import {
   CameraMode,
@@ -27,12 +31,14 @@ const SHIELD_BAR_OFFSET = 0.75
 const PASSIVE_RADIUS = 2
 
 import { getElementColor, range } from '../../util/starrail/utils'
+import { PLAYER_HEIGHT } from '@/util/shooter/const'
 
 const props = defineProps<{
   playerCharacters: PlayerCharacter[]
   cameraState: CameraState
   playerXPositions: number[]
-  playerAttackTarget: number | null
+  enemyXPositions: number[]
+  playerAttackMainTarget: number | null
   playerTurnAction: PlayerTurnAction | null
 }>()
 
@@ -50,9 +56,9 @@ const projectiles = ref<Projectile[]>([])
 const meleeAttackTransform = ref('')
 
 watch(
-  () => props.playerAttackTarget,
+  () => props.playerAttackMainTarget,
   () => {
-    if (props.playerAttackTarget == null) {
+    if (props.playerAttackMainTarget == null) {
       projectiles.value = []
       return
     } else {
@@ -76,7 +82,16 @@ watch(
       }
       // These should be all damaging spells, etc
       switch (attackType) {
-        case AttackType.MELEE:
+        case AttackType.MELEE: {
+          const deltaX =
+            props.enemyXPositions[props.playerAttackMainTarget] - PLAYER_DEFAULT_X_POSITION
+          const deltaY = ENEMY_TOP_PADDING - PLAYER_HEIGHT / 3
+          meleeAttackTransform.value = `translate(${deltaX}px, ${deltaY}px)`
+          setTimeout(() => {
+            meleeAttackTransform.value = ''
+          }, TURN_TIME)
+          break
+        }
         case AttackType.RANGED: {
           // make projectiles
           switch (target) {
@@ -91,12 +106,39 @@ watch(
               projectiles.value = [projectile]
               // need enemyXposition here lol rip
               setTimeout(() => {
-                projectiles.value[0].x += 400
-              }, 100)
+                if (!props.playerAttackMainTarget) {
+                  return
+                }
+                projectiles.value[0].x =
+                  props.enemyXPositions[props.playerAttackMainTarget] + ENEMY_SIZE / 2
+                projectiles.value[0].y = ENEMY_TOP_PADDING + ENEMY_SIZE / 2
+              }, 300)
+              setTimeout(() => {
+                projectiles.value = []
+              }, 1000)
               break
             }
             case TargetType.SPLASH_ENEMY:
-            case TargetType.ALL_ENEMIES:
+            case TargetType.ALL_ENEMIES: {
+              for (let i = 0; i < props.enemyXPositions.length; i += 1) {
+                projectileID += 1
+                const projectile: Projectile = {
+                  x: PLAYER_DEFAULT_X_POSITION + PLAYER_IMAGE_WIDTH,
+                  y: GAME_HEIGHT / 2,
+                  color: getElementColor(player.element),
+                  id: projectileID
+                }
+                projectiles.value.push(projectile)
+                setTimeout(() => {
+                  projectiles.value[i].x = props.enemyXPositions[i] + ENEMY_SIZE / 2
+                  projectiles.value[i].y = ENEMY_TOP_PADDING + ENEMY_SIZE / 2
+                }, 300 - i * 50)
+              }
+              setTimeout(() => {
+                projectiles.value = []
+              }, 1000)
+              break
+            }
             case TargetType.RANDOM_ENEMY:
           }
         }
@@ -111,23 +153,25 @@ watch(
     <!--Player Default View-->
     <g v-if="cameraState.mode === CameraMode.DEFAULT">
       <image
+        class="player-default-image"
+        :style="{ transform: meleeAttackTransform }"
         :href="playerCharacters[cameraState.focus].backImage"
-        :height="PLAYER_IMAGE_HEIGHT"
-        :width="PLAYER_IMAGE_WIDTH"
+        :height="meleeAttackTransform === '' ? PLAYER_IMAGE_HEIGHT : PLAYER_IMAGE_HEIGHT * 0.8"
+        :width="meleeAttackTransform === '' ? PLAYER_IMAGE_WIDTH : PLAYER_IMAGE_WIDTH * 0.8"
         :x="PLAYER_DEFAULT_X_POSITION"
         :y="ALLY_VIEW_TOP_PADDING"
       />
     </g>
-    <g>
+    <Teleport v-if="projectiles.length > 0" to="#projectile-teleport-target">
       <circle
         class="projectile"
         v-for="projectile in projectiles"
         :key="projectile.id"
         :style="{ transform: `translate(${projectile.x}px, ${projectile.y}px)` }"
-        :r="5"
+        :r="8"
         :fill="projectile.color"
       />
-    </g>
+    </Teleport>
     <g
       class="player-ui"
       v-for="(character, i) in playerCharacters"
@@ -267,7 +311,11 @@ watch(
 }
 
 .projectile {
-  transition: transform 0.5s;
+  transition: all 0.7s linear;
+}
+
+.player-default-image {
+  transition: all 0.7s linear;
 }
 
 .player-ui {

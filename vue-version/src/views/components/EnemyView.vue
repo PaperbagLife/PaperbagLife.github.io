@@ -95,7 +95,7 @@ const attackingTransform = computed(() => {
 <style lang="scss" scoped>
 .enemy-ui {
   .enemy-image {
-    transition: all 1s;
+    transition: all 0.7s;
   }
   .weakness-icon {
     fill: var(--color);

@@ -3,7 +3,7 @@ export const GAME_WIDTH = 840
 export const PLAYER_DEFAULT_X_POSITION = 150
 
 export const MAX_SKILLPOINTS = 5
-export const TURN_TIME = 5000
+export const TURN_TIME = 1400
 export const MULTIHIT_DELAY = 300
 
 export const HIT_ENERGY_REGEN = 5
@@ -200,7 +200,6 @@ export class PlayerCharacter extends Character {
     attack: number,
     skill: Skill,
     speed: number,
-    energy: number,
     maxEnergy: number,
     ult: Skill,
     passiveCount?: number,
@@ -222,7 +221,7 @@ export class PlayerCharacter extends Character {
     this.attackType = attackType
     this.backImage = backImage
     this.frontImage = frontImage
-    this.energy = energy
+    this.energy = maxEnergy / 2
     this.maxEnergy = maxEnergy
     this.ult = ult
     this.element = element

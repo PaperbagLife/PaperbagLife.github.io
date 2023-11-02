@@ -138,7 +138,6 @@ class CombatManager {
 
   static async resolvePlayerSkill() {
     const player = gameState.turnCharacter as PlayerCharacter
-    await delay(TURN_TIME)
     gameState.turnState.stateEnum = TurnStateEnum.PLAYER_TURN_DEFAULT
     gameState.focusedTarget.targetType = TargetType.SINGLE_ENEMY
     if (player.skill.effect === SkillEffect.DAMAGE) {
@@ -147,10 +146,16 @@ class CombatManager {
       // Depending on the type of the skill do differnt calculations here
       switch (player.skill.targetType) {
         case TargetType.SINGLE_ENEMY: {
+          gameState.playerAttackTarget = target
+          gameState.playerTurnAction = PlayerTurnAction.SKILL
+          await delay(TURN_TIME)
           this.resolveDamageOnEnemy(target, damage, player.element, player.skill.breakEfficiency)
           break
         }
         case TargetType.SPLASH_ENEMY: {
+          gameState.playerAttackTarget = target
+          gameState.playerTurnAction = PlayerTurnAction.SKILL
+          await delay(TURN_TIME)
           this.resolveDamageOnEnemy(target, damage, player.element, player.skill.breakEfficiency)
           if (target > 0) {
             this.resolveDamageOnEnemy(
@@ -171,8 +176,17 @@ class CombatManager {
           }
           break
         }
-        case TargetType.ALL_ENEMIES:
+        case TargetType.ALL_ENEMIES: {
+          gameState.playerAttackTarget = target
+          gameState.playerTurnAction = PlayerTurnAction.SKILL
+          await delay(TURN_TIME)
+          for (let i = 0; i < gameState.enemies.length; i += 1) {
+            this.resolveDamageOnEnemy(i, damage, player.element, player.skill.breakEfficiency)
+          }
+          break
+        }
         case TargetType.RANDOM_ENEMY: {
+          await delay(TURN_TIME)
           for (let i = 0; i < (player.skill.hits ?? 1); i += 1) {
             const enemyIdx = getRandomInt(gameState.enemies.length)
             this.resolveDamageOnEnemy(
@@ -216,6 +230,8 @@ class CombatManager {
       gameState.cameraState.mode = CameraMode.DEFAULT
     }
     player.energy += 30
+    gameState.playerAttackTarget = null
+    gameState.playerTurnAction = null
     await delay(TURN_TIME)
   }
 
@@ -237,33 +253,52 @@ class CombatManager {
 
   static async resolvePlayerUlt() {
     const player = gameState.turnCharacter as PlayerCharacter
-    await delay(TURN_TIME)
     if (player.ult.effect === SkillEffect.DAMAGE) {
       const damage = player.attack * player.ult.modifier
       const target = gameState.focusedTarget.mainTarget
       // Depending on the type of the skill do differnt calculations here
       switch (player.ult.targetType) {
         case TargetType.SINGLE_ENEMY: {
-          gameState.enemies[target].hp -= damage
+          gameState.playerAttackTarget = target
+          gameState.playerTurnAction = PlayerTurnAction.ULT
+          await delay(TURN_TIME)
+          this.resolveDamageOnEnemy(target, damage, player.element, player.ult.breakEfficiency)
           break
         }
         case TargetType.SPLASH_ENEMY: {
-          gameState.enemies[target].hp -= damage
+          gameState.playerAttackTarget = target
+          gameState.playerTurnAction = PlayerTurnAction.ULT
+          await delay(TURN_TIME)
+          this.resolveDamageOnEnemy(target, damage, player.element, player.ult.breakEfficiency)
           if (target > 0) {
-            gameState.enemies[target - 1].hp -= damage
+            this.resolveDamageOnEnemy(
+              target - 1,
+              damage,
+              player.element,
+              player.ult.breakEfficiency
+            )
           }
           if (target < gameState.enemies.length - 1) {
-            gameState.enemies[target + 1].hp -= damage
+            this.resolveDamageOnEnemy(
+              target + 1,
+              damage,
+              player.element,
+              player.ult.breakEfficiency
+            )
           }
           break
         }
         case TargetType.ALL_ENEMIES: {
+          gameState.playerAttackTarget = target
+          gameState.playerTurnAction = PlayerTurnAction.ULT
+          await delay(TURN_TIME)
           gameState.enemies.forEach((_, i) => {
             this.resolveDamageOnEnemy(i, damage, player.element, player.ult.breakEfficiency)
           })
           break
         }
         case TargetType.RANDOM_ENEMY: {
+          await delay(TURN_TIME)
           for (let i = 0; i < (player.ult.hits ?? 1); i += 1) {
             const enemyIdx = getRandomInt(gameState.enemies.length)
             await delay(MULTIHIT_DELAY)
@@ -594,9 +629,7 @@ const stelle = new PlayerCharacter(
     modifier: 1.2,
     breakEfficiency: 2
   },
-
   120,
-  100,
   100,
   {
     targetType: TargetType.RANDOM_ENEMY,
@@ -623,7 +656,6 @@ const bailu = new PlayerCharacter(
   },
   110,
   100,
-  100,
   {
     targetType: TargetType.ALL_ALLIES,
     hits: 3,
@@ -646,9 +678,7 @@ const march = new PlayerCharacter(
     effect: SkillEffect.SHIELD,
     modifier: 20
   },
-
   130,
-  100,
   100,
   {
     targetType: TargetType.ALL_ENEMIES,
@@ -990,13 +1020,6 @@ function printGameState() {
           :width="canvas.width"
         >
           <rect class="background" :height="canvas.height + 10" :width="canvas.width"></rect>
-          <PlayerView
-            :player-characters="gameState.playerCharacters"
-            :camera-state="gameState.cameraState"
-            :player-x-positions="playerXPositions"
-            :player-turn-action="gameState.playerTurnAction"
-            :player-attack-target="gameState.playerAttackTarget"
-          />
 
           <!--Enemy characters-->
           <EnemyView
@@ -1004,6 +1027,15 @@ function printGameState() {
             :attacking-enemy="gameState.attackingEnemy"
             :enemies="gameState.enemies"
             :enemy-x-positions="enemyXPositions"
+          />
+
+          <PlayerView
+            :player-characters="gameState.playerCharacters"
+            :camera-state="gameState.cameraState"
+            :player-x-positions="playerXPositions"
+            :enemy-x-positions="enemyXPositions"
+            :player-turn-action="gameState.playerTurnAction"
+            :player-attack-main-target="gameState.playerAttackTarget"
           />
 
           <!--Timeline-->
@@ -1021,6 +1053,7 @@ function printGameState() {
             :target-markers="targetMarkers"
           />
 
+          <g id="projectile-teleport-target" />
           <g class="damage-numbers">
             <text
               v-for="[idx, damageNumber] in damageNumbers"
