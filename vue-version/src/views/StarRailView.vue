@@ -16,7 +16,6 @@ import { useBreakpoints } from '../util/dimensions'
 import {
   ALLY_VIEW_TOP_PADDING,
   AttackType,
-  PlayerTurnAction,
   BASIC_ATTACK_ENERGY_GAIN,
   CameraMode,
   Character,
@@ -31,11 +30,14 @@ import {
   HIT_ENERGY_REGEN,
   MAX_SKILLPOINTS,
   MULTIHIT_DELAY,
+  NUMBER_DELETE_DELAY,
+  NUMBER_DRIFT_Y,
   PLAYER_BETWEEN_PADDING,
   PLAYER_DEFAULT_X_POSITION,
   PLAYER_IMAGE_WIDTH,
   PlayerButton,
   PlayerCharacter,
+  PlayerTurnAction,
   SkillEffect,
   SubTurnType,
   TIMELINE_DISTANCE,
@@ -45,6 +47,7 @@ import {
   type CameraState,
   type DamageNumber,
   type FocusedTarget,
+  type HealNumber,
   type PlayerInput,
   type SubTurn,
   type TargetMarkers,
@@ -207,6 +210,7 @@ class CombatManager {
             hp + player.skill.modifier,
             gameState.playerCharacters[target].maxHp
           )
+          makeHealNumber(player.skill.modifier, CharacterType.PLAYER, target)
           break
         }
         case TargetType.ALL_ALLIES: {
@@ -215,7 +219,6 @@ class CombatManager {
           )
         }
       }
-      gameState.cameraState.mode = CameraMode.DEFAULT
     } else if (player.skill.effect === SkillEffect.SHIELD) {
       switch (player.skill.targetType) {
         case TargetType.SINGLE_ALLY: {
@@ -227,12 +230,12 @@ class CombatManager {
           gameState.playerCharacters.forEach((pc) => (pc.shield += player.skill.modifier))
         }
       }
-      gameState.cameraState.mode = CameraMode.DEFAULT
     }
-    player.energy += 30
     gameState.playerAttackTarget = null
     gameState.playerTurnAction = null
     await delay(TURN_TIME)
+    player.energy = Math.min(player.energy + 30, player.maxEnergy)
+    gameState.cameraState.mode = CameraMode.DEFAULT
   }
 
   static async resolvePlayerAttack() {
@@ -863,7 +866,9 @@ function skillButton() {
 }
 
 let damageNumberIndex = 0
+let healNumberIndex = 0
 const damageNumbers = reactive(new Map<number, DamageNumber>())
+const healNumbers = reactive(new Map<number, HealNumber>())
 function makeDamageNumber(
   damage: number,
   characterType: CharacterType,
@@ -889,8 +894,46 @@ function makeDamageNumber(
   damageNumbers.set(damageNumberIndex, damageNumber)
   const thisIdx = damageNumberIndex
   setTimeout(() => {
+    const numb = damageNumbers.get(thisIdx)
+    if (numb) {
+      numb.y -= NUMBER_DRIFT_Y
+    }
+  })
+  setTimeout(() => {
     damageNumbers.delete(thisIdx)
-  }, 700)
+  }, NUMBER_DELETE_DELAY)
+}
+function makeHealNumber(
+  heal: number,
+  characterType: CharacterType,
+  index: number,
+  differntLocation?: boolean
+) {
+  healNumberIndex += 1
+  const healNumber = {
+    heal,
+    x:
+      characterType === CharacterType.ENEMY
+        ? enemyXPositions.value[index] + ENEMY_SIZE / 2
+        : playerXPositions.value[index] + PLAYER_IMAGE_WIDTH / 2,
+    y:
+      characterType === CharacterType.ENEMY
+        ? differntLocation
+          ? ENEMY_CENTER_Y + 10
+          : ENEMY_CENTER_Y
+        : ALLY_VIEW_TOP_PADDING * 3
+  }
+  healNumbers.set(healNumberIndex, healNumber)
+  const thisIdx = healNumberIndex
+  setTimeout(() => {
+    const numb = healNumbers.get(thisIdx)
+    if (numb) {
+      numb.y -= NUMBER_DRIFT_Y
+    }
+  })
+  setTimeout(() => {
+    healNumbers.delete(thisIdx)
+  }, NUMBER_DELETE_DELAY)
 }
 
 // Function to handle keyboard input
@@ -1059,10 +1102,19 @@ function printGameState() {
               v-for="[idx, damageNumber] in damageNumbers"
               :key="idx"
               :fill="getElementColor(damageNumber.type)"
-              :x="damageNumber.x"
-              :y="damageNumber.y"
+              :style="{ transform: `translate(${damageNumber.x}px, ${damageNumber.y}px)` }"
             >
               {{ damageNumber.damage }}
+            </text>
+          </g>
+          <g class="heal-numbers">
+            <text
+              v-for="[idx, healNumber] in healNumbers"
+              :key="idx"
+              fill="rgb(177,250,73)"
+              :style="{ transform: `translate(${healNumber.x}px, ${healNumber.y}px)` }"
+            >
+              +{{ healNumber.heal }}
             </text>
           </g>
         </svg>
@@ -1162,7 +1214,17 @@ function printGameState() {
 .damage-numbers {
   text-anchor: middle;
   font-size: 30px;
-  transition: all 1s;
+  text {
+    transition: all 0.7s linear;
+  }
+}
+
+.heal-numbers {
+  text-anchor: middle;
+  font-size: 30px;
+  text {
+    transition: all 0.7s linear;
+  }
 }
 
 .skill-points-container {

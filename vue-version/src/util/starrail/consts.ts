@@ -29,6 +29,9 @@ export const ENEMY_CENTER_Y = ENEMY_TOP_PADDING + ENEMY_SIZE / 2
 
 export const TIMELINE_DISTANCE = 10000
 
+export const NUMBER_DRIFT_Y = 20
+export const NUMBER_DELETE_DELAY = 700
+
 export enum CameraMode {
   DEFAULT = 'default view',
   ALLIES = 'allies view'
@@ -50,6 +53,12 @@ export type DamageNumber = {
   x: number
   y: number
   type?: Elements
+}
+
+export type HealNumber = {
+  heal: number
+  x: number
+  y: number
 }
 
 // Notes: the focus is on player 1 if player 1 has a damage skill of single target.
@@ -221,7 +230,7 @@ export class PlayerCharacter extends Character {
     this.attackType = attackType
     this.backImage = backImage
     this.frontImage = frontImage
-    this.energy = maxEnergy / 2
+    this.energy = maxEnergy * 0.7
     this.maxEnergy = maxEnergy
     this.ult = ult
     this.element = element

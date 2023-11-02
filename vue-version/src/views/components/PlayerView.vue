@@ -9,7 +9,6 @@ import {
   GAME_HEIGHT,
   ENEMY_SIZE,
   ENEMY_TOP_PADDING,
-  ENEMY_CENTER_Y,
   TURN_TIME
 } from '../../util/starrail/consts'
 import {
@@ -106,7 +105,8 @@ watch(
               projectiles.value = [projectile]
               // need enemyXposition here lol rip
               setTimeout(() => {
-                if (!props.playerAttackMainTarget) {
+                if (props.playerAttackMainTarget == null) {
+                  console.log('ah shit target lost')
                   return
                 }
                 projectiles.value[0].x =
@@ -115,7 +115,7 @@ watch(
               }, 300)
               setTimeout(() => {
                 projectiles.value = []
-              }, 1000)
+              }, 1100)
               break
             }
             case TargetType.SPLASH_ENEMY:
@@ -136,7 +136,7 @@ watch(
               }
               setTimeout(() => {
                 projectiles.value = []
-              }, 1000)
+              }, 1100)
               break
             }
             case TargetType.RANDOM_ENEMY:
