@@ -1,4 +1,6 @@
-import { Character, Elements } from './consts'
+import { Character, CharacterType, Elements } from './consts'
+import { GameState } from './gameState'
+
 export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 export function getRandomInt(max: number) {
   max = Math.floor(max)
@@ -32,4 +34,11 @@ export function getElementColor(element?: Elements) {
     default:
       return 'white'
   }
+}
+
+export function findCharacterIndex(character: Character, gameState: GameState) {
+  if (character.type === CharacterType.ENEMY) {
+    return gameState.enemies.findIndex((e) => e.name === character.name)
+  }
+  return gameState.playerCharacters.findIndex((c) => c.name === character.name)
 }

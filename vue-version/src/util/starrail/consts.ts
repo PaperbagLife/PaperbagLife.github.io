@@ -2,10 +2,12 @@ export const GAME_HEIGHT = 360
 export const GAME_WIDTH = 840
 export const PLAYER_DEFAULT_X_POSITION = 150
 
+// Battle related consts
 export const MAX_SKILLPOINTS = 5
 export const TURN_TIME = 1400
 export const MULTIHIT_DELAY = 300
-
+export const BREAK_DAMAGE = 20
+export const BREAK_DELAY = 50
 export const HIT_ENERGY_REGEN = 5
 
 export const PROFILE_PIC_HEIGHT = 60
