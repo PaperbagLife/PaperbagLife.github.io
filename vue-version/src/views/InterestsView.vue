@@ -12,10 +12,9 @@ const { type } = useBreakpoints()
           <p>
             <b>Violin</b><br />
             <i>2006 - present</i><br />
-            I have learned the violin for 8 years, and I still play it every week.<br />
-            With the intention to share my love for music with others, I learned how to edit
-            videos.<br />
-            I have a YouTube Channel for my Violin Covers.<br />
+            Music has been a major part of my life. Unlike many others that would leave their
+            instruments to gather dust after getting their shiny certificates, I still play violin
+            on a weekly basis. I make covers of the songs I love, mostly J-pop and Vocaloid songs<br />
             <a href="https://www.youtube.com/c/PaperbagLife">Here</a> is a link to my YouTube
             Channel.
           </p>
@@ -25,10 +24,9 @@ const { type } = useBreakpoints()
           <p>
             <b>Gaming/Game Design</b><br />
             <i>2010 - present</i><br />
-            I have played countless games since I got a PSP in 2012.<br />
-            Evetually, I started developing interest towards making a game myself.<br />
-            Tools I have used so far: RPG Maker series, Powerpoint, Scratch, GameMaker, Pygame,
-            Unity
+            I have played countless games since I got a PSP in 2012. Evetually, I started developing
+            interest towards making a game myself. Tools I have used so far: RPG Maker series,
+            Powerpoint, Scratch, GameMaker, Pygame, Unity, Vue (see <b>Games</b> section above)
           </p>
         </div>
       </div>
