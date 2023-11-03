@@ -3,9 +3,8 @@ import { computed } from 'vue'
 import { getElementColor } from '@/util/starrail/utils'
 import type { Enemy } from '../../util/starrail/consts'
 import {
-  PROFILE_PIC_HEIGHT,
   ENEMY_TOP_PADDING,
-  PROFILE_PIC_WIDTH,
+  ENEMY_SIZE,
   GAME_HEIGHT,
   PLAYER_DEFAULT_X_POSITION
 } from '../../util/starrail/consts'
@@ -27,7 +26,7 @@ const attackingTransform = computed(() => {
   }
 
   return `translate(${PLAYER_DEFAULT_X_POSITION - props.enemyXPositions[props.attackingEnemy]}px, ${
-    GAME_HEIGHT / 2 - ENEMY_TOP_PADDING - PROFILE_PIC_HEIGHT
+    GAME_HEIGHT / 2 - ENEMY_TOP_PADDING - ENEMY_SIZE
   }px)`
 })
 </script>
@@ -40,34 +39,28 @@ const attackingTransform = computed(() => {
         transform: attackingEnemy != null && i === attackingEnemy ? attackingTransform : ''
       }"
       :href="enemy.avatar"
-      :height="
-        attackingEnemy != null && i === attackingEnemy
-          ? PROFILE_PIC_HEIGHT * 1.5
-          : PROFILE_PIC_HEIGHT
-      "
-      :width="
-        attackingEnemy != null && i === attackingEnemy ? PROFILE_PIC_WIDTH * 1.5 : PROFILE_PIC_WIDTH
-      "
+      :height="attackingEnemy != null && i === attackingEnemy ? ENEMY_SIZE * 1.5 : ENEMY_SIZE"
+      :width="attackingEnemy != null && i === attackingEnemy ? ENEMY_SIZE * 1.5 : ENEMY_SIZE"
       :x="enemyXPositions[i]"
       :y="ENEMY_TOP_PADDING"
     />
     <rect
       class="health-bar-outline"
-      :x="enemyXPositions[i] + (PROFILE_PIC_WIDTH - ENEMY_HP_BAR_WIDTH) / 2"
+      :x="enemyXPositions[i] + (ENEMY_SIZE - ENEMY_HP_BAR_WIDTH) / 2"
       :y="ENEMY_HP_TOP_OFFSET"
       :width="ENEMY_HP_BAR_WIDTH"
       :height="ENEMY_HP_BAR_HEIGHT"
     />
     <rect
       class="health-bar"
-      :x="enemyXPositions[i] + (PROFILE_PIC_WIDTH - ENEMY_HP_BAR_WIDTH) / 2"
+      :x="enemyXPositions[i] + (ENEMY_SIZE - ENEMY_HP_BAR_WIDTH) / 2"
       :y="ENEMY_HP_TOP_OFFSET"
       :width="(enemy.hp / enemy.maxHp) * ENEMY_HP_BAR_WIDTH"
       :height="ENEMY_HP_BAR_HEIGHT"
     />
     <rect
       class="toughness-bar-outline"
-      :x="enemyXPositions[i] + (PROFILE_PIC_WIDTH - ENEMY_HP_BAR_WIDTH) / 2"
+      :x="enemyXPositions[i] + (ENEMY_SIZE - ENEMY_HP_BAR_WIDTH) / 2"
       :y="ENEMY_HP_TOP_OFFSET - ENEMY_TOUGHNESS_BAR_HEIGHT"
       :width="ENEMY_HP_BAR_WIDTH"
       :height="ENEMY_TOUGHNESS_BAR_HEIGHT"
@@ -75,7 +68,7 @@ const attackingTransform = computed(() => {
     <rect
       v-if="enemy.toughness > 0"
       class="toughness-bar"
-      :x="enemyXPositions[i] + (PROFILE_PIC_WIDTH - ENEMY_HP_BAR_WIDTH) / 2"
+      :x="enemyXPositions[i] + (ENEMY_SIZE - ENEMY_HP_BAR_WIDTH) / 2"
       :y="ENEMY_HP_TOP_OFFSET - ENEMY_TOUGHNESS_BAR_HEIGHT"
       :width="(enemy.toughness / enemy.maxToughness) * ENEMY_HP_BAR_WIDTH"
       :height="ENEMY_TOUGHNESS_BAR_HEIGHT"

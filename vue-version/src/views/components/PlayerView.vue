@@ -9,7 +9,8 @@ import {
   GAME_HEIGHT,
   ENEMY_SIZE,
   ENEMY_TOP_PADDING,
-  TURN_TIME
+  TURN_TIME,
+  HP_BAR_WIDTH
 } from '../../util/starrail/consts'
 import {
   CameraMode,
@@ -25,7 +26,7 @@ import {
   PLAYER_DEFAULT_X_POSITION
 } from '../../util/starrail/consts'
 
-const BASE_HEIGHT = 270
+const BASE_HEIGHT = 280
 const SHIELD_BAR_OFFSET = 0.75
 const PASSIVE_RADIUS = 2
 
@@ -217,13 +218,13 @@ watch(
           class="health-bar-outline"
           :x="PROFILE_PIC_BASE_OFFSET + i * PROFILE_PIC_SIDE_OFFSET"
           :y="BASE_HEIGHT + PROFILE_PIC_HEIGHT"
-          :width="PROFILE_PIC_WIDTH"
+          :width="HP_BAR_WIDTH"
           :height="HP_BAR_HEIGHT" />
         <rect
           class="health-bar"
           :x="PROFILE_PIC_BASE_OFFSET + i * PROFILE_PIC_SIDE_OFFSET"
           :y="BASE_HEIGHT + PROFILE_PIC_HEIGHT"
-          :width="(character.hp / character.maxHp) * PROFILE_PIC_WIDTH"
+          :width="(character.hp / character.maxHp) * HP_BAR_WIDTH"
           :height="HP_BAR_HEIGHT" />
         <g v-if="character.shield > 0">
           <line
@@ -272,19 +273,26 @@ watch(
       <g class="ult-circle" :data-index="i">
         <circle
           :cx="ULT_GAUGE_BASE_OFFSET + i * PROFILE_PIC_SIDE_OFFSET"
-          :cy="BASE_HEIGHT + 40"
-          r="25"
+          :cy="BASE_HEIGHT + 30"
+          r="22"
           fill="black"
         />
         <circle
           :cx="ULT_GAUGE_BASE_OFFSET + i * PROFILE_PIC_SIDE_OFFSET"
-          :cy="BASE_HEIGHT + 40"
-          r="25"
+          :cy="BASE_HEIGHT + 30"
+          r="22"
           :fill="`url(#${character.name}energy-gradient)`"
           stroke="grey"
           stroke-width="1"
         />
       </g>
+      <text
+        class="hp-number-display"
+        :x="ULT_GAUGE_BASE_OFFSET + i * PROFILE_PIC_SIDE_OFFSET"
+        :y="BASE_HEIGHT + 58"
+      >
+        {{ character.hp }}
+      </text>
     </g>
     <template v-if="cameraState.mode === CameraMode.ALLIES">
       <g
@@ -316,6 +324,16 @@ watch(
 
 .player-default-image {
   transition: all 0.7s linear;
+}
+
+.hp-number-display {
+  user-select: none;
+  font-size: 8px;
+  stroke: black;
+  paint-order: stroke;
+  fill: white;
+  text-anchor: middle;
+  dominant-baseline: middle;
 }
 
 .player-ui {

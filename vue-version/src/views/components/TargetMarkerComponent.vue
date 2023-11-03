@@ -39,8 +39,6 @@ defineProps<{
       <line x1="0" y1="-20" x2="0" y2="-10" stroke="rgb(255, 8, 0)"></line>
       <line x1="0" y1="10" x2="0" y2="20" stroke="rgb(255, 8, 0)"></line>
     </g>
-  </g>
-  <g class="sub-target-crosshair" v-if="turnCharacter?.type === CharacterType.PLAYER">
     <g
       v-for="targetMarker in targetMarkers.sub"
       :key="targetMarker"
@@ -54,3 +52,9 @@ defineProps<{
     </g>
   </g>
 </template>
+
+<style lang="scss" scoped>
+.target-crosshair {
+  pointer-events: none;
+}
+</style>

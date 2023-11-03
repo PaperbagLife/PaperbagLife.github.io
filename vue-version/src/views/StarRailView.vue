@@ -142,7 +142,6 @@ class CombatManager {
   static async resolvePlayerSkill() {
     const player = gameState.turnCharacter as PlayerCharacter
     gameState.turnState.stateEnum = TurnStateEnum.PLAYER_TURN_DEFAULT
-    gameState.focusedTarget.targetType = TargetType.SINGLE_ENEMY
     if (player.skill.effect === SkillEffect.DAMAGE) {
       const damage = player.attack * player.skill.modifier
       const target = gameState.focusedTarget.mainTarget
@@ -236,6 +235,7 @@ class CombatManager {
     await delay(TURN_TIME)
     player.energy = Math.min(player.energy + 30, player.maxEnergy)
     gameState.cameraState.mode = CameraMode.DEFAULT
+    gameState.focusedTarget.targetType = TargetType.SINGLE_ENEMY
   }
 
   static async resolvePlayerAttack() {
@@ -787,22 +787,12 @@ const playerXPositions = computed<number[]>(() => {
 })
 
 const enemyXPositions = computed<number[]>(() => {
-  const START_LOCATION = 350
-  const space = canvas.width - START_LOCATION
-
-  const sidePadding =
-    (space -
-      gameState.enemies.length * (ENEMY_SIZE + ENEMY_BETWEEN_PADDING) -
-      ENEMY_BETWEEN_PADDING) /
-    2
+  const startLocation =
+    canvas.width -
+    (gameState.enemies.length * (ENEMY_SIZE + ENEMY_BETWEEN_PADDING) + ENEMY_BETWEEN_PADDING * 2)
   const result: number[] = []
   for (let i = 0; i < gameState.enemies.length; i++) {
-    result.push(
-      START_LOCATION +
-        sidePadding +
-        ENEMY_BETWEEN_PADDING +
-        i * (ENEMY_SIZE + ENEMY_BETWEEN_PADDING)
-    )
+    result.push(startLocation + ENEMY_BETWEEN_PADDING + i * (ENEMY_SIZE + ENEMY_BETWEEN_PADDING))
   }
   return result
 })
@@ -1003,11 +993,30 @@ function onGameTouch(e: MouseEvent | TouchEvent) {
 
   const enemy = e.target.closest<SVGGElement>('.enemy-ui')
   if (enemy) {
+    const targetIdx = parseInt(enemy.dataset.index ?? '')
+    console.log(targetIdx, gameState.focusedTarget.mainTarget)
+    if (gameState.focusedTarget.mainTarget === targetIdx) {
+      // Execute the action
+      if (gameState.turnState.stateEnum === TurnStateEnum.PLAYER_TURN_SKILL_PENDING) {
+        skillButton()
+      } else if (gameState.turnState.stateEnum === TurnStateEnum.PLAYER_TURN_DEFAULT) {
+        attackButton()
+      }
+    }
     gameState.focusedTarget.mainTarget = parseInt(enemy.dataset.index ?? '')
   }
 
   const player = e.target.closest<SVGGElement>('.player-image')
   if (player) {
+    const targetIdx = parseInt(player.dataset.index ?? '')
+    if (gameState.focusedTarget.mainTarget === targetIdx) {
+      // Execute the action
+      if (gameState.turnState.stateEnum === TurnStateEnum.PLAYER_TURN_SKILL_PENDING) {
+        skillButton()
+      } else if (gameState.turnState.stateEnum === TurnStateEnum.PLAYER_TURN_DEFAULT) {
+        attackButton()
+      }
+    }
     gameState.focusedTarget.mainTarget = parseInt(player.dataset.index ?? '')
   }
 }

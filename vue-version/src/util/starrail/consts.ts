@@ -8,13 +8,14 @@ export const MULTIHIT_DELAY = 300
 
 export const HIT_ENERGY_REGEN = 5
 
-export const PROFILE_PIC_HEIGHT = 70
-export const PROFILE_PIC_WIDTH = 70
+export const PROFILE_PIC_HEIGHT = 60
+export const PROFILE_PIC_WIDTH = 60
+export const HP_BAR_WIDTH = 80
 export const HP_BAR_HEIGHT = 4
 export const PROFILE_PIC_SIDE_OFFSET = 110
-export const PROFILE_PIC_BASE_OFFSET = 30
-export const ULT_GAUGE_BASE_OFFSET = 100
-export const BASIC_ATTACK_ENERGY_GAIN = 5
+export const PROFILE_PIC_BASE_OFFSET = 20
+export const ULT_GAUGE_BASE_OFFSET = 90
+export const BASIC_ATTACK_ENERGY_GAIN = 20
 
 export const PLAYER_IMAGE_HEIGHT = 250
 export const PLAYER_IMAGE_WIDTH = 80
@@ -22,7 +23,7 @@ export const PLAYER_BETWEEN_PADDING = 40
 
 export const ALLY_VIEW_TOP_PADDING = 20
 
-export const ENEMY_SIZE = PROFILE_PIC_WIDTH
+export const ENEMY_SIZE = 70
 export const ENEMY_TOP_PADDING = 30
 export const ENEMY_BETWEEN_PADDING = 20
 export const ENEMY_CENTER_Y = ENEMY_TOP_PADDING + ENEMY_SIZE / 2
