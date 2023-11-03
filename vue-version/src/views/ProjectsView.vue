@@ -4,7 +4,9 @@ import coupletroubleUrl from '../assets/img/couple_trouble.png'
 import cvshooterUrl from '../assets/img/cv_shooter.png'
 import mobaUrl from '../assets/img/moba.png'
 import shopsimUrl from '../assets/img/Shopsim.png'
+import starrailUrl from '../assets/img/starrail.png'
 const { width, type } = useBreakpoints()
+const COLUMN_FILL_RATIO = 0.84
 </script>
 
 <template>
@@ -16,7 +18,10 @@ const { width, type } = useBreakpoints()
           <p>
             <b>League of Cylinders - C#, Unity</b><br />
             <i>Sept 2021 - Oct 2021</i><br />
-            <img :src="mobaUrl" width="400" height="250" /><br />
+            <img
+              :src="mobaUrl"
+              :width="(type === 'xs' ? width : width / 2) * COLUMN_FILL_RATIO"
+            /><br />
             When the semester started I thought I would like to try recreating League of Legends on
             Unity. Inspired by my previous project that used unity navigation, I thought I could use
             this along with my pervious experience to make something similar to League.
@@ -26,7 +31,7 @@ const { width, type } = useBreakpoints()
           <p>
             <b>ShopSim - C#, Unity</b><br />
             <i>Jan 2021</i><br />
-            <img :src="shopsimUrl" width="440" height="250" /><br />
+            <img :src="shopsimUrl" :width="(width / 2) * COLUMN_FILL_RATIO" /><br />
             Over the winter I created a fully animated 3D animation/simulation of shoppers pathing
             in a shop. I used Unity navigation to make pathing calculated at real time. I used
             finalIK to make realistic animations for the shoppers' 3D model. The simulation records
@@ -39,7 +44,7 @@ const { width, type } = useBreakpoints()
           <p>
             <b>Couple Trouble - Python, Pygames, OpenCV</b><br />
             <i>Feb 2020</i><br />
-            <img :src="coupletroubleUrl" width="400" height="250" /><br />
+            <img :src="coupletroubleUrl" :width="(width / 2) * COLUMN_FILL_RATIO" /><br />
             I lead a team of 4 to participate in Tartan Hacks 2020.<br />
             We won the "Best Valentines Hack" award.<br />
             I was the main programmer in charge of coding the main game.<br />
@@ -54,7 +59,7 @@ const { width, type } = useBreakpoints()
           <p>
             <b>CV Shooter- Python, Pygames, OpenCV</b><br />
             <i>Feb 2020</i><br />
-            <img :src="cvshooterUrl" width="400" height="230" /><br />
+            <img :src="cvshooterUrl" :width="(width / 2) * COLUMN_FILL_RATIO" /><br />
             This was my 15-112 Project. I scored 97% on this project.<br />
             It is a top-down space shooter game.<br />
             I used OpenCV to implement a control system that detects a red color.<br />
@@ -63,6 +68,16 @@ const { width, type } = useBreakpoints()
             The boss has various different attack patterns and a cool laser attack.<br />
             <a href="https://www.youtube.com/watch?v=WvnU6LHCbh4">Here</a> is a link to a YouTube
             video about this game.<br />
+          </p>
+        </div>
+        <div class="border-top" :class="type === 'xs' ? 'col-12' : 'col-6'">
+          <p>
+            <b>Cosmo Rail - Vue, Typescript</b><br />
+            <i>Sept 2023 - Ongoing</i><br />
+            <img :src="starrailUrl" :width="(width / 2) * COLUMN_FILL_RATIO" /><br />
+            After I started working on UI for my job, I thought I could use my newfound knowledge to
+            make a game.<br />
+            This is a turn based game with animations using css.<br />
           </p>
         </div>
         <div class="border-top" :class="type === 'xs' ? 'col-12' : 'col-6'">

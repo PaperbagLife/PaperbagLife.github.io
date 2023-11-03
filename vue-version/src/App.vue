@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import { useBreakpoints } from './util/dimensions'
 import { RouterLink, RouterView } from 'vue-router'
 const { type } = useBreakpoints()
@@ -32,7 +32,7 @@ const games: GamePage[] = [
 
 <template>
   <header :class="{ header: showSideNav && type === 'xs' }">
-    <div v-if="type !== 'xs'" class="mt-3 mx-2 nav-bar d-flex justify-content-start">
+    <div v-if="type !== 'xs'" class="pt-2 mx-2 nav-bar d-flex justify-content-start">
       <template v-for="page in pages" :key="page.name">
         <router-link class="router-link mx-2" :to="page.route">
           <label class="d-flex">
@@ -141,7 +141,7 @@ const games: GamePage[] = [
   overflow: auto;
 }
 .header {
-  max-height: 15vh;
+  max-height: 10vh;
   background-color: #66ccff;
 }
 .nav-menu {

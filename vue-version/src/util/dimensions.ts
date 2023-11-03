@@ -1,5 +1,7 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 
+const HEADER_WIDTH = 501
+
 export const useBreakpoints = () => {
   const windowWidth = ref(window.innerWidth)
   const windowHeight = ref(window.innerHeight)
@@ -12,7 +14,7 @@ export const useBreakpoints = () => {
   onUnmounted(() => window.removeEventListener('resize', onWidthChange))
 
   const type = computed(() => {
-    if (windowWidth.value < windowHeight.value) return 'xs'
+    if (windowWidth.value < HEADER_WIDTH) return 'xs'
     return 'md'
   })
 
