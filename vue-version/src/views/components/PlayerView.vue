@@ -150,6 +150,15 @@ watch(
 </script>
 
 <template>
+  <defs>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+      <feMerge>
+        <feMergeNode in="coloredBlur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
   <g>
     <!--Player Default View-->
     <g v-if="cameraState.mode === CameraMode.DEFAULT">
@@ -270,7 +279,11 @@ watch(
         />
         <stop offset="100%" stop-opacity="0" :stop-color="getElementColor(character.element)" />
       </linearGradient>
-      <g class="ult-circle" :data-index="i">
+      <g
+        class="ult-circle"
+        :class="{ ready: character.energy === character.maxEnergy }"
+        :data-index="i"
+      >
         <circle
           :cx="ULT_GAUGE_BASE_OFFSET + i * PROFILE_PIC_SIDE_OFFSET"
           :cy="BASE_HEIGHT + 30"
@@ -282,8 +295,7 @@ watch(
           :cy="BASE_HEIGHT + 30"
           r="22"
           :fill="`url(#${character.name}energy-gradient)`"
-          stroke="grey"
-          stroke-width="1"
+          :filter="character.energy === character.maxEnergy ? `url(#glow)` : ''"
         />
       </g>
       <text
@@ -316,6 +328,9 @@ watch(
 <style lang="scss" scoped>
 .ult-circle {
   opacity: 80%;
+  &.ready {
+    opacity: 100%;
+  }
 }
 
 .projectile {

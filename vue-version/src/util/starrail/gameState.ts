@@ -471,16 +471,18 @@ class TurnManager {
         // Assume only player can have reactions
         gameState.focusedTarget.mainTarget = enemyIdx
         const reactPlayer = gameState.turnCharacter as PlayerCharacter
-        await delay(500)
         if (currentSubTurn.damage && enemyIdx !== -1) {
+          gameState.playerAttackTarget = enemyIdx
+          gameState.playerTurnAction = PlayerTurnAction.ATTACK
+          await delay(1000)
           CombatManager.resolveDamageOnEnemy(
             enemyIdx,
             currentSubTurn.damage,
             reactPlayer.element,
             1
           )
+          await delay(TURN_TIME - 1000)
         }
-        await delay(500)
       }
       if (currentSubTurn.type === SubTurnType.ULT) {
         gameState.turnState.stateEnum = TurnStateEnum.PLAYER_ULT_PENDING

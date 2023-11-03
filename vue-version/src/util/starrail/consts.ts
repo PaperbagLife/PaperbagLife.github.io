@@ -16,7 +16,7 @@ export const HP_BAR_WIDTH = 80
 export const HP_BAR_HEIGHT = 4
 export const PROFILE_PIC_SIDE_OFFSET = 110
 export const PROFILE_PIC_BASE_OFFSET = 20
-export const ULT_GAUGE_BASE_OFFSET = 90
+export const ULT_GAUGE_BASE_OFFSET = 85
 export const BASIC_ATTACK_ENERGY_GAIN = 20
 
 export const PLAYER_IMAGE_HEIGHT = 250
@@ -238,7 +238,7 @@ export class PlayerCharacter extends Character {
     this.ult = ult
     this.element = element
     this.passiveCount = passiveCount
-    this.shield = 0
+    this.shield = 10
     this.passiveMax = passiveCount
   }
 }
