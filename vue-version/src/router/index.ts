@@ -6,6 +6,7 @@ import InterestsView from '../views/InterestsView.vue'
 import ShooterGameView from '../views/ShooterGameView.vue'
 import DanmakuView from '../views/DanmakuView.vue'
 import StarRailView from '../views/StarRailView.vue'
+import ThreeView from '../views/ThreeView.vue'
 
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
@@ -44,6 +45,11 @@ const router = createRouter({
       path: '/games/starrail',
       name: 'starrail',
       component: StarRailView
+    },
+    {
+      path: '/demo',
+      name: 'demo',
+      component: ThreeView
     }
   ]
 })

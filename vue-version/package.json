@@ -12,6 +12,8 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "three": "^0.163.0",
+    "three-pathfinding": "^1.2.0",
     "vue": "^3.2.47",
     "vue-router": "^4.1.6"
   },
@@ -19,6 +21,7 @@
     "@rushstack/eslint-patch": "^1.2.0",
     "@tsconfig/node18": "^2.0.0",
     "@types/node": "^18.16.3",
+    "@types/three": "^0.163.0",
     "@vitejs/plugin-vue": "^4.2.1",
     "@vue/eslint-config-prettier": "^7.1.0",
     "@vue/eslint-config-typescript": "^11.0.3",

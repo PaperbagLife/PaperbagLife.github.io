@@ -15,7 +15,8 @@ const pages: Page[] = [
   { name: 'Home', icon: 'home', route: '/' },
   { name: 'Coursework', icon: 'book', route: '/coursework' },
   { name: 'Projects', icon: 'collections', route: '/projects' },
-  { name: 'Interests', icon: 'interests', route: '/interests' }
+  { name: 'Interests', icon: 'interests', route: '/interests' },
+  { name: 'Demo', icon: 'construction', route: '/demo' }
 ]
 
 type GamePage = {
