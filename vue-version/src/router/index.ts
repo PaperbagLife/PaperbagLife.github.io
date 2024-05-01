@@ -5,8 +5,9 @@ import ProjectsView from '../views/ProjectsView.vue'
 import InterestsView from '../views/InterestsView.vue'
 import ShooterGameView from '../views/ShooterGameView.vue'
 import DanmakuView from '../views/DanmakuView.vue'
-import StarRailView from '../views/StarRailView.vue'
-import ThreeView from '../views/ThreeView.vue'
+
+const StarRailView = () => import('../views/StarRailView.vue')
+const ThreeView = () => import('../views/ThreeView.vue')
 
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
