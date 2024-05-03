@@ -5,6 +5,7 @@ import ProjectsView from '../views/ProjectsView.vue'
 import InterestsView from '../views/InterestsView.vue'
 import ShooterGameView from '../views/ShooterGameView.vue'
 import DanmakuView from '../views/DanmakuView.vue'
+import GamesView from '../views/GamesView.vue'
 
 const StarRailView = () => import('../views/StarRailView.vue')
 const ThreeView = () => import('../views/ThreeView.vue')
@@ -46,6 +47,11 @@ const router = createRouter({
       path: '/games/starrail',
       name: 'starrail',
       component: StarRailView
+    },
+    {
+      path: '/games',
+      name: 'games',
+      component: GamesView
     },
     {
       path: '/demo',

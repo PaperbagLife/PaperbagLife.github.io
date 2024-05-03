@@ -16,18 +16,8 @@ const pages: Page[] = [
   { name: 'Coursework', icon: 'book', route: '/coursework' },
   { name: 'Projects', icon: 'collections', route: '/projects' },
   { name: 'Interests', icon: 'interests', route: '/interests' },
-  { name: 'Demo', icon: 'construction', route: '/demo' }
-]
-
-type GamePage = {
-  name: string
-  route: string
-}
-
-const games: GamePage[] = [
-  { name: 'Shooter', route: '/games/shooter' },
-  { name: 'Danmaku', route: '/games/danmaku' },
-  { name: 'Star rail', route: '/games/starrail' }
+  { name: 'Demo', icon: 'construction', route: '/demo' },
+  { name: 'Web Games', icon: 'gamepad', route: '/games' }
 ]
 </script>
 
@@ -35,14 +25,14 @@ const games: GamePage[] = [
   <header :class="{ header: showSideNav && type === 'xs' }">
     <div v-if="type !== 'xs'" class="pt-2 mx-2 nav-bar d-flex justify-content-start">
       <template v-for="page in pages" :key="page.name">
-        <router-link class="router-link mx-2" :to="page.route">
+        <router-link class="router-link mx-2 px-2" :to="page.route">
           <label class="d-flex">
             <span class="material-icons-outlined">{{ page.icon }}</span>
             <span class="page-name">{{ page.name }}</span>
           </label>
         </router-link>
       </template>
-      <div class="dropdown">
+      <!--<div class="dropdown">
         <button
           class="btn btn-sm d-flex dropdown-toggle p-0 align-items-center"
           type="button"
@@ -66,7 +56,7 @@ const games: GamePage[] = [
             </label>
           </router-link>
         </div>
-      </div>
+      </div>-->
     </div>
     <div v-else>
       <div @click="showSideNav = !showSideNav" class="ml-3 mt-3 material-icons-outlined">
