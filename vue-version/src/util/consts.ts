@@ -4,12 +4,15 @@ import mobaUrl from '../assets/img/moba.png'
 import shopsimUrl from '../assets/img/Shopsim.png'
 import starrailUrl from '../assets/img/starrail.png'
 
-type Project = {
+export const COLUMN_FILL_RATIO=0.84
+
+export type Project = {
   title: string
-  timeline: string
+  timeline?: string
   description: string
   img?: string
   link?: string
+  route?: string
 }
 
 export const projectEntries: Project[] = [
@@ -58,5 +61,140 @@ export const projectEntries: Project[] = [
     description:
       'In my first year, I joined the Game Creation Society at CMU and worked with a team of 9 people. We created a 3D VR hack and slash game made for the HTC Vive headset. I worked on the enemy attack logic and did some testing for the game. ',
     link: 'https://www.gamecreation.org/games/enter_the_arena'
+  }
+]
+
+export const interests: Project[]=  [
+  {
+    title: 'Violin',
+    timeline: '2006 - present',
+    description:
+      'Music has been a major part of my life. Unlike many others that would leave their instruments to gather dust after getting their shiny certificates, I still play violin on a weekly basis. I make covers of the songs I love, mostly J-pop and Vocaloid songs',
+    link: "https://www.youtube.com/c/PaperbagLife"
+  },
+  {
+    title: 'Violin',
+    timeline: '2006 - present',
+    description:
+      'Music has been a major part of my life. Unlike many others that would leave their instruments to gather dust after getting their shiny certificates, I still play violin on a weekly basis. I make covers of the songs I love, mostly J-pop and Vocaloid songs',
+    link: "https://www.youtube.com/c/PaperbagLife"
+  }
+]
+
+type Semester = {
+  name: string
+  courses: string[]
+}
+export const semesters: Semester[] = [
+  {
+    name: 'Fall 2018:',
+    courses: [
+      '15110 Principles of Computing',
+      '21122 Integration and Approximation',
+      '33121 Physics for Science Students',
+      '82171 Elementary Japanese 1'
+    ]
+  },
+  {
+    name: 'Spring 2019:',
+    courses: [
+      '03121 Modern Biology',
+      '15112 Fundamentals of Programming and Computer Science',
+      '21127 Concepts of Mathematics',
+      '21241 Matrices and Linear Transformations',
+      '73102 Principles of Microeconomics',
+      '76107 Writing about Data',
+      '76108 Writing about Public Problems'
+    ]
+  },
+  {
+    name: 'Summer 1 2019:',
+    courses: ['21259 Calculus in 3D', '21260 Differential Equations']
+  },
+  {
+    name: 'Summer 2 2019:',
+    courses: ['15122 Principles of Imperative Computation']
+  },
+  {
+    name: 'Fall 2019:',
+    courses: [
+      '15150 Principles of Functional Programming',
+      '15251 Great Ideas in Theoretical Computer Science',
+      '21295 Putnam Seminar',
+      '21325 Probability',
+      '88120 Reason, Passion, and Cognition'
+    ]
+  },
+  {
+    name: 'Spring 2020:',
+    courses: [
+      '15210 Parallel and Sequential Data Structures and Algorithms',
+      '15213 Introduction to Computer Systems',
+      '21270 Intro to Mathematical Finance',
+      '21380 Intro to Mathematical Modelling',
+      '38230 Engage in Wellness'
+    ]
+  },
+  {
+    name: 'Fall 2020:',
+    courses: [
+      '10315 Machine Learning',
+      '15281 Artificial Intelligence: Representation and Problem Solving',
+      '21370 Discrete Time Finance',
+      '33104 Experimental Physics',
+      '76270 Writing for the Professions'
+    ]
+  },
+  {
+    name: 'Spring 2021:',
+    courses: [
+      '21420 Continuous Time Finance',
+      '15451 Algorithms',
+      '15440 Distributed Systems',
+      '73103 Principles of Macro Economics',
+      '80100 Introduction to Philosophy'
+    ]
+  },
+  {
+    name: 'Fall 2021:',
+    courses: [
+      '15462 Computer Graphics',
+      '15317 Constructive Logic',
+      '82279 Anime - Visual Interplay between Japan and the World',
+      '80283 IMHYSI(Linguistics) '
+    ]
+  },
+  {
+    name: 'Spring 2022:',
+    courses: [
+      '15330 Introduction to Computer Security',
+      '33120 Science and Science Fiction',
+      '85102 Introduction to Psychology',
+      '15195 Competition Programming ',
+      '98012 Stuco: Fun with Robots'
+    ]
+  }
+]
+
+
+type WebGameProject = Project & {
+  route: string
+}
+
+export const games: WebGameProject[] = [
+  {
+    title: 'Shooter',
+    description: 'Simple top-down shooter game using DOMs',
+    route: '/games/shooter'
+  },
+  {
+    title: 'Danmaku',
+    description: 'Tohou-like top-down bullet hell using canvas',
+    route: '/games/danmaku'
+  },
+  {
+    title: 'Star rail',
+    description: 'Turn based combat similar to Honkai Star Rail',
+    route: '/games/starrail'
   }
 ]

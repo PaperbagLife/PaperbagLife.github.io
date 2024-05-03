@@ -1,0 +1,32 @@
+<script setup lang="ts">
+import { type Project, COLUMN_FILL_RATIO } from '@/util/consts'
+import { useBreakpoints } from '@/util/dimensions'
+const { width, type } = useBreakpoints()
+
+const props = defineProps<{
+  entries: Project[]
+}>()
+</script>
+<template>
+  <div class="row mx-0">
+    <div
+      v-for="entry in props.entries"
+      :key="entry.title"
+      class="border-top"
+      :class="type === 'xs' ? 'col-12' : 'col-6'"
+    >
+      <p>
+        <b>{{ entry.title }}</b> <br />
+        <i v-if="entry.timeline">{{ entry.timeline }}</i> <br />
+        <b v-if="entry.link">{{ entry.link }}</b> <br />
+        <img
+          v-if="entry.img"
+          :src="entry.img"
+          :width="(type === 'xs' ? width : width / 2) * COLUMN_FILL_RATIO"
+        />
+        <br />
+        {{ entry.description }}
+      </p>
+    </div>
+  </div>
+</template>
