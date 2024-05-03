@@ -26,6 +26,9 @@ const props = defineProps<{
         />
         <br />
         {{ entry.description }}
+        <router-link v-if="entry.route" class="router-link mx-2 px-2" :to="entry.route">
+          Link
+        </router-link>
       </p>
     </div>
   </div>
