@@ -1,14 +1,42 @@
 <script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import { RouterLink } from 'vue-router'
 import { useBreakpoints } from '../util/dimensions'
 import dpUrl from '../assets/img/dp.jpg'
 import resumeUrl from '../assets/docs/Lu-Yunkun.pdf'
 const { type } = useBreakpoints()
+
+const educationTitle = ref<HTMLElement | null>(null)
+const showEducationTitle = ref(false)
+
+const projectTitle = ref<HTMLElement | null>(null)
+const showProjectTitle = ref(false)
+
+const sectionTitles = [educationTitle, projectTitle]
+const showSectionTitles = [showEducationTitle, showProjectTitle]
+onMounted(() => {
+  showEducationTitle.value = true
+  showProjectTitle.value = true
+
+  window.addEventListener('scroll', () => {
+    // check for visibility of title div
+    sectionTitles.forEach((sectionTitle, i) => {
+      if (!sectionTitle.value) return
+      const box = sectionTitle.value.getBoundingClientRect()
+      if (box && box.top < window.innerHeight && box.bottom > 0) {
+        showSectionTitles[i].value = true
+      } else {
+        showSectionTitles[i].value = false
+      }
+    })
+  })
+})
 </script>
 
 <template>
   <main>
-    <div class="col mt-4">
-      <div class="row d-flex align-items-center justify-content-center">
+    <div class="col">
+      <div class="row py-5 d-flex align-items-center justify-content-center">
         <div class="col-auto">
           <img class="profile-pic" :src="dpUrl" />
         </div>
@@ -32,17 +60,56 @@ const { type } = useBreakpoints()
             </a>
           </div>
         </div>
-        <div class="row" :class="type === 'xs' ? 'bio-xs' : ''">
-          I obtained an undergraduate degree from Carnegie Mellon University. <br />
-          I have attended many hackathons and developed a handful of games.<br />
-          I work as a software engineer for clockwork systems.<br />
+      </div>
+      <div class="row mx-3 my-2 d-flex">
+        <div
+          ref="educationTitle"
+          class="section-title col-auto"
+          :class="showEducationTitle ? 'show' : ''"
+        >
+          Education
         </div>
+        <div class="col-12">
+          I have a BS in computer science from Carnegie Mellon University. <br />
+          Courses I have taken include 15440 Distributed Systems and 15451 Algorithms. <br />
+          <a href="#/coursework">See full list</a>
+        </div>
+      </div>
+      <div class="row mx-3 my-2 d-flex">
+        <div
+          ref="projectTitle"
+          class="section-title col-auto"
+          :class="showProjectTitle ? 'show' : ''"
+        >
+          Projects
+        </div>
+        <div class="col-12">TODO: Make this section look good</div>
       </div>
     </div>
   </main>
 </template>
 
 <style>
+.section-title {
+  font-size: 2rem;
+  opacity: 0;
+  transition: opacity 2s;
+}
+
+.section-title.show {
+  opacity: 1;
+  animation: title-animation 1s;
+}
+
+@keyframes title-animation {
+  0% {
+    transform: translateX(5%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
 .mw-90 {
   max-width: 90%;
 }

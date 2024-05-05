@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { interests } from '../util/consts'
+import { onMounted } from 'vue'
 import ProjectsComponent from './components/ProjectsComponent.vue'
+onMounted(() => {
+  document.documentElement.scrollTop = 0
+})
 </script>
 
 <template>

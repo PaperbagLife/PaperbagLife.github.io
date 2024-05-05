@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { useBreakpoints } from '../util/dimensions'
+import { onMounted } from 'vue'
 import { semesters } from '../util/consts'
 const { type } = useBreakpoints()
+onMounted(() => {
+  document.documentElement.scrollTop = 0
+})
 </script>
 
 <template>

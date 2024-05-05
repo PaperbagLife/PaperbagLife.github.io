@@ -30,7 +30,6 @@ function onMoreMenuClick() {
 
 function onRouterLinkClick() {
   morePagesExpanded.value = false
-  window.scrollTo(0, 0)
 }
 </script>
 
