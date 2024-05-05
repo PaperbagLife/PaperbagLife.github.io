@@ -10,31 +10,32 @@ const { type } = useBreakpoints()
     <div class="col mt-4">
       <div class="row d-flex align-items-center justify-content-center">
         <div class="col-auto">
-          <img :src="dpUrl" width="250" height="250" />
+          <img class="profile-pic" :src="dpUrl" />
         </div>
         <div class="col-auto mw-90">
           <div :class="type === 'xs' ? 'col text-center' : ''">
             <h1>Yunkun (Ricky) Lu</h1>
-            <h2>Software Engineer</h2>
-            <a class="btn button px-4 mr-3" :class="type === 'xs' ? '' : ''" :href="resumeUrl">
-              Resume </a
-            ><a href="https://www.linkedin.com/in/yunkun-lu/"
-              ><i class="mx-1 fa-icon fa fa-linkedin fa-lg"></i
-            ></a>
-            <a href="https://github.com/PaperbagLife"
-              ><i class="mx-1 fa-icon fa fa-github fa-lg"></i
-            ></a>
+            <section class="animation">
+              <div class="first"><div>Software Engineer</div></div>
+              <div class="second"><div>Passionate Gamer</div></div>
+              <div class="third"><div>Violin Youtuber</div></div>
+            </section>
+            <a class="btn button px-4 mr-3" :href="resumeUrl"> Resume </a>
+            <a href="https://www.linkedin.com/in/yunkun-lu/">
+              <i class="mx-1 fa-icon fa fa-linkedin fa-lg" />
+            </a>
+            <a href="https://github.com/PaperbagLife">
+              <i class="mx-1 fa-icon fa fa-github fa-lg" />
+            </a>
             <a href="https://www.youtube.com/c/PaperbagLife"
-              ><i class="mx-1 fa-icon fa fa-youtube fa-lg"></i
-            ></a>
+              ><i class="mx-1 fa-icon fa fa-youtube fa-lg" />
+            </a>
           </div>
-
-          <div :class="type === 'xs' ? 'bio-xs' : ''">
-            I obtained an undergraduate degree from Carnegie Mellon University. <br />
-            I have attended many hackathons and developed a handful of games.<br />
-            I work as a software engineer for clockwork systems.<br />
-            <b>Contact:</b> yunkunL@alumni.cmu.edu
-          </div>
+        </div>
+        <div class="row" :class="type === 'xs' ? 'bio-xs' : ''">
+          I obtained an undergraduate degree from Carnegie Mellon University. <br />
+          I have attended many hackathons and developed a handful of games.<br />
+          I work as a software engineer for clockwork systems.<br />
         </div>
       </div>
     </div>
@@ -55,5 +56,72 @@ const { type } = useBreakpoints()
 }
 .fa-icon {
   color: #66ccff;
+}
+.profile-pic {
+  border-radius: 1rem;
+  width: 200px;
+  height: 200px;
+}
+.animation {
+  height: 3rem;
+  overflow: hidden;
+  color: white;
+  font-size: 1rem;
+}
+
+.animation > div > div {
+  padding: 0.25rem 0.75rem;
+  height: 2rem;
+  margin-bottom: 2rem;
+  display: inline-block;
+  border-radius: 1rem;
+  text-align: center;
+}
+
+.animation div:first-child {
+  animation: text-animation 10s infinite;
+}
+
+.first div {
+  background-color: #66ccff;
+}
+.second div {
+  background-color: #3bcd1e;
+}
+.third div {
+  background-color: #d60924;
+}
+
+@keyframes text-animation {
+  0% {
+    margin-top: 0;
+  }
+  12% {
+    margin-top: 0;
+  }
+  20% {
+    margin-top: -3.5rem;
+  }
+  32% {
+    margin-top: -3.5rem;
+  }
+  40% {
+    margin-top: -7rem;
+  }
+  62% {
+    margin-top: -7rem;
+  }
+  70% {
+    margin-top: -3.5rem;
+  }
+  82% {
+    margin-top: -3.5rem;
+  }
+  92% {
+    margin-top: 0;
+  }
+  100% {
+    margin-top: 0;
+  }
 }
 </style>
