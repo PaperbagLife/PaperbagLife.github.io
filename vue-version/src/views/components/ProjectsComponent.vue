@@ -18,7 +18,7 @@ const props = defineProps<{
       <p>
         <b>{{ entry.title }}</b> <br />
         <i v-if="entry.timeline">{{ entry.timeline }}</i> <br />
-        <b v-if="entry.link">{{ entry.link }}</b> <br />
+        <a v-if="entry.link" :href="entry.link">Demo</a>
         <img
           v-if="entry.img"
           :src="entry.img"
