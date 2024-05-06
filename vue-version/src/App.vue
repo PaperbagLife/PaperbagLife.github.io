@@ -163,11 +163,13 @@ function onRouterLinkClick() {
   z-index: 1;
   background-color: aliceblue;
   border-radius: 1rem;
+  pointer-events: none;
 }
 
 .expanded-menu.show {
   opacity: 1;
   transform: translateY(-2rem);
+  pointer-events: all;
 }
 
 .viewport {
@@ -180,10 +182,12 @@ function onRouterLinkClick() {
   z-index: 1;
   opacity: 0;
   transition: opacity 0.4s cubic-bezier(0.4, 0, 0.1, 1);
+  pointer-events: none;
 }
 
 .nav-menu.show {
   opacity: 1;
+  pointer-events: all;
 }
 
 .xs-nav {
