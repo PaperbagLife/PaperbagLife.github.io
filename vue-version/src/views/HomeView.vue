@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { RouterLink } from 'vue-router'
 import { useBreakpoints } from '../util/dimensions'
 import dpUrl from '../assets/img/dp.jpg'
 import resumeUrl from '../assets/docs/Lu-Yunkun.pdf'
-const { type } = useBreakpoints()
+import { projectEntries, COLUMN_FILL_RATIO } from '@/util/consts'
+const { width, type } = useBreakpoints()
 
 const educationTitle = ref<HTMLElement | null>(null)
 const showEducationTitle = ref(false)
@@ -14,6 +14,9 @@ const showProjectTitle = ref(false)
 
 const sectionTitles = [educationTitle, projectTitle]
 const showSectionTitles = [showEducationTitle, showProjectTitle]
+
+const projectsWithImage = projectEntries.filter((project) => project.img)
+
 onMounted(() => {
   showEducationTitle.value = true
   showProjectTitle.value = true
@@ -83,13 +86,32 @@ onMounted(() => {
         >
           Projects
         </div>
-        <div class="col-12"></div>
+        <div class="col-12">
+          <div class="row">
+            <div
+              v-for="project in projectsWithImage"
+              :key="project.title"
+              :class="type == 'xs' ? 'col-12' : 'col-6'"
+              class="my-2"
+            >
+              <img
+                :src="project.img"
+                class="project-img"
+                :width="(type === 'xs' ? width : width / 2) * COLUMN_FILL_RATIO"
+                :height="((type === 'xs' ? width : width / 2) * COLUMN_FILL_RATIO) / 2"
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </main>
 </template>
 
 <style>
+.project-img {
+  border-radius: 1rem;
+}
 .section-title {
   font-size: 2rem;
   opacity: 0;

@@ -31,6 +31,7 @@ function onImgClick(route?: string) {
           :src="entry.img"
           @click="onImgClick(entry.route)"
           :width="(type === 'xs' ? width : width / 2) * COLUMN_FILL_RATIO"
+          :height="((type === 'xs' ? width : width / 2) * COLUMN_FILL_RATIO) / 2"
           :class="entry.route ? 'img-link' : ''"
         />
         <br />
