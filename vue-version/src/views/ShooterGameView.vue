@@ -433,7 +433,7 @@ onUnmounted(() => {
 
 <template>
   <main :class="type">
-    <div class="col d-flex justify-content-center player-score">Score: {{ playerScore }}</div>
+    <div class="col mt-2 d-flex justify-content-center player-score">Score: {{ playerScore }}</div>
     <div class="col justify-content-center restart-button-wrapper">
       <button
         v-if="gameOver"

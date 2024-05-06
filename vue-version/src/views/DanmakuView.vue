@@ -286,7 +286,7 @@ onUnmounted(() => {
 
 <template>
   <main :class="type">
-    <div class="col">
+    <div class="col mt-2">
       <div class="row justify-content-center">
         <div class="game-viewport">
           <canvas id="game-canvas" :height="CANVAS_HEIGHT" :width="CANVAS_WIDTH"></canvas>

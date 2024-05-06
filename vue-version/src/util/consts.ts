@@ -3,9 +3,10 @@ import cvshooterImg from '../assets/img/cv_shooter.png'
 import mobaImg from '../assets/img/moba.png'
 import danmakuImg from '../assets/img/danmaku.png'
 import shopsimImg from '../assets/img/Shopsim.png'
+import shooterImg from '../assets/img/shooter.png'
 import starrailImg from '../assets/img/starrail.png'
 
-export const COLUMN_FILL_RATIO=0.84
+export const COLUMN_FILL_RATIO = 0.84
 
 export type Project = {
   title: string
@@ -65,20 +66,20 @@ export const projectEntries: Project[] = [
   }
 ]
 
-export const interests: Project[]=  [
+export const interests: Project[] = [
   {
     title: 'Violin',
     timeline: '2006 - present',
     description:
-      'Music has been a major part of my life. Unlike many others that would leave their instruments to gather dust after getting their shiny certificates, I still play violin on a weekly basis. I make covers of the songs I love, mostly J-pop and Vocaloid songs',
-    link: "https://www.youtube.com/c/PaperbagLife"
+      "Music has been a major part of my life. Whether I'm navigating the depths of sadness or riding the waves of energy, the violin is my faithful companion. I also have a YouTube Channel where I make covers of the songs I love, mostly J-pop and Vocaloid songs",
+    link: 'https://www.youtube.com/c/PaperbagLife'
   },
   {
-    title: 'Violin',
-    timeline: '2006 - present',
+    title: 'Gaming/Game Design',
+    timeline: '2010 - present',
     description:
-      'Music has been a major part of my life. Unlike many others that would leave their instruments to gather dust after getting their shiny certificates, I still play violin on a weekly basis. I make covers of the songs I love, mostly J-pop and Vocaloid songs',
-    link: "https://www.youtube.com/c/PaperbagLife"
+      "I'm an avid gamer and aspiring game designer, and it all started back in 2012 when I received a PSP as a gift. Since then, gaming has been my passion, leading me through countless adventures and quests in virtual realms. But my interest didn't stop at just playing; it sparked a desire within me to create my own gaming experiences. I've explored various tools and platforms to bring my ideas to life. From experimenting with RPG Maker series, Powerpoint, and Scratch in the beginning, to mastering more advanced engines like GameMaker, Pygame, Unity, and Vue, my journey in game design has been a thrilling ride. You can catch a glimpse of these in the 'More' section above",
+    link: '#/games'
   }
 ]
 
@@ -177,7 +178,6 @@ export const semesters: Semester[] = [
   }
 ]
 
-
 type WebGameProject = Project & {
   route: string
 }
@@ -185,6 +185,7 @@ type WebGameProject = Project & {
 export const games: WebGameProject[] = [
   {
     title: 'Shooter',
+    img: shooterImg,
     description: 'Simple top-down shooter game using DOMs',
     route: '/games/shooter'
   },

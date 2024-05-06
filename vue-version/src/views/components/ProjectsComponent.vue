@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import router from '@/router'
 import { type Project, COLUMN_FILL_RATIO } from '@/util/consts'
 import { useBreakpoints } from '@/util/dimensions'
 const { width, type } = useBreakpoints()
@@ -6,6 +7,12 @@ const { width, type } = useBreakpoints()
 const props = defineProps<{
   entries: Project[]
 }>()
+
+function onImgClick(route?: string) {
+  if (route) {
+    router.push(route)
+  }
+}
 </script>
 <template>
   <div class="row mx-0">
@@ -22,14 +29,22 @@ const props = defineProps<{
         <img
           v-if="entry.img"
           :src="entry.img"
+          @click="onImgClick(entry.route)"
           :width="(type === 'xs' ? width : width / 2) * COLUMN_FILL_RATIO"
+          :class="entry.route ? 'img-link' : ''"
         />
         <br />
-        {{ entry.description }}
-        <router-link v-if="entry.route" class="router-link mx-2 px-2" :to="entry.route">
-          Link
+        {{ entry.description }} <br />
+        <router-link v-if="entry.route" class="router-link" :to="entry.route">
+          Click to Play
         </router-link>
       </p>
     </div>
   </div>
 </template>
+
+<style scoped>
+.img-link {
+  cursor: pointer;
+}
+</style>

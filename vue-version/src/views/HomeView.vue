@@ -70,7 +70,7 @@ onMounted(() => {
           Education
         </div>
         <div class="col-12">
-          I have a BS in computer science from Carnegie Mellon University. <br />
+          I have a BS in Computer Science from Carnegie Mellon University. <br />
           Courses I have taken include 15440 Distributed Systems and 15451 Algorithms. <br />
           <a href="#/coursework">See full list</a>
         </div>
@@ -83,7 +83,7 @@ onMounted(() => {
         >
           Projects
         </div>
-        <div class="col-12">TODO: Make this section look good</div>
+        <div class="col-12"></div>
       </div>
     </div>
   </main>
