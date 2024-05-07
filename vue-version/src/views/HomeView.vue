@@ -3,8 +3,9 @@ import { onMounted, ref } from 'vue'
 import { useBreakpoints } from '../util/dimensions'
 import dpUrl from '../assets/img/dp.jpg'
 import resumeUrl from '../assets/docs/Lu-Yunkun.pdf'
-import { projectEntries, COLUMN_FILL_RATIO } from '@/util/consts'
-const { width, type } = useBreakpoints()
+import { projectEntries } from '@/util/consts'
+import SlideShowComponenet from './components/SlideShowComponenet.vue'
+const { type } = useBreakpoints()
 
 const educationTitle = ref<HTMLElement | null>(null)
 const showEducationTitle = ref(false)
@@ -87,21 +88,7 @@ onMounted(() => {
           Projects
         </div>
         <div class="col-12">
-          <div class="row">
-            <div
-              v-for="project in projectsWithImage"
-              :key="project.title"
-              :class="type == 'xs' ? 'col-12' : 'col-6'"
-              class="my-2"
-            >
-              <img
-                :src="project.img"
-                class="project-img"
-                :width="(type === 'xs' ? width : width / 2) * COLUMN_FILL_RATIO"
-                :height="((type === 'xs' ? width : width / 2) * COLUMN_FILL_RATIO) / 2"
-              />
-            </div>
-          </div>
+          <SlideShowComponenet :projects="projectsWithImage" />
         </div>
       </div>
     </div>
@@ -109,9 +96,6 @@ onMounted(() => {
 </template>
 
 <style>
-.project-img {
-  border-radius: 1rem;
-}
 .section-title {
   font-size: 2rem;
   opacity: 0;
