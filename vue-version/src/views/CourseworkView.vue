@@ -14,7 +14,7 @@ onMounted(() => {
       <h1 class="ml-2">Coursework</h1>
       <div class="row mx-0">
         <template v-for="semester in semesters" :key="semester.name">
-          <div class="border-top" :class="type === 'xs' ? 'col-12' : 'col-6'">
+          <div class="border-top py-2" :class="type === 'xs' ? 'col-12' : 'col-6'">
             <p>
               <b>{{ semester.name }}</b>
             </p>

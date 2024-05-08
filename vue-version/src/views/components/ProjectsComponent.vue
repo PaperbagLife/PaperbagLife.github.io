@@ -19,13 +19,14 @@ function onImgClick(route?: string) {
     <div
       v-for="entry in props.entries"
       :key="entry.title"
-      class="border-top"
+      class="border-top py-1"
       :class="type === 'xs' ? 'col-12' : 'col-6'"
     >
       <p>
         <b>{{ entry.title }}</b> <br />
         <i v-if="entry.timeline">{{ entry.timeline }}</i> <br />
         <a v-if="entry.link" :href="entry.link">Demo</a>
+        <a v-else><br /></a>
         <img
           v-if="entry.img"
           :src="entry.img"
