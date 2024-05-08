@@ -12,6 +12,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "swiper": "^11.1.1",
     "three": "^0.163.0",
     "three-pathfinding": "^1.2.0",
     "vue": "^3.2.47",
@@ -20,6 +21,8 @@
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.2.0",
     "@tsconfig/node18": "^2.0.0",
+    "@types/flickity": "^2.2.11",
+    "@types/jquery": "^3.5.29",
     "@types/node": "^18.16.3",
     "@types/three": "^0.163.0",
     "@vitejs/plugin-vue": "^4.2.1",
