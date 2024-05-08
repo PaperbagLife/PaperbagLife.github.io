@@ -13,8 +13,11 @@ const showEducationTitle = ref(false)
 const projectTitle = ref<HTMLElement | null>(null)
 const showProjectTitle = ref(false)
 
-const sectionTitles = [educationTitle, projectTitle]
-const showSectionTitles = [showEducationTitle, showProjectTitle]
+const interestTitle = ref<HTMLElement | null>(null)
+const showInterestTitle = ref(false)
+
+const sectionTitles = [educationTitle, projectTitle, interestTitle]
+const showSectionTitles = [showEducationTitle, showProjectTitle, showInterestTitle]
 
 const projectsWithImage = projectEntries.filter((project) => project.img)
 
@@ -90,6 +93,16 @@ onMounted(() => {
         <div class="col-12">
           <SlideShowComponenet route="projects" :projects="projectsWithImage" />
         </div>
+      </div>
+      <div class="row mx-3 my-2 d-flex">
+        <div
+          ref="interestTitle"
+          class="section-title col-auto"
+          :class="showInterestTitle ? 'show' : ''"
+        >
+          Interests
+        </div>
+        <div class="col-12"></div>
       </div>
     </div>
   </main>

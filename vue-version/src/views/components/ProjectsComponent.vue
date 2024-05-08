@@ -25,7 +25,7 @@ function onImgClick(route?: string) {
       <p>
         <b>{{ entry.title }}</b> <br />
         <i v-if="entry.timeline">{{ entry.timeline }}</i> <br />
-        <a v-if="entry.link" :href="entry.link">Demo</a>
+        <a v-if="entry.link" :href="entry.link">Demo<br /></a>
         <a v-else><br /></a>
         <img
           v-if="entry.img"
