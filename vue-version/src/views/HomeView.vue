@@ -88,7 +88,7 @@ onMounted(() => {
           Projects
         </div>
         <div class="col-12">
-          <SlideShowComponenet :projects="projectsWithImage" />
+          <SlideShowComponenet route="projects" :projects="projectsWithImage" />
         </div>
       </div>
     </div>

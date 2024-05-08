@@ -1,11 +1,16 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import router from '@/router'
 import type { Project } from '@/util/consts'
 
 const SCROLL_PROJECT_WIDTH = 300
-defineProps<{
+const props = defineProps<{
   projects: Project[]
+  route: string
 }>()
+
+function routeToPage() {
+  router.push(props.route)
+}
 </script>
 
 <template>
@@ -21,7 +26,8 @@ defineProps<{
         <div class="row mx-auto">{{ project.title }}</div>
         <img
           :src="project.img"
-          class="row"
+          class="project-img row"
+          @click="routeToPage"
           :width="SCROLL_PROJECT_WIDTH"
           :height="SCROLL_PROJECT_WIDTH / 2"
         />
@@ -37,5 +43,8 @@ swiper-container {
 }
 .slide-wrapper {
   display: grid;
+}
+.project-img:hover {
+  cursor: pointer;
 }
 </style>
