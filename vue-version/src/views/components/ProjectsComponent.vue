@@ -38,7 +38,7 @@ function onImgClick(route?: string) {
         <br />
         {{ entry.description }} <br />
         <router-link v-if="entry.route" class="router-link" :to="entry.route">
-          Click to Play
+          Click to play
         </router-link>
       </p>
     </div>
