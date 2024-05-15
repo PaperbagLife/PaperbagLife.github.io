@@ -128,7 +128,7 @@ function openYoutube() {
           Other than Code
         </div>
         <div class="col-12">
-          Check me out on YouTube! <br />
+          <a href="#/interests">Read more </a>or check me out on YouTube! <br />
           <img @click="openYoutube" class="youtube-img" :src="youtubeImg" :width="width * 0.6" />
         </div>
       </div>
