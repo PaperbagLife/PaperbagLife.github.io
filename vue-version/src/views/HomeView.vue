@@ -112,7 +112,11 @@ function openYoutube() {
           Fun stuff
         </div>
         <div class="col-12">
-          <SlideShowComponenet route="projects" :projects="projectsWithImage" />
+          <SlideShowComponenet
+            route="projects"
+            :projects="projectsWithImage"
+            :project-width="type === 'xs' ? width * 0.6 : width * 0.5"
+          />
         </div>
       </div>
       <div class="row mx-3 py-4 d-flex">
@@ -124,13 +128,8 @@ function openYoutube() {
           Other than Code
         </div>
         <div class="col-12">
-          Check me out on YouTube!
-          <img
-            @click="openYoutube"
-            class="youtube-img"
-            :src="youtubeImg"
-            :width="width * COLUMN_FILL_RATIO"
-          />
+          Check me out on YouTube! <br />
+          <img @click="openYoutube" class="youtube-img" :src="youtubeImg" :width="width * 0.6" />
         </div>
       </div>
     </div>

@@ -2,10 +2,10 @@
 import router from '@/router'
 import type { Project } from '@/util/consts'
 
-const SCROLL_PROJECT_WIDTH = 300
 const props = defineProps<{
   projects: Project[]
   route: string
+  projectWidth: number
 }>()
 
 function routeToPage() {
@@ -23,13 +23,13 @@ function routeToPage() {
   >
     <swiper-slide class="d-flex" v-for="project in projects" :key="project.title">
       <div class="slide-wrapper col-12 justify-content-center">
-        <div class="row mx-auto">{{ project.title }}</div>
+        <div class="row justify-content-center mx-auto">{{ project.title }}</div>
         <img
           :src="project.img"
-          class="project-img row"
+          class="project-img mx-auto row"
           @click="routeToPage"
-          :width="SCROLL_PROJECT_WIDTH"
-          :height="SCROLL_PROJECT_WIDTH / 2"
+          :width="projectWidth"
+          :height="projectWidth / 2"
         />
       </div>
     </swiper-slide>
