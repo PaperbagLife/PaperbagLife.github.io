@@ -17,14 +17,17 @@ const showProjectTitle = ref(false)
 const interestTitle = ref<HTMLElement | null>(null)
 const showInterestTitle = ref(false)
 
-const sectionTitles = [educationTitle, projectTitle, interestTitle]
-const showSectionTitles = [showEducationTitle, showProjectTitle, showInterestTitle]
+const aboutTitle = ref<HTMLElement | null>(null)
+const showAboutTitle = ref(false)
+
+const sectionTitles = [aboutTitle, educationTitle, projectTitle, interestTitle]
+const showSectionTitles = [showAboutTitle, showEducationTitle, showProjectTitle, showInterestTitle]
 
 const projectsWithImage = projectEntries.filter((project) => project.img)
 
 onMounted(() => {
+  showAboutTitle.value = true
   showEducationTitle.value = true
-  showProjectTitle.value = true
 
   window.addEventListener('scroll', () => {
     // check for visibility of title div
@@ -73,8 +76,8 @@ function openYoutube() {
           </div>
         </div>
       </div>
-      <div class="row mx-3 my-2 d-flex">
-        <div class="section-title col-auto" :class="showEducationTitle ? 'show' : ''">
+      <div class="row mx-3 pb-4 d-flex">
+        <div class="section-title col-auto" ref="aboutTitle" :class="showAboutTitle ? 'show' : ''">
           Who am I?
         </div>
         <div class="col-12">
@@ -83,7 +86,7 @@ function openYoutube() {
           playing the violin or uploading J-pop and gaming videos on my YouTube channel.
         </div>
       </div>
-      <div class="row mx-3 my-2 d-flex">
+      <div class="row mx-3 py-4 d-flex">
         <div
           ref="educationTitle"
           class="section-title col-auto"
@@ -98,7 +101,7 @@ function openYoutube() {
           <a href="#/coursework">See full list</a>
         </div>
       </div>
-      <div class="row mx-3 my-2 d-flex">
+      <div class="row mx-3 py-4 d-flex">
         <div
           ref="projectTitle"
           class="section-title col-auto"
@@ -110,7 +113,7 @@ function openYoutube() {
           <SlideShowComponenet route="projects" :projects="projectsWithImage" />
         </div>
       </div>
-      <div class="row mx-3 my-2 d-flex">
+      <div class="row mx-3 py-4 d-flex">
         <div
           ref="interestTitle"
           class="section-title col-auto"
@@ -140,14 +143,17 @@ function openYoutube() {
 }
 
 .section-title {
-  font-size: 2rem;
+  font-size: 2.4rem;
+  font-weight: bold;
+  font-style: italic;
   opacity: 0;
   transition: opacity 2s;
+  color: #ff9966;
 }
 
 .section-title.show {
   opacity: 1;
-  animation: title-animation 1s;
+  animation: title-animation 0.8s;
 }
 
 @keyframes title-animation {
