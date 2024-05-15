@@ -129,7 +129,12 @@ function openYoutube() {
         </div>
         <div class="col-12">
           <a href="#/interests">Read more </a>or check me out on YouTube! <br />
-          <img @click="openYoutube" class="youtube-img" :src="youtubeImg" :width="width * 0.6" />
+          <img
+            @click="openYoutube"
+            class="youtube-img"
+            :src="youtubeImg"
+            :width="type === 'xs' ? width * 0.7 : width * 0.8"
+          />
         </div>
       </div>
     </div>
