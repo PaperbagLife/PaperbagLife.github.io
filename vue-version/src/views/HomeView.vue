@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useBreakpoints } from '../util/dimensions'
 import dpUrl from '../assets/img/dp.jpg'
 import resumeUrl from '../assets/docs/Lu-Yunkun.pdf'
 import youtubeImg from '../assets/img/youtube_channel.png'
-import { COLUMN_FILL_RATIO, projectEntries } from '@/util/consts'
+import { projectEntries } from '@/util/consts'
 import SlideShowComponenet from './components/SlideShowComponenet.vue'
 const { width, type } = useBreakpoints()
 
@@ -25,22 +25,68 @@ const showSectionTitles = [showAboutTitle, showEducationTitle, showProjectTitle,
 
 const projectsWithImage = projectEntries.filter((project) => project.img)
 
+const checkTitleBoundary = () => {
+  // check for visibility of title div
+  sectionTitles.forEach((sectionTitle, i) => {
+    if (!sectionTitle.value) return
+    const box = sectionTitle.value.querySelector('.section-title')?.getBoundingClientRect()
+    if (box && box.top < window.innerHeight && box.bottom > 0) {
+      showSectionTitles[i].value = true
+    } else {
+      showSectionTitles[i].value = false
+    }
+  })
+}
+
 onMounted(() => {
   showAboutTitle.value = true
   showEducationTitle.value = true
 
-  window.addEventListener('scroll', () => {
-    // check for visibility of title div
-    sectionTitles.forEach((sectionTitle, i) => {
-      if (!sectionTitle.value) return
-      const box = sectionTitle.value.getBoundingClientRect()
-      if (box && box.top < window.innerHeight && box.bottom > 0) {
-        showSectionTitles[i].value = true
-      } else {
-        showSectionTitles[i].value = false
+  window.addEventListener('scroll', checkTitleBoundary)
+  window.addEventListener('click', checkTitleBoundary)
+})
+
+const warningLevel = 7
+const level1 = 10
+
+const currentClick = ref(0)
+const deleteMode = ref(false)
+
+function onProfilePicClick() {
+  currentClick.value += 1
+  if (currentClick.value > level1) {
+    deleteMode.value = true
+  }
+  if (deleteMode.value) {
+    const removeIdx = currentClick.value - level1 - 1
+    if (sectionTitles && removeIdx < sectionTitles.length) {
+      sectionTitles[removeIdx].value?.remove()
+    }
+  }
+}
+
+const randomSentences = [
+  'I like to play badminton!',
+  'This website is created with vue.',
+  'I create games for fun!',
+  'This picture was taken on the London Eye!'
+]
+
+const easterEggMessage = computed(() => {
+  if (currentClick.value === 0) {
+    return 'Click me!'
+  }
+  if (currentClick.value > warningLevel) {
+    if (currentClick.value >= level1) {
+      if (currentClick.value - level1 >= sectionTitles.length) {
+        return 'PURGED!!'
       }
-    })
-  })
+      return 'With each additional click, one section will be destroyed!'
+    }
+    return `Click ${level1 - currentClick.value} more times to unlock power of destruction!`
+  }
+
+  return randomSentences[Math.floor(Math.random() * randomSentences.length)]
 })
 
 function openYoutube() {
@@ -52,8 +98,11 @@ function openYoutube() {
   <main>
     <div class="col">
       <div class="row py-5 d-flex align-items-center justify-content-center">
-        <div class="col-auto">
-          <img class="profile-pic" :src="dpUrl" />
+        <div class="col-auto d-flex justify-content-center">
+          <div class="px-3 easter-egg" :class="currentClick > 0 ? 'out' : ''">
+            {{ easterEggMessage }}
+          </div>
+          <img class="profile-pic" :src="dpUrl" @click="onProfilePicClick" />
         </div>
         <div class="col-auto mw-90">
           <div :class="type === 'xs' ? 'col text-center' : ''">
@@ -76,10 +125,8 @@ function openYoutube() {
           </div>
         </div>
       </div>
-      <div class="row mx-2 pb-4 d-flex">
-        <div class="section-title col-auto" ref="aboutTitle" :class="showAboutTitle ? 'show' : ''">
-          Who am I?
-        </div>
+      <div class="row mx-2 pb-4 d-flex" ref="aboutTitle" :class="showAboutTitle ? 'show' : ''">
+        <div class="section-title col-auto">Who am I?</div>
         <div class="col-12">
           I'm a software engineer working for Clockwork Systems. Outside of work, I love turning
           creative ideas into playable experiences, from Unity-powered adventures to quirky Pygame
@@ -88,14 +135,12 @@ function openYoutube() {
           videos on my YouTube channel.
         </div>
       </div>
-      <div class="row mx-2 py-4 d-flex">
-        <div
-          ref="educationTitle"
-          class="section-title col-auto"
-          :class="showEducationTitle ? 'show' : ''"
-        >
-          Boring Stuff
-        </div>
+      <div
+        class="row mx-2 py-4 d-flex"
+        ref="educationTitle"
+        :class="showEducationTitle ? 'show' : ''"
+      >
+        <div class="section-title col-auto">Boring Stuff</div>
         <div class="col-12">
           I have a BS in Computer Science from Carnegie Mellon University. <br />
           Notable courses I have taken include 15440 Distributed Systems and 15451 Algorithms.
@@ -103,14 +148,8 @@ function openYoutube() {
           <a href="#/coursework">See full list</a>
         </div>
       </div>
-      <div class="row mx-2 py-4 d-flex">
-        <div
-          ref="projectTitle"
-          class="section-title col-auto"
-          :class="showProjectTitle ? 'show' : ''"
-        >
-          Fun Stuff
-        </div>
+      <div class="row mx-2 py-4 d-flex" ref="projectTitle" :class="showProjectTitle ? 'show' : ''">
+        <div class="section-title col-auto">Fun Stuff</div>
         <div class="col-12">
           <SlideShowComponenet
             route="projects"
@@ -119,14 +158,12 @@ function openYoutube() {
           />
         </div>
       </div>
-      <div class="row mx-2 py-4 d-flex">
-        <div
-          ref="interestTitle"
-          class="section-title col-auto"
-          :class="showInterestTitle ? 'show' : ''"
-        >
-          More than Code
-        </div>
+      <div
+        class="row mx-2 py-4 d-flex"
+        ref="interestTitle"
+        :class="showInterestTitle ? 'show' : ''"
+      >
+        <div class="section-title col-auto">More than Code</div>
         <div class="col-12">
           <a href="#/interests">Read more </a>or check me out on YouTube! <br />
           <img
@@ -142,6 +179,17 @@ function openYoutube() {
 </template>
 
 <style>
+.easter-egg {
+  font-size: small;
+  color: grey;
+  position: absolute;
+  top: -10px;
+}
+
+.easter-egg.out {
+  top: -40px;
+}
+
 .youtube-img {
   border: 2px solid #66ccff;
   border-radius: 1rem;
@@ -157,7 +205,7 @@ function openYoutube() {
   color: #ff9966;
 }
 
-.section-title.show {
+.show .section-title {
   opacity: 1;
   animation: title-animation 0.8s;
 }
@@ -186,11 +234,13 @@ function openYoutube() {
   color: #66ccff;
 }
 .profile-pic {
+  user-select: none;
   border-radius: 1rem;
   width: 200px;
   height: 200px;
 }
 .animation {
+  user-select: none;
   height: 3rem;
   overflow: hidden;
   color: white;
