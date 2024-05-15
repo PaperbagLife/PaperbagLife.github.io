@@ -81,9 +81,11 @@ function openYoutube() {
           Who am I?
         </div>
         <div class="col-12">
-          I'm a game developer who loves turning creative ideas into playable experiences, from
-          Unity-powered adventures to quirky Pygame projects. When I'm not coding, you can find me
-          playing the violin or uploading J-pop and gaming videos on my YouTube channel.
+          I'm a software engineer working for Clockwork Systems. Outside of work, I love turning
+          creative ideas into playable experiences, from Unity-powered adventures to quirky Pygame
+          projects. <br />
+          When I'm not coding, you can find me playing the violin or uploading J-pop and gaming
+          videos on my YouTube channel.
         </div>
       </div>
       <div class="row mx-3 py-4 d-flex">
