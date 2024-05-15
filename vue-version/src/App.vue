@@ -35,16 +35,6 @@ function onRouterLinkClick() {
 
 <template>
   <header>
-    <router-link
-      @click="onRouterLinkClick"
-      class="mt-2 home-route router-link ml-3 px-2"
-      :to="homePage.route"
-    >
-      <label class="d-flex my-1">
-        <span class="material-icons-outlined">{{ homePage.icon }}</span>
-        <span class="home-name">{{ homePage.name }}</span>
-      </label>
-    </router-link>
     <div v-if="type !== 'xs'" class="p-2 nav-bar d-flex align-items-center justify-content-end">
       <template v-for="page in pages" :key="page.name">
         <router-link @click="onRouterLinkClick" class="router-link mx-2 px-2" :to="page.route">
@@ -106,6 +96,16 @@ function onRouterLinkClick() {
         </template>
       </div>
     </div>
+    <router-link
+      @click="onRouterLinkClick"
+      class="mt-2 home-route router-link ml-3 px-2"
+      :to="homePage.route"
+    >
+      <label class="d-flex my-1">
+        <span class="material-icons-outlined">{{ homePage.icon }}</span>
+        <span class="home-name">{{ homePage.name }}</span>
+      </label>
+    </router-link>
   </header>
   <div class="viewport">
     <RouterView />
@@ -116,7 +116,7 @@ function onRouterLinkClick() {
 .nav-bar {
   position: fixed;
   width: 100%;
-  z-index: 1;
+  z-index: 2;
   background: white;
 }
 .home-route {

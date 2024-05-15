@@ -3,9 +3,10 @@ import { onMounted, ref } from 'vue'
 import { useBreakpoints } from '../util/dimensions'
 import dpUrl from '../assets/img/dp.jpg'
 import resumeUrl from '../assets/docs/Lu-Yunkun.pdf'
-import { projectEntries } from '@/util/consts'
+import youtubeImg from '../assets/img/youtube_channel.png'
+import { COLUMN_FILL_RATIO, projectEntries } from '@/util/consts'
 import SlideShowComponenet from './components/SlideShowComponenet.vue'
-const { type } = useBreakpoints()
+const { width, type } = useBreakpoints()
 
 const educationTitle = ref<HTMLElement | null>(null)
 const showEducationTitle = ref(false)
@@ -38,6 +39,10 @@ onMounted(() => {
     })
   })
 })
+
+function openYoutube() {
+  window.open('https://www.youtube.com/c/paperbaglife')
+}
 </script>
 
 <template>
@@ -69,16 +74,27 @@ onMounted(() => {
         </div>
       </div>
       <div class="row mx-3 my-2 d-flex">
+        <div class="section-title col-auto" :class="showEducationTitle ? 'show' : ''">
+          Who am I?
+        </div>
+        <div class="col-12">
+          I'm a game developer who loves turning creative ideas into playable experiences, from
+          Unity-powered adventures to quirky Pygame projects. When I'm not coding, you can find me
+          playing the violin or uploading J-pop and gaming videos on my YouTube channel.
+        </div>
+      </div>
+      <div class="row mx-3 my-2 d-flex">
         <div
           ref="educationTitle"
           class="section-title col-auto"
           :class="showEducationTitle ? 'show' : ''"
         >
-          Education
+          School of Thought
         </div>
         <div class="col-12">
           I have a BS in Computer Science from Carnegie Mellon University. <br />
-          Courses I have taken include 15440 Distributed Systems and 15451 Algorithms. <br />
+          Notable courses I have taken include 15440 Distributed Systems and 15451 Algorithms.
+          <br />
           <a href="#/coursework">See full list</a>
         </div>
       </div>
@@ -88,7 +104,7 @@ onMounted(() => {
           class="section-title col-auto"
           :class="showProjectTitle ? 'show' : ''"
         >
-          Projects
+          Fun stuff
         </div>
         <div class="col-12">
           <SlideShowComponenet route="projects" :projects="projectsWithImage" />
@@ -100,15 +116,29 @@ onMounted(() => {
           class="section-title col-auto"
           :class="showInterestTitle ? 'show' : ''"
         >
-          Interests
+          Other than Code
         </div>
-        <div class="col-12"></div>
+        <div class="col-12">
+          Check me out on YouTube!
+          <img
+            @click="openYoutube"
+            class="youtube-img"
+            :src="youtubeImg"
+            :width="width * COLUMN_FILL_RATIO"
+          />
+        </div>
       </div>
     </div>
   </main>
 </template>
 
 <style>
+.youtube-img {
+  border: 2px solid #66ccff;
+  border-radius: 1rem;
+  cursor: pointer;
+}
+
 .section-title {
   font-size: 2rem;
   opacity: 0;

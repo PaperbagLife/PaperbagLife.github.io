@@ -5,6 +5,7 @@ import danmakuImg from '../assets/img/danmaku.png'
 import shopsimImg from '../assets/img/Shopsim.png'
 import shooterImg from '../assets/img/shooter.png'
 import starrailImg from '../assets/img/starrail.png'
+import youtubeImg from '../assets/img/youtube_channel.png'
 
 export const COLUMN_FILL_RATIO = 0.84
 
@@ -71,8 +72,9 @@ export const interests: Project[] = [
     title: 'Violin',
     timeline: '2006 - present',
     description:
-      "Music has been a major part of my life. Whether I'm navigating the depths of sadness or riding the waves of energy, the violin is my faithful companion. I also have a YouTube Channel where I make covers of the songs I love, mostly J-pop and Vocaloid songs",
-    link: 'https://www.youtube.com/c/PaperbagLife'
+      "Music has been a major part of my life. Whether I'm navigating the depths of sadness or riding the waves of energy, the violin is my faithful companion. I also have a YouTube Channel where I make J-pop and Vocaloid covers. Ocassionally I upload edited clips of my gaming journey.",
+    link: 'https://www.youtube.com/c/PaperbagLife',
+    img: youtubeImg
   },
   {
     title: 'Gaming/Game Design',
