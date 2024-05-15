@@ -76,7 +76,7 @@ function openYoutube() {
           </div>
         </div>
       </div>
-      <div class="row mx-3 pb-4 d-flex">
+      <div class="row mx-2 pb-4 d-flex">
         <div class="section-title col-auto" ref="aboutTitle" :class="showAboutTitle ? 'show' : ''">
           Who am I?
         </div>
@@ -88,13 +88,13 @@ function openYoutube() {
           videos on my YouTube channel.
         </div>
       </div>
-      <div class="row mx-3 py-4 d-flex">
+      <div class="row mx-2 py-4 d-flex">
         <div
           ref="educationTitle"
           class="section-title col-auto"
           :class="showEducationTitle ? 'show' : ''"
         >
-          School of Thought
+          Boring Stuff
         </div>
         <div class="col-12">
           I have a BS in Computer Science from Carnegie Mellon University. <br />
@@ -103,13 +103,13 @@ function openYoutube() {
           <a href="#/coursework">See full list</a>
         </div>
       </div>
-      <div class="row mx-3 py-4 d-flex">
+      <div class="row mx-2 py-4 d-flex">
         <div
           ref="projectTitle"
           class="section-title col-auto"
           :class="showProjectTitle ? 'show' : ''"
         >
-          Fun stuff
+          Fun Stuff
         </div>
         <div class="col-12">
           <SlideShowComponenet
@@ -119,13 +119,13 @@ function openYoutube() {
           />
         </div>
       </div>
-      <div class="row mx-3 py-4 d-flex">
+      <div class="row mx-2 py-4 d-flex">
         <div
           ref="interestTitle"
           class="section-title col-auto"
           :class="showInterestTitle ? 'show' : ''"
         >
-          Other than Code
+          More than Code
         </div>
         <div class="col-12">
           <a href="#/interests">Read more </a>or check me out on YouTube! <br />
@@ -144,7 +144,7 @@ function openYoutube() {
 }
 
 .section-title {
-  font-size: 2.4rem;
+  font-size: 2rem;
   font-weight: bold;
   font-style: italic;
   opacity: 0;
