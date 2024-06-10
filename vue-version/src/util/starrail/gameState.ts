@@ -87,6 +87,9 @@ class CombatManager {
   ) {
     // breakEfficiency only missing if skill is heal or shield
     const enemy = gameState.enemies[enemyIdx]
+    if (!enemy) {
+      return
+    }
     enemy.hp -= damage
     makeDamageNumber(damage, CharacterType.ENEMY, enemyIdx, element)
     if (enemy.weakness.includes(element) && enemy.toughness != 0) {
@@ -360,12 +363,32 @@ class TurnManager {
     let enemyIdx = -1
     if (!turn.character) return
     if (turn.character.type === CharacterType.ENEMY) {
-      const enemy = turn.character as Enemy
-      gameState.turnState = { resolvingSubTurn: false, stateEnum: TurnStateEnum.ENEMY_TURN }
-      gameState.turnCharacter = enemy
-      enemyIdx = turn.index
-      const subTurns = await CombatManager.resolveEnemyMove()
-      gameState.currentTurn.subTurns.push(...subTurns)
+      // Check for insert ult
+      if (gameState.ultSignaled != null) {
+        // put the current turn back
+        gameState.queue.unshift(turn)
+        gameState.currentTurn = {
+          character: undefined,
+          index: gameState.ultSignaled,
+          timeUntil: 0,
+          subTurns: [
+            {
+              type: SubTurnType.ULT,
+              character: gameState.playerCharacters[gameState.ultSignaled]
+            }
+          ]
+        }
+        gameState.turnCharacter = null
+        gameState.ultSignaled = null
+        gameState.playerInput = null
+      } else {
+        const enemy = turn.character as Enemy
+        gameState.turnState = { resolvingSubTurn: false, stateEnum: TurnStateEnum.ENEMY_TURN }
+        gameState.turnCharacter = enemy
+        enemyIdx = turn.index
+        const subTurns = await CombatManager.resolveEnemyMove()
+        gameState.currentTurn.subTurns.push(...subTurns)
+      }
     } else {
       // player turn
       const player = turn.character as PlayerCharacter
@@ -448,7 +471,6 @@ class TurnManager {
         await delay(200)
       }
     }
-
     if (!gameState.currentTurn) return
     if (gameState.turnCharacter) {
       gameState.turnCharacter.turnEnd()
@@ -471,6 +493,7 @@ class TurnManager {
         // Assume only player can have reactions
         gameState.focusedTarget.mainTarget = enemyIdx
         const reactPlayer = gameState.turnCharacter as PlayerCharacter
+        gameState.turnState.resolvingSubTurn = true
         if (currentSubTurn.damage && enemyIdx !== -1) {
           gameState.playerAttackTarget = enemyIdx
           gameState.playerTurnAction = PlayerTurnAction.ATTACK
