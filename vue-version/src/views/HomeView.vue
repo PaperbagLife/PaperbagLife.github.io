@@ -39,9 +39,7 @@ const checkTitleBoundary = () => {
 }
 
 onMounted(() => {
-  showAboutTitle.value = true
-  showEducationTitle.value = true
-
+  checkTitleBoundary()
   window.addEventListener('scroll', checkTitleBoundary)
   window.addEventListener('click', checkTitleBoundary)
 })

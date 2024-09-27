@@ -25,8 +25,7 @@ function onImgClick(route?: string) {
       <p>
         <b>{{ entry.title }}</b> <br />
         <i v-if="entry.timeline">{{ entry.timeline }}</i> <br />
-        <a v-if="entry.link" :href="entry.link">Demo<br /></a>
-        <a v-else><br /></a>
+        <a v-if="entry.link" :href="entry.link">Link <br /></a>
         <img
           v-if="entry.img"
           :src="entry.img"
@@ -34,6 +33,17 @@ function onImgClick(route?: string) {
           :width="(type === 'xs' ? width : width / 2) * COLUMN_FILL_RATIO"
           :height="((type === 'xs' ? width : width / 2) * COLUMN_FILL_RATIO) / 2"
           :class="entry.route ? 'img-link' : ''"
+        />
+        <iframe
+          v-if="entry.youtube"
+          :src="entry.youtube"
+          :width="(type === 'xs' ? width : width / 2) * COLUMN_FILL_RATIO"
+          :height="((type === 'xs' ? width : width / 2) * COLUMN_FILL_RATIO) / 2"
+          title="YouTube video player"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen
         />
         <br />
         {{ entry.description }} <br />

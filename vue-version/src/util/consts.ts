@@ -1,8 +1,5 @@
-import coupletroubleImg from '../assets/img/couple_trouble.png'
-import cvshooterImg from '../assets/img/cv_shooter.png'
 import mobaImg from '../assets/img/moba.png'
 import danmakuImg from '../assets/img/danmaku.png'
-import shopsimImg from '../assets/img/Shopsim.png'
 import shooterImg from '../assets/img/shooter.png'
 import starrailImg from '../assets/img/starrail.png'
 import youtubeImg from '../assets/img/youtube_channel.png'
@@ -14,6 +11,7 @@ export type Project = {
   timeline?: string
   description: string
   img?: string
+  youtube?: string
   link?: string
   route?: string
 }
@@ -31,24 +29,21 @@ export const projectEntries: Project[] = [
     timeline: 'Jan 2021',
     description:
       "I created a fully animated 3D animation/simulation of shoppers walking around a shop. I used Unity's navigation to make pathing calculated at real time. I used finalIK to make realistic animations for the shoppers' 3D model. The simulation records paths of each shopper when they choose a destination to walk towards.",
-    img: shopsimImg,
-    link: 'https://www.youtube.com/watch?v=bK8pCRX2u8I'
+    youtube: 'https://www.youtube.com/embed/bK8pCRX2u8I?si=3ElUwQU_ogGa3lnD'
   },
   {
     title: 'Couple Trouble - Python, Pygames, OpenCV',
     timeline: 'Feb 2020',
     description:
       'I lead a team of 4 in Tartan Hacks 2020 and we won the "Best Valentines Hack" award. I was the main programmer for the game system. I used OpenCV to implement a control system that detects two different colors. The players has to hold hands wearing rings to control the car and avoid obstacles. This was an interesting take on the valentine theme, so we stood out and won.',
-    img: coupletroubleImg,
-    link: 'https://www.youtube.com/watch?v=w7r6SNbJifU'
+    youtube: 'https://www.youtube.com/embed/w7r6SNbJifU?si=n6_rSGrgoQ2iCHCF'
   },
   {
     title: 'CV Shooter- Python, Pygames, OpenCV',
     timeline: 'May 2019',
     description:
       "This was my 15-112 Project. It is a top-down space shooter game. I used OpenCV to implement a control system that detects a red color. The game uses a dynamic difficulty system that adjusts itself to the player's performance. The boss has various different attack patterns and a cool laser attack.",
-    img: cvshooterImg,
-    link: 'https://www.youtube.com/watch?v=WvnU6LHCbh4'
+    youtube: 'https://www.youtube.com/embed/WvnU6LHCbh4?si=lkFygfzb--4GqAKh'
   },
   {
     title: 'Cosmo Rail - Vue, Typescript',

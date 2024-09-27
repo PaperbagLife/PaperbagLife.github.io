@@ -117,7 +117,6 @@ function onRouterLinkClick() {
   position: fixed;
   width: 100%;
   z-index: 2;
-  background: white;
 }
 .home-route {
   position: fixed;
