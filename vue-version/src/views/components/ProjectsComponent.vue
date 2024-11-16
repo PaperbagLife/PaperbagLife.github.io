@@ -27,7 +27,7 @@ function onImgClick(route?: string) {
         <i v-if="entry.timeline">{{ entry.timeline }}</i> <br />
         <a v-if="entry.link" :href="entry.link">Link <br /></a>
         <img
-          v-if="entry.img"
+          v-if="entry.img && !entry.youtube"
           :src="entry.img"
           @click="onImgClick(entry.route)"
           :width="(type === 'xs' ? width : width / 2) * COLUMN_FILL_RATIO"
