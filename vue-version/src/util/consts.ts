@@ -4,6 +4,7 @@ import shooterImg from '../assets/img/shooter.png'
 import starrailImg from '../assets/img/starrail.png'
 import youtubeImg from '../assets/img/youtube_channel.png'
 import coupleImg from '../assets/img/couple_trouble.png'
+import bruhImg from '../assets/img/bruh.png'
 
 export const COLUMN_FILL_RATIO = 0.84
 
@@ -199,5 +200,11 @@ export const games: WebGameProject[] = [
     img: starrailImg,
     description: 'Turn based combat similar to Honkai Star Rail',
     route: '/games/starrail'
+  },
+  {
+    title: 'Deck Building',
+    img: bruhImg,
+    description: 'Deck building game',
+    route: '/games/deckbuilding'
   }
 ]

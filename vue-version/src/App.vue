@@ -2,6 +2,9 @@
 import { ref } from 'vue'
 import { useBreakpoints } from './util/dimensions'
 import { RouterLink, RouterView } from 'vue-router'
+import { useHeaderVisibility } from './util/headerVisibility'
+
+const { headerVisible } = useHeaderVisibility()
 const { type } = useBreakpoints()
 
 type Page = {
@@ -34,7 +37,7 @@ function onRouterLinkClick() {
 </script>
 
 <template>
-  <header>
+  <header v-if="headerVisible">
     <div v-if="type !== 'xs'" class="p-2 nav-bar d-flex align-items-center justify-content-end">
       <template v-for="page in pages" :key="page.name">
         <router-link @click="onRouterLinkClick" class="router-link mx-2 px-2" :to="page.route">
@@ -107,7 +110,8 @@ function onRouterLinkClick() {
       </label>
     </router-link>
   </header>
-  <div class="viewport">
+
+  <div class="viewport" :class="{ 'no-header': !headerVisible }">
     <RouterView />
   </div>
 </template>
@@ -175,6 +179,16 @@ function onRouterLinkClick() {
   padding-top: 40px;
   overflow: auto;
 }
+.viewport.no-header {
+  padding-top: 0;
+}
+
+.no-header-home {
+  position: absolute;
+  z-index: 2;
+  left: 1rem;
+}
+
 .nav-menu {
   background: #66ccff;
   position: fixed;

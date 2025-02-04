@@ -6,6 +6,7 @@ import InterestsView from '../views/InterestsView.vue'
 import ShooterGameView from '../views/ShooterGameView.vue'
 import DanmakuView from '../views/DanmakuView.vue'
 import GamesView from '../views/GamesView.vue'
+import DeckBuildingView from '@/views/DeckBuildingView.vue'
 
 const StarRailView = () => import('../views/StarRailView.vue')
 const ThreeView = () => import('../views/ThreeView.vue')
@@ -57,6 +58,14 @@ const router = createRouter({
       path: '/demo',
       name: 'demo',
       component: ThreeView
+    },
+    {
+      path: '/games/deckbuilding',
+      name: 'deckbuilding',
+      component: DeckBuildingView,
+      meta: {
+        hideHeader: true
+      }
     }
   ]
 })
