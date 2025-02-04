@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { getElementColor } from '@/util/starrail/utils'
-import type { Enemy } from '../../util/starrail/consts'
+import type { Enemy } from '../../../util/starrail/consts'
 import {
   ENEMY_TOP_PADDING,
   ENEMY_SIZE,
   GAME_HEIGHT,
   PLAYER_DEFAULT_X_POSITION
-} from '../../util/starrail/consts'
+} from '../../../util/starrail/consts'
 
 const ENEMY_HP_BAR_WIDTH = 48
 const BOSS_HP_WIDTH = 100

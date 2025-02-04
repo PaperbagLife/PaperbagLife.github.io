@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CameraState, Character, TargetMarkers } from '../../util/starrail/consts'
+import type { CameraState, Character, TargetMarkers } from '../../../util/starrail/consts'
 import {
   CharacterType,
   PLAYER_IMAGE_HEIGHT,
@@ -8,7 +8,7 @@ import {
   ALLY_VIEW_TOP_PADDING,
   ENEMY_CENTER_Y,
   CameraMode
-} from '../../util/starrail/consts'
+} from '../../../util/starrail/consts'
 defineProps<{
   turnCharacter: Character | null
   cameraState: CameraState

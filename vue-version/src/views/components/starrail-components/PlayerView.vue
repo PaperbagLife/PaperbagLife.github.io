@@ -11,7 +11,7 @@ import {
   ENEMY_TOP_PADDING,
   TURN_TIME,
   HP_BAR_WIDTH
-} from '../../util/starrail/consts'
+} from '../../../util/starrail/consts'
 import {
   CameraMode,
   HP_BAR_HEIGHT,
@@ -24,13 +24,13 @@ import {
   PROFILE_PIC_WIDTH,
   ULT_GAUGE_BASE_OFFSET,
   PLAYER_DEFAULT_X_POSITION
-} from '../../util/starrail/consts'
+} from '../../../util/starrail/consts'
 
 const BASE_HEIGHT = 280
 const SHIELD_BAR_OFFSET = 0.75
 const PASSIVE_RADIUS = 2
 
-import { getElementColor, range } from '../../util/starrail/utils'
+import { getElementColor, range } from '../../../util/starrail/utils'
 import { PLAYER_HEIGHT } from '@/util/shooter/const'
 
 const props = defineProps<{

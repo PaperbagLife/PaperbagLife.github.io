@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { SubTurn, TimelineTurn } from '../../util/starrail/consts'
+import type { SubTurn, TimelineTurn } from '../../../util/starrail/consts'
 
 defineProps<{
   currentTurn: TimelineTurn | null
