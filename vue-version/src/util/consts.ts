@@ -53,7 +53,7 @@ export const projectEntries: Project[] = [
     description:
       'After I started working on UI for my job, I thought I could use my newfound knowledge to make games using Vue and Typescript. I have made several minigames on my personal website, you can see them under the Games section on this website. The screenshot above is a turn based game with animations using css.',
     img: starrailImg,
-    link: 'paperbaglife@github.io/#/games'
+    link: '#/games'
   },
   {
     title: 'Enter the Arena - C#, Unity',
