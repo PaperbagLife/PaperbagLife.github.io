@@ -10,10 +10,10 @@ import {
 } from '../util/starrail/consts'
 import { useGameState } from '../util/starrail/gameState'
 import { getElementColor } from '../util/starrail/utils'
-import EnemyView from './components/starrail-components/EnemyView.vue'
-import PlayerView from './components/starrail-components/PlayerView.vue'
-import TargetMarkerComponent from './components/starrail-components/TargetMarkerComponent.vue'
-import TimelineComponent from './components/starrail-components/TimelineComponent.vue'
+import EnemyView from './components/starrailComponents/EnemyView.vue'
+import PlayerView from './components/starrailComponents/PlayerView.vue'
+import TargetMarkerComponent from './components/starrailComponents/TargetMarkerComponent.vue'
+import TimelineComponent from './components/starrailComponents/TimelineComponent.vue'
 
 const canvas = { width: GAME_WIDTH, height: GAME_HEIGHT }
 

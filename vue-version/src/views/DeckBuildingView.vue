@@ -1,5 +1,71 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
+import {
+  useGameState,
+  type Card,
+  CardType,
+  CardColor,
+  type RenderCard
+} from '@/util/deckbuilding/gameManager'
+import RenderCardComponent from './components/deckbuildingComponents/RenderCardComponent.vue'
+
+const CARD_WIDTH = 150
+const CARD_HEIGHT = 200
+
+const { gameState, initializeGame } = useGameState()
+
+const renderCards = computed<RenderCard[]>(() => {
+  if (!gameState.currentBattle) {
+    return []
+  }
+  const currentCards: RenderCard[] = []
+  gameState.currentBattle.hand.forEach((card, i) => {
+    currentCards.push({
+      card,
+      centerX: 200 + i * CARD_WIDTH * 1.2,
+      centerY: 700
+    })
+  })
+
+  return currentCards
+})
+
+const cards: Card[] = [
+  {
+    type: CardType.POINT,
+    id: '1',
+    color: CardColor.LIGHT,
+    value: 1
+  },
+  {
+    type: CardType.POINT,
+    id: '2',
+    color: CardColor.LIGHT,
+    value: 2
+  },
+  {
+    type: CardType.POINT,
+    id: '3',
+    color: CardColor.LIGHT,
+    value: 3
+  },
+  {
+    type: CardType.POINT,
+    id: '4',
+    color: CardColor.LIGHT,
+    value: 4
+  },
+  {
+    type: CardType.POINT,
+    id: '5',
+    color: CardColor.LIGHT,
+    value: 5
+  }
+]
+onMounted(() => {
+  initializeGame(cards)
+  gameState.currentBattle.hand = cards
+})
 </script>
 <template>
   <main>
@@ -15,6 +81,12 @@ import { onMounted, ref } from 'vue'
 
         <!-- Red ball in center -->
         <circle cx="800" cy="450" r="50" fill="black" />
+        <!-- Question Area -->
+        <RenderCardComponent
+          v-for="renderCard in renderCards"
+          :key="renderCard.card.id"
+          :renderCard="renderCard"
+        />
       </svg>
     </div>
   </main>

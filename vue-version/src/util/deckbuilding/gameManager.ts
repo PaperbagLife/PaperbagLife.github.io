@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { reactive, ref } from 'vue'
 
 export enum CardColor {
   DARK,
@@ -12,6 +12,7 @@ export enum CardType {
 
 export type PointCard = {
   type: CardType.POINT
+  id: string
   color: CardColor
   value: number
 }
@@ -21,9 +22,16 @@ export type Card = PointCard | UtilityCard
 export type UtilityCard = {
   type: CardType.UTILITY
   name: string
+  id: string
   description: string
   inputCount: number
   operation: (inputs: PointCard[]) => PointCard[]
+}
+
+export type RenderCard = {
+  card: Card
+  centerX: number
+  centerY: number
 }
 
 // Target is a score range, e.g Target = 5, range = +- 1.
@@ -124,9 +132,27 @@ export enum Scene {
 }
 
 export class GameState {
-  scene = ref(Scene.TITLE)
-  gold = ref(0)
-  deck = ref<Card[]>([])
-  blessings = ref<Blessing[]>([])
+  scene = Scene.TITLE
+  gold = 0
+  deck: Card[] = []
+  blessings: Blessing[] = []
   currentBattle: BattleState | null = null
+}
+
+export const enemies = [
+  new Enemy('Slime', 3, 3, 5, 3, 1, 3, [Operations.ADD, Operations.SUBTRACT], [0.5, 1])
+]
+
+const gameState = reactive(new GameState())
+
+function initializeGame(deck: Card[]) {
+  gameState.gold = 0
+  gameState.deck = deck
+  gameState.blessings = []
+  const firstBattle = new BattleState(deck, enemies[0])
+  gameState.currentBattle = firstBattle
+}
+
+export function useGameState() {
+  return { gameState, initializeGame }
 }
