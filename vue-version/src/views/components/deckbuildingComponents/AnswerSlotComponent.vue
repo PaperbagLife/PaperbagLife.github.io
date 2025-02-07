@@ -13,6 +13,8 @@ import {
 import { type Enemy } from '@/util/deckbuilding/gameManager'
 import RenderCardSlotComponent from './RenderCardSlotComponent.vue'
 
+const operatorSize = 30
+
 const props = defineProps<{
   cardSlots: RenderCardSlot[]
   renderOperations: RenderOperations[]
@@ -30,10 +32,11 @@ const props = defineProps<{
     :style="{ transform: `translate(${renderOperation.centerX}px, ${renderOperation.centerY}px)` }"
   >
     <g v-if="renderOperation.operation === Operations.ADD">
-      <circle cx="0" cy="0" r="50" fill="black" />
+      <line :x1="operatorSize" :x2="-operatorSize" class="operator-line" />
+      <line :y1="operatorSize" :y2="-operatorSize" class="operator-line" />
     </g>
     <g v-if="renderOperation.operation === Operations.SUBTRACT">
-      <circle cx="0" cy="0" r="50" fill="black" />
+      <line :x1="operatorSize" :x2="-operatorSize" class="operator-line" />
     </g>
   </g>
 </template>
@@ -41,6 +44,12 @@ const props = defineProps<{
 <style scoped>
 .card-number {
   font-size: 25px;
+}
+
+.operator-line {
+  stroke: black;
+  stroke-width: 4;
+  stroke-linecap: round;
 }
 
 .dark {

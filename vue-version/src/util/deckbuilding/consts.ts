@@ -10,23 +10,29 @@ export enum CardType {
 
 export type PointCard = {
   type: CardType.POINT
-  id: string
+  instanceID?: number
   color: CardColor
   value: number
 }
 
-export type Card = PointCard | UtilityCard
-
-export const CARD_PRICE = 2
-
+// InstanceID is a unique id for each card in deck.
 export type UtilityCard = {
   type: CardType.UTILITY
   name: string
-  id: string
+  instanceID?: number
+  art_id: number
   description: string
   inputCount: number
   operation: (inputs: PointCard[]) => PointCard[]
 }
+
+export type Card = PointCard | UtilityCard
+
+type RequireInstanceID<T> = Omit<T, 'instanceID'> & { instanceID: number }
+
+export type CardInstance = RequireInstanceID<PointCard> | RequireInstanceID<UtilityCard>
+
+export const CARD_PRICE = 2
 
 export type RenderCard = {
   card: Card

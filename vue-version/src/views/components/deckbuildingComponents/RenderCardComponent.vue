@@ -32,13 +32,17 @@ const cardColor = computed(() => {
   if (props.renderCard.card.type !== CardType.POINT) {
     return 'white'
   }
-  return props.renderCard.card.color === CardColor.DARK ? 'black' : 'none'
+  return props.renderCard.card.color === CardColor.DARK ? 'black' : 'white'
 })
 </script>
 
 <template>
   <!-- This will be in an svg-->
-  <g :style="{ transform: originTranslate }">
+  <g
+    :style="{ transform: originTranslate }"
+    class="render-card"
+    :data-instanceID="props.renderCard.card.instanceID"
+  >
     <rect
       :width="CARD_WIDTH"
       :height="CARD_HEIGHT"

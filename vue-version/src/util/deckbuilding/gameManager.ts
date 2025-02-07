@@ -1,5 +1,12 @@
 import { reactive, ref } from 'vue'
-import { type Card, CardColor, Operations, type PointCard, Scene } from './consts'
+import {
+  type Card,
+  CardColor,
+  type CardInstance,
+  Operations,
+  type PointCard,
+  Scene
+} from './consts'
 
 // Target is a score range, e.g Target = 5, range = +- 1.
 // Some blessings work on range some work on target.
@@ -85,13 +92,13 @@ export class Shop {
 export type Floor = Enemy | Shop
 
 export class BattleState {
-  currentDeck: Card[]
-  hand: Card[]
-  discard: Card[]
+  currentDeck: CardInstance[]
+  hand: CardInstance[]
+  discard: CardInstance[]
   animationStack: string[] = []
   enemy: Enemy
   battleEnd: boolean = false
-  constructor(currentDeck: Card[], enemy: Enemy) {
+  constructor(currentDeck: CardInstance[], enemy: Enemy) {
     this.currentDeck = currentDeck
     this.hand = []
     this.discard = []
@@ -164,11 +171,12 @@ export class BattleState {
 export class GameState {
   scene = Scene.TITLE
   gold = 0
-  deck: Card[] = []
+  deck: CardInstance[] = []
   blessings: Blessing[] = []
   currentBattle: BattleState | null = null
   floors: Floor[] = []
   lastEnemy: Enemy | null = null
+  idCounter: number = 0
 }
 
 export const enemies = [
@@ -186,18 +194,21 @@ function gameOver(enemy: Enemy) {
 
 function initializeGame(deck: Card[]) {
   gameState.gold = 0
-  gameState.deck = deck
   gameState.blessings = []
   // Generate a list of floors
   gameState.floors = []
   for (let i = 0; i < 10; i++) {
     gameState.floors.push(enemies[0])
   }
+  gameState.idCounter = 0
+  deck.forEach((card) => {
+    gameState.deck.push({ ...card, instanceID: gameState.idCounter++ })
+  })
 
   // Temporary for testing
   const currentEnemy = gameState.floors.pop()
   if (currentEnemy instanceof Enemy) {
-    gameState.currentBattle = new BattleState(deck, currentEnemy)
+    gameState.currentBattle = new BattleState(gameState.deck, currentEnemy)
     gameState.currentBattle.startBattle()
   }
 }

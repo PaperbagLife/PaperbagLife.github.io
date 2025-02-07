@@ -25,7 +25,7 @@ const originTranslate = computed(() => {
 <template>
   <!-- This will be in an svg-->
   <g>
-    <g :style="{ transform: originTranslate }">
+    <g :style="{ transform: originTranslate }" class="render-card-slot">
       <rect
         :width="CARD_WIDTH"
         :height="CARD_HEIGHT"
