@@ -3,8 +3,8 @@ import { computed } from 'vue'
 import { getElementColor } from '@/util/starrail/utils'
 import type { Enemy } from '../../../util/starrail/consts'
 import {
-  ENEMY_TOP_PADDING,
   ENEMY_SIZE,
+  ENEMY_TOP_PADDING,
   GAME_HEIGHT,
   PLAYER_DEFAULT_X_POSITION
 } from '../../../util/starrail/consts'

@@ -1,38 +1,5 @@
 import { reactive, ref } from 'vue'
-
-export enum CardColor {
-  DARK,
-  LIGHT
-}
-
-export enum CardType {
-  POINT,
-  UTILITY
-}
-
-export type PointCard = {
-  type: CardType.POINT
-  id: string
-  color: CardColor
-  value: number
-}
-
-export type Card = PointCard | UtilityCard
-
-export type UtilityCard = {
-  type: CardType.UTILITY
-  name: string
-  id: string
-  description: string
-  inputCount: number
-  operation: (inputs: PointCard[]) => PointCard[]
-}
-
-export type RenderCard = {
-  card: Card
-  centerX: number
-  centerY: number
-}
+import { type Card, CardColor, Operations, type PointCard, Scene } from './consts'
 
 // Target is a score range, e.g Target = 5, range = +- 1.
 // Some blessings work on range some work on target.
@@ -41,16 +8,11 @@ export type RenderCard = {
 export type Blessing = {
   name: string
   description: string
+  rarity: number // from 0 to 3, N, R, SR, SSR.
   onBattleStart: (state: BattleState) => void
   onNewQuestion: (state: BattleState) => void
   onCalculation: (state: BattleState) => void
   onBattleEnd: (state: BattleState) => void
-}
-
-export enum Operations {
-  ADD,
-  SUBTRACT,
-  MULTIPLY
 }
 
 // Enemies will have a list of targets and ranges.
@@ -58,7 +20,7 @@ export enum Operations {
 // Exact target is considered a critical hit, -2 hp
 // Player has to deplete hp within a certain number of questions.
 // Make sure questionCount >= health.
-class Enemy {
+export class Enemy {
   name: string
   health: number
   questionCount: number
@@ -109,26 +71,94 @@ class Enemy {
   }
 }
 
+export class Shop {
+  id: string
+  cards: Card[]
+  blessings: Blessing[]
+  constructor(id: string, cards: Card[], blessings: Blessing[]) {
+    this.id = id
+    this.cards = cards
+    this.blessings = blessings
+  }
+}
+
+export type Floor = Enemy | Shop
+
 export class BattleState {
   currentDeck: Card[]
   hand: Card[]
   discard: Card[]
   animationStack: string[] = []
   enemy: Enemy
+  battleEnd: boolean = false
   constructor(currentDeck: Card[], enemy: Enemy) {
     this.currentDeck = currentDeck
     this.hand = []
     this.discard = []
     this.enemy = enemy
   }
-}
 
-export enum Scene {
-  TITLE,
-  MAP,
-  BATTLE,
-  SHOP,
-  GAME_OVER
+  drawCards(this: BattleState, count: number) {
+    for (let i = 0; i < count; i++) {
+      if (this.currentDeck.length == 0) {
+        this.currentDeck = this.discard
+        this.discard = []
+      }
+      const card = this.currentDeck.pop()
+      if (card) {
+        this.hand.push(card)
+      }
+    }
+  }
+
+  startBattle(this: BattleState) {
+    this.enemy.nextTarget()
+    this.currentDeck.sort(() => Math.random() - 0.5)
+    this.battleEnd = false
+    this.drawCards(5)
+  }
+
+  resolveQuestion(this: BattleState, cards: PointCard[]) {
+    // Based on the operators, calculate the result
+    let result = cards[0].value
+    for (let i = 1; i < this.enemy.currentOperators.length; i++) {
+      const value = cards[i].value * (cards[i].color === CardColor.DARK ? -1 : 1)
+      switch (this.enemy.currentOperators[i]) {
+        case Operations.ADD:
+          result += value
+          break
+        case Operations.SUBTRACT:
+          result -= value
+          break
+        case Operations.MULTIPLY:
+          result *= value
+          break
+      }
+    }
+    // Check if the result is within the range
+    const exactHit = result === this.enemy.currentTarget
+    const hit = Math.abs(result - this.enemy.currentTarget) <= this.enemy.range
+    if (exactHit) {
+      this.enemy.health -= 2
+    } else if (hit) {
+      this.enemy.health -= 1
+    }
+    this.enemy.questionCount--
+    // Check gameover
+    if (this.enemy.questionCount == 0 && this.enemy.health > 0) {
+      // Game over
+      gameOver(this.enemy)
+    }
+
+    // Check if enemy is dead
+
+    if (this.enemy.health <= 0) {
+      // Enemy is dead
+      this.battleEnd = true
+      return
+    }
+    this.enemy.nextTarget()
+  }
 }
 
 export class GameState {
@@ -137,6 +167,8 @@ export class GameState {
   deck: Card[] = []
   blessings: Blessing[] = []
   currentBattle: BattleState | null = null
+  floors: Floor[] = []
+  lastEnemy: Enemy | null = null
 }
 
 export const enemies = [
@@ -145,12 +177,29 @@ export const enemies = [
 
 const gameState = reactive(new GameState())
 
+function gameOver(enemy: Enemy) {
+  // Show game over screen
+  console.log('Game over')
+  gameState.lastEnemy = enemy
+  gameState.scene = Scene.GAME_OVER
+}
+
 function initializeGame(deck: Card[]) {
   gameState.gold = 0
   gameState.deck = deck
   gameState.blessings = []
-  const firstBattle = new BattleState(deck, enemies[0])
-  gameState.currentBattle = firstBattle
+  // Generate a list of floors
+  gameState.floors = []
+  for (let i = 0; i < 10; i++) {
+    gameState.floors.push(enemies[0])
+  }
+
+  // Temporary for testing
+  const currentEnemy = gameState.floors.pop()
+  if (currentEnemy instanceof Enemy) {
+    gameState.currentBattle = new BattleState(deck, currentEnemy)
+    gameState.currentBattle.startBattle()
+  }
 }
 
 export function useGameState() {

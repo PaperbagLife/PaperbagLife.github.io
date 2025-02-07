@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import router from '@/router'
-import { type Project, COLUMN_FILL_RATIO } from '@/util/consts'
+import { COLUMN_FILL_RATIO, type Project } from '@/util/consts'
 import { useBreakpoints } from '@/util/dimensions'
 const { width, type } = useBreakpoints()
 

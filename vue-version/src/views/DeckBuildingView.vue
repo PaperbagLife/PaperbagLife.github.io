@@ -1,34 +1,99 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
-import {
-  useGameState,
-  type Card,
-  CardType,
-  CardColor,
-  type RenderCard
-} from '@/util/deckbuilding/gameManager'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useGameState } from '@/util/deckbuilding/gameManager'
 import RenderCardComponent from './components/deckbuildingComponents/RenderCardComponent.vue'
-
-const CARD_WIDTH = 150
-const CARD_HEIGHT = 200
+import {
+  type Card,
+  CARD_HEIGHT,
+  CARD_WIDTH,
+  CardColor,
+  CardType,
+  HAND_AREA_RIGHT_PADDING,
+  QUESTION_TOP_PADDING,
+  type RenderCard,
+  type RenderCardSlot,
+  type RenderOperations,
+  SVG_HEIGHT,
+  SVG_WIDTH
+} from '@/util/deckbuilding/consts'
+import AnswerSlotComponent from './components/deckbuildingComponents/AnswerSlotComponent.vue'
 
 const { gameState, initializeGame } = useGameState()
 
-const renderCards = computed<RenderCard[]>(() => {
+const handRenderCards = computed<RenderCard[]>(() => {
   if (!gameState.currentBattle) {
     return []
   }
   const currentCards: RenderCard[] = []
+  const handSize = gameState.currentBattle.hand.length
+  // spread the cards evenly across available area
+  const availableWidth = SVG_WIDTH - HAND_AREA_RIGHT_PADDING
+  const effectiveWidth = availableWidth / (handSize + 1)
+  const startX = effectiveWidth
+  console.log('hand size', handSize, availableWidth, effectiveWidth)
   gameState.currentBattle.hand.forEach((card, i) => {
     currentCards.push({
       card,
-      centerX: 200 + i * CARD_WIDTH * 1.2,
-      centerY: 700
+      centerX: startX + i * effectiveWidth,
+      centerY: SVG_HEIGHT - CARD_HEIGHT / 2
     })
   })
 
   return currentCards
 })
+
+const questionCardSlots = ref<RenderCardSlot[]>([])
+const renderOperations = ref<RenderOperations[]>([])
+
+watch(
+  () => gameState.currentBattle?.enemy.name,
+  () => {
+    console.log('updating quesiton card slots')
+    if (!gameState.currentBattle) {
+      return
+    }
+    const enemy = gameState.currentBattle.enemy
+    const cardSlots: RenderCardSlot[] = []
+    const availableWidth = SVG_WIDTH
+    const effectiveWidth = availableWidth / (enemy.cardCount + 1)
+    const startX = effectiveWidth
+    for (let i = 0; i < enemy.cardCount; i++) {
+      cardSlots.push({
+        renderCard: null,
+        id: i,
+        centerX: startX + i * effectiveWidth,
+        centerY: QUESTION_TOP_PADDING
+      })
+    }
+
+    questionCardSlots.value = cardSlots
+  }
+)
+
+watch(
+  () => gameState.currentBattle?.enemy.currentOperators,
+  () => {
+    if (!gameState.currentBattle) {
+      return
+    }
+    const currentOperators = gameState.currentBattle.enemy.currentOperators
+    console.log('updating render operations', gameState.currentBattle.enemy.currentOperators)
+    const renderOps: RenderOperations[] = []
+    const availableWidth = SVG_WIDTH
+    const effectiveWidth = availableWidth / (currentOperators.length + 1)
+    const startX = effectiveWidth
+    for (let i = 0; i < currentOperators.length; i++) {
+      renderOps.push({
+        operation: currentOperators[i],
+        id: i,
+        centerX: startX + i * effectiveWidth,
+        centerY: 0
+      })
+    }
+    renderOperations.value = renderOps
+    console.log(renderOperations.value)
+  }
+)
 
 const cards: Card[] = [
   {
@@ -46,7 +111,7 @@ const cards: Card[] = [
   {
     type: CardType.POINT,
     id: '3',
-    color: CardColor.LIGHT,
+    color: CardColor.DARK,
     value: 3
   },
   {
@@ -58,13 +123,12 @@ const cards: Card[] = [
   {
     type: CardType.POINT,
     id: '5',
-    color: CardColor.LIGHT,
+    color: CardColor.DARK,
     value: 5
   }
 ]
 onMounted(() => {
   initializeGame(cards)
-  gameState.currentBattle.hand = cards
 })
 </script>
 <template>
@@ -72,18 +136,19 @@ onMounted(() => {
     <div class="col">
       <svg
         class="svg-container"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 1600 900"
+        :viewBox="`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`"
         preserveAspectRatio="xMidYMid meet"
       >
         <!-- White background -->
         <rect width="100%" height="100%" fill="white" />
 
-        <!-- Red ball in center -->
-        <circle cx="800" cy="450" r="50" fill="black" />
         <!-- Question Area -->
+        <AnswerSlotComponent
+          :card-slots="questionCardSlots"
+          :render-operations="renderOperations"
+        ></AnswerSlotComponent>
         <RenderCardComponent
-          v-for="renderCard in renderCards"
+          v-for="renderCard in handRenderCards"
           :key="renderCard.card.id"
           :renderCard="renderCard"
         />
@@ -109,5 +174,9 @@ body {
   width: 100%;
   height: 100vh;
   display: block;
+}
+
+:root {
+  touch-action: pan-x pan-y;
 }
 </style>

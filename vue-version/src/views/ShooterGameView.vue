@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useBreakpoints } from '../util/dimensions'
-import { onMounted, ref, onUnmounted, watch, computed } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import bossImage from '../assets/game/img/boss.png'
 const { type } = useBreakpoints()
 

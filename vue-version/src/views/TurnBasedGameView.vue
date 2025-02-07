@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useBreakpoints } from '../util/dimensions'
-import { onMounted, ref, reactive } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import mainCharacterImage from '../assets/game/img/stelle-avatar.png'
 import bailuImage from '../assets/game/img/bailu-avatar.png'
 import frostSpawnImage from '../assets/game/img/frostspawn.png'

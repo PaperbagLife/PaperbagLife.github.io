@@ -1,29 +1,29 @@
 <script setup lang="ts">
-import { watch, ref } from 'vue'
+import { ref, watch } from 'vue'
 import {
-  PlayerTurnAction,
-  type CameraState,
-  type PlayerCharacter,
-  TargetType,
   AttackType,
-  GAME_HEIGHT,
+  type CameraState,
   ENEMY_SIZE,
   ENEMY_TOP_PADDING,
-  TURN_TIME,
-  HP_BAR_WIDTH
+  GAME_HEIGHT,
+  HP_BAR_WIDTH,
+  type PlayerCharacter,
+  PlayerTurnAction,
+  TargetType,
+  TURN_TIME
 } from '../../../util/starrail/consts'
 import {
+  ALLY_VIEW_TOP_PADDING,
   CameraMode,
   HP_BAR_HEIGHT,
-  PROFILE_PIC_BASE_OFFSET,
+  PLAYER_DEFAULT_X_POSITION,
   PLAYER_IMAGE_HEIGHT,
   PLAYER_IMAGE_WIDTH,
+  PROFILE_PIC_BASE_OFFSET,
   PROFILE_PIC_HEIGHT,
   PROFILE_PIC_SIDE_OFFSET,
-  ALLY_VIEW_TOP_PADDING,
   PROFILE_PIC_WIDTH,
-  ULT_GAUGE_BASE_OFFSET,
-  PLAYER_DEFAULT_X_POSITION
+  ULT_GAUGE_BASE_OFFSET
 } from '../../../util/starrail/consts'
 
 const BASE_HEIGHT = 280

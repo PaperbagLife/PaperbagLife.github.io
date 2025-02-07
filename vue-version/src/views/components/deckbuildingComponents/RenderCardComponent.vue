@@ -1,31 +1,59 @@
 <script setup lang="ts">
-import { ref, defineProps, computed } from 'vue'
-import { type RenderCard, CardType } from '@/util/deckbuilding/gameManager'
+import { computed, defineProps, ref } from 'vue'
+import {
+  CARD_HEIGHT,
+  CARD_WIDTH,
+  CardColor,
+  CardType,
+  type RenderCard
+} from '@/util/deckbuilding/consts'
 
 const props = defineProps<{
   renderCard: RenderCard
+  originX?: number
+  originY?: number
 }>()
 
-const originTranslate = computed(() => {
-  const relOrigin = {
-    originX: props.renderCard.centerX,
-    originY: props.renderCard.centerY
+const POINT_CARD_TEXT_TOP_PADDING = 15
+const POINT_CARD_TEXT_SIDE_PADDING = 20
+
+const origin = computed(() => {
+  return {
+    originX: props.originX ? props.originX : props.renderCard.centerX,
+    originY: props.originY ? props.originY : props.renderCard.centerY
   }
-  return `translate(${relOrigin.originX}px, ${relOrigin.originY}px)`
 })
 
-const CARD_WIDTH = 150
-const CARD_HEIGHT = 200
+const originTranslate = computed(() => {
+  return `translate(${origin.value.originX}px, ${origin.value.originY}px)`
+})
+
+const cardColor = computed(() => {
+  if (props.renderCard.card.type !== CardType.POINT) {
+    return 'white'
+  }
+  return props.renderCard.card.color === CardColor.DARK ? 'black' : 'none'
+})
 </script>
 
 <template>
   <!-- This will be in an svg-->
   <g :style="{ transform: originTranslate }">
-    <rect :width="CARD_WIDTH" :height="CARD_HEIGHT" fill="none" stroke="black" />
+    <rect
+      :width="CARD_WIDTH"
+      :height="CARD_HEIGHT"
+      :x="-CARD_WIDTH / 2"
+      :y="-CARD_HEIGHT / 2"
+      :fill="cardColor"
+      rx="5"
+      stroke="black"
+    />
     <text
+      class="card-number"
+      :class="{ dark: renderCard.card.color === CardColor.DARK }"
       v-if="renderCard.card.type === CardType.POINT"
-      x="0"
-      y="0"
+      :x="POINT_CARD_TEXT_TOP_PADDING - CARD_WIDTH / 2"
+      :y="POINT_CARD_TEXT_SIDE_PADDING - CARD_HEIGHT / 2"
       dominant-baseline="middle"
       text-anchor="middle"
     >
@@ -33,3 +61,13 @@ const CARD_HEIGHT = 200
     </text>
   </g>
 </template>
+
+<style scoped>
+.card-number {
+  font-size: 25px;
+}
+
+.dark {
+  fill: white;
+}
+</style>
