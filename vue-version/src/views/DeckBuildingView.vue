@@ -22,6 +22,7 @@ import AnswerSlotComponent from './components/deckbuildingComponents/AnswerSlotC
 const { gameState, initializeGame } = useGameState()
 
 const svgElement = ref<SVGElement | null>(null)
+const background = ref<SVGRectElement | null>(null)
 
 const handRenderCards = computed<RenderCard[]>(() => {
   if (!gameState.currentBattle) {
@@ -146,21 +147,21 @@ const cards: Card[] = [
 ]
 onMounted(() => {
   initializeGame(cards)
+  window.scrollTo(0, 1)
 })
 
-function onMouseDown(e: MouseEvent | TouchEvent) {
+function onMouseDown(e: PointerEvent) {
   // if the target is a card, then we want to start dragging it
   if (!(e.target instanceof Element)) {
     return
   }
   const card = e.target.closest<SVGGElement>('.render-card')
   if (card) {
+    e.target.setPointerCapture(e.pointerId) // Capture pointer
     const instanceID = card.dataset.instanceID
     if (!instanceID) {
       return
     }
-    console.log('instanceID', instanceID)
-    console.log(instanceIDToRenderCard.value)
     const renderCard = instanceIDToRenderCard.value.get(parseInt(instanceID))
     if (!renderCard) {
       return
@@ -173,33 +174,29 @@ function onMouseDown(e: MouseEvent | TouchEvent) {
   }
 }
 
-function onMouseMove(e: MouseEvent | TouchEvent) {
-  if (!dragCard.value) {
+function onMouseMove(e: PointerEvent) {
+  if (!dragCard.value || !svgElement.value || !background.value) {
     return
   }
-  if (!svgElement.value) {
-    return
-  }
-  console.log('mouse move', e)
-  const rect = svgElement.value.getBoundingClientRect()
+
+  const rect = background.value.getBoundingClientRect()
   const mouseX = e.clientX - rect.left
   const mouseY = e.clientY - rect.top
   const scaleX = SVG_WIDTH / rect.width
   const scaleY = SVG_HEIGHT / rect.height
-
   dragCard.value.centerX = mouseX * scaleX
   dragCard.value.centerY = mouseY * scaleY
-  console.log('drag card', dragCard.value.centerX, dragCard.value.centerY)
 }
 
-function onMouseUp(e: MouseEvent | TouchEvent) {
+function onMouseUp(e: PointerEvent) {
   if (!dragCard.value) {
     return
   }
-  // if we are over a card slot, then we want to place the card there
-  // TODO
-  // if we are not over a card slot, then we want to return the card to the hand
+
   if (dragCard.value?.card.instanceID !== undefined) {
+    // if we are over a card slot, then we want to place the card there
+    // TODO
+    // if we are not over a card slot, then we want to return the card to the hand
     // Push according to the position of the card
     const index = handRenderCards.value.findIndex((card) => card.centerX > dragCard.value!.centerX)
     if (index === -1) {
@@ -217,19 +214,15 @@ function onMouseUp(e: MouseEvent | TouchEvent) {
     <div class="col">
       <svg
         ref="svgElement"
-        class="svg-container"
+        class="svg-container mx-auto my-auto"
         :viewBox="`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`"
         preserveAspectRatio="xMidYMid meet"
-        @mousedown="onMouseDown"
-        @touchstart="onMouseDown"
-        @mousemove="onMouseMove"
-        @touchmove="onMouseMove"
-        @mouseup="onMouseUp"
-        @touchend="onMouseUp"
-        @mouseleave="onMouseLeave"
+        @pointerdown.prevent="onMouseDown"
+        @pointermove.prevent="onMouseMove"
+        @pointerup.prevent="onMouseUp"
       >
         <!-- White background -->
-        <rect width="100%" height="100%" fill="white" />
+        <rect ref="background" width="100%" height="100%" fill="white" />
 
         <!-- Question Area -->
         <AnswerSlotComponent
@@ -264,6 +257,7 @@ body {
   width: 100%;
   height: 100vh;
   display: block;
+  touch-action: none;
 }
 
 :root {
