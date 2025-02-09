@@ -27,13 +27,6 @@ const origin = computed(() => {
 const originTranslate = computed(() => {
   return `translate(${origin.value.originX}px, ${origin.value.originY}px)`
 })
-
-const cardColor = computed(() => {
-  if (props.renderCard.card.type !== CardType.POINT) {
-    return 'white'
-  }
-  return props.renderCard.card.color === CardColor.DARK ? 'black' : 'white'
-})
 </script>
 
 <template>
@@ -44,40 +37,54 @@ const cardColor = computed(() => {
     :class="{ dragged: props.renderCard.dragged }"
     :data-instanceID="props.renderCard.card.instanceID"
   >
-    <rect
-      :width="CARD_WIDTH"
-      :height="CARD_HEIGHT"
-      :x="-CARD_WIDTH / 2"
-      :y="-CARD_HEIGHT / 2"
-      :fill="cardColor"
-      rx="5"
-      stroke="black"
-    />
-    <text
-      class="card-number"
-      :class="{ dark: renderCard.card.color === CardColor.DARK }"
-      v-if="renderCard.card.type === CardType.POINT"
-      :x="POINT_CARD_TEXT_TOP_PADDING - CARD_WIDTH / 2"
-      :y="POINT_CARD_TEXT_SIDE_PADDING - CARD_HEIGHT / 2"
-      dominant-baseline="middle"
-      text-anchor="middle"
-    >
-      {{ renderCard.card.value }}
-    </text>
+    <g v-if="renderCard.card.type === CardType.POINT">
+      <rect
+        class="render-card-rect"
+        :class="{ dark: renderCard.card.color === CardColor.DARK }"
+        :width="CARD_WIDTH"
+        :height="CARD_HEIGHT"
+        :x="-CARD_WIDTH / 2"
+        :y="-CARD_HEIGHT / 2"
+        rx="5"
+        stroke="black"
+      />
+      <text
+        class="card-number"
+        :class="{ dark: renderCard.card.color === CardColor.DARK }"
+        :x="POINT_CARD_TEXT_TOP_PADDING - CARD_WIDTH / 2"
+        :y="POINT_CARD_TEXT_SIDE_PADDING - CARD_HEIGHT / 2"
+        dominant-baseline="middle"
+        text-anchor="middle"
+      >
+        {{ renderCard.card.value }}
+      </text>
+    </g>
   </g>
 </template>
 
-<style>
+<style scoped>
 .card-number {
   font-size: 25px;
   user-select: none;
+}
+
+.dragging .render-card {
+  pointer-events: none;
+}
+
+.render-card-rect {
+  fill: rgb(251, 255, 206);
+}
+
+.render-card-rect.dark {
+  fill: rgb(4, 0, 49);
 }
 
 .render-card {
   cursor: pointer;
 }
 
-.dark {
+.card-number.dark {
   fill: white;
 }
 </style>
