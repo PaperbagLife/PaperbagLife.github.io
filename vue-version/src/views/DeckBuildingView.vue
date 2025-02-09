@@ -277,8 +277,14 @@ body {
   overflow: hidden;
 }
 
+body {
+  position: fixed;
+  -webkit-overflow-scrolling: touch;
+}
+
 .svg-container {
   width: 100%;
+  max-height: 100dvh;
   height: 100vh;
   display: block;
   touch-action: none;
