@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useGameState } from '@/util/deckbuilding/gameManager'
 import RenderCardComponent from './components/deckbuildingComponents/RenderCardComponent.vue'
 import {
@@ -10,6 +10,7 @@ import {
   type CardInstance,
   CardType,
   HAND_AREA_RIGHT_PADDING,
+  type PointCard,
   QUESTION_TOP_PADDING,
   type RenderCard,
   type RenderCardSlot,
@@ -18,11 +19,18 @@ import {
   SVG_WIDTH
 } from '@/util/deckbuilding/consts'
 import AnswerSlotComponent from './components/deckbuildingComponents/AnswerSlotComponent.vue'
+import EnemyComponent from './components/deckbuildingComponents/EnemyComponent.vue'
 
 const { gameState, initializeGame } = useGameState()
 
+const SUBMIT_BUTTON_PADDING = 160
+
 const svgElement = ref<SVGElement | null>(null)
 const background = ref<SVGRectElement | null>(null)
+
+const submitButtonVisible = computed(() => {
+  return questionCardSlots.value.every((slot) => slot.renderCard !== null)
+})
 
 const handRenderCards = computed<RenderCard[]>(() => {
   if (!gameState.currentBattle) {
@@ -39,7 +47,7 @@ const handRenderCards = computed<RenderCard[]>(() => {
       card,
       centerX: startX + i * effectiveWidth,
       centerY: SVG_HEIGHT - CARD_HEIGHT / 2,
-      dragged:false
+      dragged: false
     })
   })
 
@@ -158,7 +166,6 @@ function onMouseDown(e: PointerEvent) {
   }
   const card = e.target.closest<SVGGElement>('.render-card')
   if (card) {
-    console.log("dragging card", card)
     e.target.setPointerCapture(e.pointerId) // Capture pointer
     const instanceID = card.dataset.instanceID
     if (!instanceID) {
@@ -169,9 +176,11 @@ function onMouseDown(e: PointerEvent) {
       return
     }
     dragCard.value = renderCard
-    renderCard.dragged = true
+    dragging.value = true
     // If the card is in the hand, remove it from the hand
-    const handIndex = gameState.currentBattle?.hand.findIndex((c) => c.instanceID === renderCard.card.instanceID)
+    const handIndex = gameState.currentBattle?.hand.findIndex(
+      (c) => c.instanceID === renderCard.card.instanceID
+    )
     if (handIndex !== undefined && handIndex !== -1) {
       gameState.currentBattle?.hand.splice(handIndex, 1)
     }
@@ -199,6 +208,12 @@ function onMouseMove(e: PointerEvent) {
 }
 
 function onMouseUp(e: PointerEvent) {
+  if (e.target instanceof Element && e.target.closest('.submit-button') && !dragging.value) {
+    console.log('submitting')
+    const cards = questionCardSlots.value.map((slot) => slot.renderCard?.card as PointCard)
+    gameState.currentBattle?.resolveQuestion(cards)
+    return
+  }
   if (!dragCard.value) {
     return
   }
@@ -208,13 +223,18 @@ function onMouseUp(e: PointerEvent) {
     if (!(e.target instanceof Element)) {
       return
     }
-    const cardSlot = e.target.closest<SVGGElement>('.render-card-slot')
+    const cardSlot = e.target.closest<SVGGElement>('g')
+    console.log(cardSlot)
     const slotId = cardSlot?.dataset.id
     if (slotId) {
       const slot = questionCardSlots.value.find((slot) => slot.id === parseInt(slotId))
       if (slot) {
+        // If card already in slot, return it to the hand
+        if (slot.renderCard) {
+          gameState.currentBattle?.hand.push(slot.renderCard.card as CardInstance)
+        }
         slot.renderCard = dragCard.value
-        dragCard.value.dragged = false
+        dragging.value = false
         dragCard.value = null
         return
       }
@@ -231,6 +251,7 @@ function onMouseUp(e: PointerEvent) {
     dragCard.value = null
   }
   dragCard.value = null
+  dragging.value = false
 }
 </script>
 <template>
@@ -239,6 +260,7 @@ function onMouseUp(e: PointerEvent) {
       <svg
         ref="svgElement"
         class="svg-container mx-auto my-auto"
+        :class="{ dragging: dragging }"
         :viewBox="`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`"
         preserveAspectRatio="xMidYMid meet"
         @pointerdown.prevent="onMouseDown"
@@ -252,22 +274,52 @@ function onMouseUp(e: PointerEvent) {
         <AnswerSlotComponent
           :card-slots="questionCardSlots"
           :render-operations="renderOperations"
-        ></AnswerSlotComponent>
+        />
         <RenderCardComponent
           v-for="renderCard in handRenderCards"
           :key="renderCard.card.instanceID"
           :renderCard="renderCard"
         />
         <RenderCardComponent v-if="dragCard" :renderCard="dragCard" />
+
+        <!-- Submit Button -->
+        <rect
+          v-if="submitButtonVisible"
+          class="submit-button"
+          :x="SVG_WIDTH - HAND_AREA_RIGHT_PADDING"
+          :y="SVG_HEIGHT - SUBMIT_BUTTON_PADDING"
+          rx="10"
+          :width="120"
+          :height="60"
+        />
+
+        <!-- Enemy -->
+        <EnemyComponent v-if="gameState.currentBattle" :enemy="gameState.currentBattle.enemy" />
       </svg>
     </div>
   </main>
 </template>
-<style lang="css" scoped>
+<style lang="scss">
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+.render-card {
+  transition: transform 1s;
+}
+
+.dragging {
+  .render-card {
+    pointer-events: none;
+    transition: none;
+  }
+}
+
+.submit-button {
+  fill: green;
+  cursor: pointer;
 }
 
 html,

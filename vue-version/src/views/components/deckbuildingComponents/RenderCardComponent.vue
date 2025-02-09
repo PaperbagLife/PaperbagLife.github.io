@@ -67,7 +67,7 @@ const cardColor = computed(() => {
   </g>
 </template>
 
-<style scoped>
+<style>
 .card-number {
   font-size: 25px;
   user-select: none;
@@ -75,10 +75,6 @@ const cardColor = computed(() => {
 
 .render-card {
   cursor: pointer;
-}
-
-.dragged {
-  pointer-events: none;
 }
 
 .dark {
