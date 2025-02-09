@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import {
   CARD_HEIGHT,
   CARD_WIDTH,
@@ -19,6 +19,10 @@ const props = defineProps<{
   cardSlots: RenderCardSlot[]
   renderOperations: RenderOperations[]
 }>()
+
+onMounted(() => {
+  console.log('AnswerSlotComponent mounted', props.renderOperations)
+})
 </script>
 
 <template>

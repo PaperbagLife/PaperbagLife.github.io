@@ -78,13 +78,13 @@ const dragging = ref(false)
 const dragCard = ref<RenderCard | null>(null)
 
 watch(
-  () => gameState.currentBattle?.enemy.name,
+  () => gameState.currentBattle?.enemy.currentQuestionIndex,
   () => {
-    console.log('updating quesiton card slots')
     if (!gameState.currentBattle) {
       return
     }
     const enemy = gameState.currentBattle.enemy
+    const currentQuestionIndex = gameState.currentBattle.enemy.currentQuestionIndex
     const cardSlots: RenderCardSlot[] = []
     const availableWidth = SVG_WIDTH
     const effectiveWidth = availableWidth / (enemy.cardCount + 1)
@@ -92,7 +92,7 @@ watch(
     for (let i = 0; i < enemy.cardCount; i++) {
       cardSlots.push({
         renderCard: null,
-        id: i,
+        id: `${currentQuestionIndex}-${i}`,
         centerX: startX + i * effectiveWidth,
         centerY: QUESTION_TOP_PADDING
       })
@@ -109,7 +109,6 @@ watch(
       return
     }
     const currentOperators = gameState.currentBattle.enemy.currentOperators
-    console.log('updating render operations', gameState.currentBattle.enemy.currentOperators)
     const renderOps: RenderOperations[] = []
     const availableWidth = SVG_WIDTH
     const effectiveWidth = availableWidth / (currentOperators.length + 2)
@@ -140,12 +139,37 @@ const cards: Card[] = [
   },
   {
     type: CardType.POINT,
-    color: CardColor.DARK,
+    color: CardColor.LIGHT,
     value: 3
   },
   {
     type: CardType.POINT,
     color: CardColor.LIGHT,
+    value: 4
+  },
+  {
+    type: CardType.POINT,
+    color: CardColor.LIGHT,
+    value: 5
+  },
+  {
+    type: CardType.POINT,
+    color: CardColor.DARK,
+    value: 1
+  },
+  {
+    type: CardType.POINT,
+    color: CardColor.DARK,
+    value: 2
+  },
+  {
+    type: CardType.POINT,
+    color: CardColor.DARK,
+    value: 3
+  },
+  {
+    type: CardType.POINT,
+    color: CardColor.DARK,
     value: 4
   },
   {
@@ -166,7 +190,6 @@ function onMouseDown(e: PointerEvent) {
   }
   const card = e.target.closest<SVGGElement>('.render-card')
   if (card) {
-    e.target.setPointerCapture(e.pointerId) // Capture pointer
     const instanceID = card.dataset.instanceID
     if (!instanceID) {
       return
@@ -209,7 +232,6 @@ function onMouseMove(e: PointerEvent) {
 
 function onMouseUp(e: PointerEvent) {
   if (e.target instanceof Element && e.target.closest('.submit-button') && !dragging.value) {
-    console.log('submitting')
     const cards = questionCardSlots.value.map((slot) => slot.renderCard?.card as PointCard)
     gameState.currentBattle?.resolveQuestion(cards)
     return
@@ -223,11 +245,11 @@ function onMouseUp(e: PointerEvent) {
     if (!(e.target instanceof Element)) {
       return
     }
-    const cardSlot = e.target.closest<SVGGElement>('g')
+    const cardSlot = e.target.closest<SVGGElement>('.render-card-slot')
     console.log(cardSlot)
     const slotId = cardSlot?.dataset.id
     if (slotId) {
-      const slot = questionCardSlots.value.find((slot) => slot.id === parseInt(slotId))
+      const slot = questionCardSlots.value.find((slot) => slot.id === slotId)
       if (slot) {
         // If card already in slot, return it to the hand
         if (slot.renderCard) {
@@ -269,6 +291,8 @@ function onMouseUp(e: PointerEvent) {
       >
         <!-- White background -->
         <rect ref="background" width="100%" height="100%" fill="white" />
+
+        <text x="800" y="20" v-if="gameState.currentBattle?.animationStack.length">ANIMATING</text>
 
         <!-- Question Area -->
         <AnswerSlotComponent

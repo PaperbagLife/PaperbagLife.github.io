@@ -42,7 +42,7 @@ export type RenderCard = {
 }
 
 export type RenderCardSlot = {
-  id: number
+  id: string
   centerX: number
   centerY: number
   renderCard: RenderCard | null
@@ -57,9 +57,9 @@ export enum Scene {
 }
 
 export enum Operations {
-  ADD,
-  SUBTRACT,
-  MULTIPLY
+  ADD = 'ADD',
+  SUBTRACT = 'SUBTRACT',
+  MULTIPLY = 'MULTIPLY'
 }
 
 export type RenderOperations = {
@@ -78,3 +78,5 @@ export const SVG_WIDTH = 1600
 export const SVG_HEIGHT = 900
 
 export const QUESTION_TOP_PADDING = 400
+
+export const CARD_SCORE_ANIMATION_DURATION = 1000

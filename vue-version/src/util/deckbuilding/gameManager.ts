@@ -1,6 +1,7 @@
 import { reactive, ref } from 'vue'
 import {
   type Card,
+  CARD_SCORE_ANIMATION_DURATION,
   CardColor,
   type CardInstance,
   Operations,
@@ -39,6 +40,7 @@ export class Enemy {
   operators: Operations[]
   operatorsCDF: number[]
   currentOperators: Operations[]
+  currentQuestionIndex: number = 0
   constructor(
     name: string,
     health: number,
@@ -61,6 +63,7 @@ export class Enemy {
     this.operators = operators
     this.operatorsCDF = operatorCDF
     this.currentOperators = []
+    this.currentQuestionIndex = 0
   }
   nextTarget(this: Enemy) {
     this.currentTarget = Math.floor(
@@ -95,7 +98,8 @@ export class BattleState {
   currentDeck: CardInstance[]
   hand: CardInstance[]
   discard: CardInstance[]
-  animationStack: string[] = []
+  animationStack: number[] = []
+  blessings: Blessing[] = []
   enemy: Enemy
   battleEnd: boolean = false
   constructor(currentDeck: CardInstance[], enemy: Enemy) {
@@ -118,8 +122,9 @@ export class BattleState {
     }
   }
 
-  startBattle(this: BattleState) {
+  startBattle(this: BattleState, blessings: Blessing[]) {
     this.enemy.nextTarget()
+    this.blessings = blessings
     this.currentDeck.sort(() => Math.random() - 0.5)
     this.battleEnd = false
     this.drawCards(5)
@@ -127,9 +132,9 @@ export class BattleState {
 
   resolveQuestion(this: BattleState, cards: PointCard[]) {
     // Based on the operators, calculate the result
-    let result = cards[0].value
-    for (let i = 1; i < this.enemy.currentOperators.length; i++) {
-      const value = cards[i].value * (cards[i].color === CardColor.DARK ? -1 : 1)
+    let result = cards[0].value * (cards[0].color === CardColor.DARK ? -1 : 1)
+    for (let i = 0; i < this.enemy.currentOperators.length; i++) {
+      const value = cards[i + 1].value * (cards[i + 1].color === CardColor.DARK ? -1 : 1)
       switch (this.enemy.currentOperators[i]) {
         case Operations.ADD:
           result += value
@@ -141,7 +146,12 @@ export class BattleState {
           result *= value
           break
       }
+      this.animationStack.push(CARD_SCORE_ANIMATION_DURATION)
     }
+    // blessing
+    this.blessings.forEach((blessing) => {
+      blessing.onCalculation(this)
+    })
     // Check if the result is within the range
     const exactHit = result === this.enemy.currentTarget
     const hit = Math.abs(result - this.enemy.currentTarget) <= this.enemy.range
@@ -164,7 +174,20 @@ export class BattleState {
       this.battleEnd = true
       return
     }
-    this.enemy.nextTarget()
+    this.nextQuestion()
+  }
+
+  nextQuestion(this: BattleState) {
+    if (this.animationStack.length !== 0) {
+      const animationTime = this.animationStack.shift()
+      setTimeout(() => {
+        this.nextQuestion()
+      }, animationTime)
+    } else {
+      this.enemy.nextTarget()
+      this.drawCards(3)
+      this.enemy.currentQuestionIndex++
+    }
   }
 }
 
@@ -209,7 +232,7 @@ function initializeGame(deck: Card[]) {
   const currentEnemy = gameState.floors.pop()
   if (currentEnemy instanceof Enemy) {
     gameState.currentBattle = new BattleState(gameState.deck, currentEnemy)
-    gameState.currentBattle.startBattle()
+    gameState.currentBattle.startBattle(gameState.blessings)
   }
 }
 

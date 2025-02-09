@@ -33,6 +33,7 @@ const originTranslate = computed(() => {
       <tspan :x="CARD_WIDTH / 2" y="-20">{{
         `Target: ${enemy.currentTarget} ± ${enemy.range}`
       }}</tspan>
+      <tspan :x="CARD_WIDTH / 2" y="20">{{ `HP: ${enemy.health}` }}</tspan>
     </text>
   </g>
 </template>
