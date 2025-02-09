@@ -38,6 +38,7 @@ export type RenderCard = {
   card: Card
   centerX: number
   centerY: number
+  dragged: boolean
 }
 
 export type RenderCardSlot = {

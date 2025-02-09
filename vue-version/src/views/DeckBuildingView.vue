@@ -34,12 +34,12 @@ const handRenderCards = computed<RenderCard[]>(() => {
   const availableWidth = SVG_WIDTH - HAND_AREA_RIGHT_PADDING
   const effectiveWidth = availableWidth / (handSize + 1)
   const startX = effectiveWidth
-  console.log('hand', gameState.currentBattle.hand)
   gameState.currentBattle.hand.forEach((card, i) => {
     currentCards.push({
       card,
       centerX: startX + i * effectiveWidth,
-      centerY: SVG_HEIGHT - CARD_HEIGHT / 2
+      centerY: SVG_HEIGHT - CARD_HEIGHT / 2,
+      dragged:false
     })
   })
 
@@ -56,6 +56,12 @@ const instanceIDToRenderCard = computed(() => {
       return
     }
     instanceIDToRenderCard.set(renderCard.card.instanceID, renderCard)
+  })
+  questionCardSlots.value.forEach((slot) => {
+    if (slot.renderCard?.card.instanceID === undefined) {
+      return
+    }
+    instanceIDToRenderCard.set(slot.renderCard.card.instanceID, slot.renderCard)
   })
   return instanceIDToRenderCard
 })
@@ -116,31 +122,26 @@ watch(
 const cards: Card[] = [
   {
     type: CardType.POINT,
-    id: '1',
     color: CardColor.LIGHT,
     value: 1
   },
   {
     type: CardType.POINT,
-    id: '2',
     color: CardColor.LIGHT,
     value: 2
   },
   {
     type: CardType.POINT,
-    id: '3',
     color: CardColor.DARK,
     value: 3
   },
   {
     type: CardType.POINT,
-    id: '4',
     color: CardColor.LIGHT,
     value: 4
   },
   {
     type: CardType.POINT,
-    id: '5',
     color: CardColor.DARK,
     value: 5
   }
@@ -157,6 +158,7 @@ function onMouseDown(e: PointerEvent) {
   }
   const card = e.target.closest<SVGGElement>('.render-card')
   if (card) {
+    console.log("dragging card", card)
     e.target.setPointerCapture(e.pointerId) // Capture pointer
     const instanceID = card.dataset.instanceID
     if (!instanceID) {
@@ -167,10 +169,18 @@ function onMouseDown(e: PointerEvent) {
       return
     }
     dragCard.value = renderCard
-    gameState.currentBattle?.hand.splice(
-      gameState.currentBattle.hand.findIndex((c) => c.instanceID === renderCard.card.instanceID),
-      1
-    )
+    renderCard.dragged = true
+    // If the card is in the hand, remove it from the hand
+    const handIndex = gameState.currentBattle?.hand.findIndex((c) => c.instanceID === renderCard.card.instanceID)
+    if (handIndex !== undefined && handIndex !== -1) {
+      gameState.currentBattle?.hand.splice(handIndex, 1)
+    }
+    // If the card is in a slot, remove it from the slot
+    questionCardSlots.value.forEach((slot) => {
+      if (slot.renderCard?.card.instanceID === renderCard.card.instanceID) {
+        slot.renderCard = null
+      }
+    })
   }
 }
 
@@ -195,7 +205,21 @@ function onMouseUp(e: PointerEvent) {
 
   if (dragCard.value?.card.instanceID !== undefined) {
     // if we are over a card slot, then we want to place the card there
-    // TODO
+    if (!(e.target instanceof Element)) {
+      return
+    }
+    const cardSlot = e.target.closest<SVGGElement>('.render-card-slot')
+    const slotId = cardSlot?.dataset.id
+    if (slotId) {
+      const slot = questionCardSlots.value.find((slot) => slot.id === parseInt(slotId))
+      if (slot) {
+        slot.renderCard = dragCard.value
+        dragCard.value.dragged = false
+        dragCard.value = null
+        return
+      }
+    }
+
     // if we are not over a card slot, then we want to return the card to the hand
     // Push according to the position of the card
     const index = handRenderCards.value.findIndex((card) => card.centerX > dragCard.value!.centerX)

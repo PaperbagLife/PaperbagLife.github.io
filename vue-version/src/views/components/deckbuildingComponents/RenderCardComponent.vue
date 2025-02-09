@@ -41,6 +41,7 @@ const cardColor = computed(() => {
   <g
     :style="{ transform: originTranslate }"
     class="render-card"
+    :class="{ dragged: props.renderCard.dragged }"
     :data-instanceID="props.renderCard.card.instanceID"
   >
     <rect
@@ -74,6 +75,10 @@ const cardColor = computed(() => {
 
 .render-card {
   cursor: pointer;
+}
+
+.dragged {
+  pointer-events: none;
 }
 
 .dark {

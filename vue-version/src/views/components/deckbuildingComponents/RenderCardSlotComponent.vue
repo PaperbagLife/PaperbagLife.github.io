@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import {
   CARD_HEIGHT,
   CARD_WIDTH,
@@ -20,12 +20,16 @@ const originTranslate = computed(() => {
   }
   return `translate(${relOrigin.originX}px, ${relOrigin.originY}px)`
 })
+
+watch(() => props.renderCardSlot, () => {
+  console.log('renderCardSlot changed')
+})
 </script>
 
 <template>
   <!-- This will be in an svg-->
-  <g>
-    <g :style="{ transform: originTranslate }" class="render-card-slot">
+  <g >
+    <g :style="{ transform: originTranslate }" :data-id="renderCardSlot.id" class="render-card-slot">
       <rect
         :width="CARD_WIDTH"
         :height="CARD_HEIGHT"
@@ -34,11 +38,10 @@ const originTranslate = computed(() => {
         rx="5"
         fill="none"
         stroke="black"
+        pointer-events="visible"
       />
-      <g>
-        <line :x1="-20" :y1="0" :x2="20" :y2="0" stroke="black" />
-        <line :x1="0" :y1="-20" :x2="0" :y2="20" stroke="black" />
-      </g>
+      <line :x1="-20" :y1="0" :x2="20" :y2="0" stroke="black" />
+      <line :x1="0" :y1="-20" :x2="0" :y2="20" stroke="black" />
     </g>
     <RenderCardComponent
       v-if="renderCardSlot.renderCard != null"
