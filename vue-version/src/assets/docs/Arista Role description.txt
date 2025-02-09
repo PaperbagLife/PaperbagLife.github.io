@@ -1,3 +1,0 @@
-I worked on the Engineering Productivity (EngProd) team. 
-I was in charge of creating tools to boost other engineer's productivity.
-I worked with Kubernetes, CI/CD pipelines, and git/perforce.
