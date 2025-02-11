@@ -39,6 +39,7 @@ export type RenderCard = {
   centerX: number
   centerY: number
   dragged: boolean
+  shake?: boolean
 }
 
 export type RenderCardSlot = {
@@ -79,4 +80,5 @@ export const SVG_HEIGHT = 900
 
 export const QUESTION_TOP_PADDING = 400
 
-export const CARD_SCORE_ANIMATION_DURATION = 1000
+export const CARD_SCORE_ANIMATION_DURATION = 1500
+export const ENEMY_DAMAGE_ANIMATION_DURATION = 1500

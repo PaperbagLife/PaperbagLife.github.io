@@ -34,10 +34,10 @@ const originTranslate = computed(() => {
   <g
     :style="{ transform: originTranslate }"
     class="render-card"
-    :class="{ dragged: props.renderCard.dragged }"
-    :data-instanceID="props.renderCard.card.instanceID"
+    :class="{ dragged: renderCard.dragged }"
+    :data-instanceID="renderCard.card.instanceID"
   >
-    <g v-if="renderCard.card.type === CardType.POINT">
+    <g v-if="renderCard.card.type === CardType.POINT" :class="{ shake: renderCard.shake }">
       <rect
         class="render-card-rect"
         :class="{ dark: renderCard.card.color === CardColor.DARK }"
@@ -66,6 +66,28 @@ const originTranslate = computed(() => {
 .card-number {
   font-size: 25px;
   user-select: none;
+}
+
+.shake {
+  animation: shake 0.5s;
+}
+
+@keyframes shake {
+  0% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-5deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+  75% {
+    transform: rotate(-5deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
 }
 
 .dragging .render-card {

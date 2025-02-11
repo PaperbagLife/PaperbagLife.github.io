@@ -4,6 +4,7 @@ import {
   CARD_SCORE_ANIMATION_DURATION,
   CardColor,
   type CardInstance,
+  ENEMY_DAMAGE_ANIMATION_DURATION,
   Operations,
   type PointCard,
   Scene
@@ -94,11 +95,17 @@ export class Shop {
 
 export type Floor = Enemy | Shop
 
+export type ScoreAnimation = {
+  duration: number
+  value?: number
+}
+
 export class BattleState {
   currentDeck: CardInstance[]
   hand: CardInstance[]
   discard: CardInstance[]
-  animationStack: number[] = []
+  animationStack: ScoreAnimation[] = []
+  currentValue: number = 0
   blessings: Blessing[] = []
   enemy: Enemy
   battleEnd: boolean = false
@@ -133,6 +140,7 @@ export class BattleState {
   resolveQuestion(this: BattleState, cards: PointCard[]) {
     // Based on the operators, calculate the result
     let result = cards[0].value * (cards[0].color === CardColor.DARK ? -1 : 1)
+    this.animationStack.push({ duration: CARD_SCORE_ANIMATION_DURATION, value: result })
     for (let i = 0; i < this.enemy.currentOperators.length; i++) {
       const value = cards[i + 1].value * (cards[i + 1].color === CardColor.DARK ? -1 : 1)
       switch (this.enemy.currentOperators[i]) {
@@ -146,7 +154,7 @@ export class BattleState {
           result *= value
           break
       }
-      this.animationStack.push(CARD_SCORE_ANIMATION_DURATION)
+      this.animationStack.push({ duration: CARD_SCORE_ANIMATION_DURATION, value: result })
     }
     // blessing
     this.blessings.forEach((blessing) => {
@@ -155,6 +163,7 @@ export class BattleState {
     // Check if the result is within the range
     const exactHit = result === this.enemy.currentTarget
     const hit = Math.abs(result - this.enemy.currentTarget) <= this.enemy.range
+    this.animationStack.push({ duration: ENEMY_DAMAGE_ANIMATION_DURATION })
     if (exactHit) {
       this.enemy.health -= 2
     } else if (hit) {
@@ -179,11 +188,17 @@ export class BattleState {
 
   nextQuestion(this: BattleState) {
     if (this.animationStack.length !== 0) {
-      const animationTime = this.animationStack.shift()
+      console.log('animating')
+      const animation = this.animationStack.shift()
+      if (animation?.value) {
+        this.currentValue = animation.value
+      }
       setTimeout(() => {
         this.nextQuestion()
-      }, animationTime)
+      }, animation?.duration)
     } else {
+      console.log('animation finished')
+      this.currentValue = 0
       this.enemy.nextTarget()
       this.drawCards(3)
       this.enemy.currentQuestionIndex++

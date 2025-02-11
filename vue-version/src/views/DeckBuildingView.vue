@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
-import { useGameState } from '@/util/deckbuilding/gameManager'
+import { BattleState, useGameState } from '@/util/deckbuilding/gameManager'
 import RenderCardComponent from './components/deckbuildingComponents/RenderCardComponent.vue'
 import {
   type Card,
   CARD_HEIGHT,
+  CARD_SCORE_ANIMATION_DURATION,
   CARD_WIDTH,
   CardColor,
   type CardInstance,
@@ -230,10 +231,30 @@ function onMouseMove(e: PointerEvent) {
   dragCard.value.centerY = mouseY * scaleY
 }
 
+function submitQuestion() {
+  const cards = questionCardSlots.value.map((slot) => slot.renderCard?.card as PointCard)
+  gameState.currentBattle?.resolveQuestion(cards)
+  // Add a shaking effect to all cards
+  questionCardSlots.value.forEach((cardSlot, i) => {
+    setTimeout(() => {
+      if (!cardSlot.renderCard) {
+        return
+      }
+      cardSlot.renderCard.shake = true
+      setTimeout(() => {
+        if (!cardSlot.renderCard) {
+          return
+        }
+        cardSlot.renderCard.shake = false
+      }, CARD_SCORE_ANIMATION_DURATION)
+    }, i * CARD_SCORE_ANIMATION_DURATION)
+  })
+  return
+}
+
 function onMouseUp(e: PointerEvent) {
   if (e.target instanceof Element && e.target.closest('.submit-button') && !dragging.value) {
-    const cards = questionCardSlots.value.map((slot) => slot.renderCard?.card as PointCard)
-    gameState.currentBattle?.resolveQuestion(cards)
+    submitQuestion()
     return
   }
   if (!dragCard.value) {
@@ -299,6 +320,9 @@ function onMouseUp(e: PointerEvent) {
           :card-slots="questionCardSlots"
           :render-operations="renderOperations"
         />
+        <text x="800" y="100" class="current-value">
+          {{ gameState.currentBattle?.currentValue }}
+        </text>
         <RenderCardComponent
           v-for="renderCard in handRenderCards"
           :key="renderCard.card.instanceID"
@@ -328,6 +352,10 @@ function onMouseUp(e: PointerEvent) {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+.current-value {
+  font-size: 50px;
 }
 
 .render-card {
@@ -364,6 +392,10 @@ body {
   height: 100vh;
   display: block;
   touch-action: none;
+}
+
+.svg-container text {
+  user-select: none;
 }
 
 :root {
