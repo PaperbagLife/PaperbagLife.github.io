@@ -19,10 +19,6 @@ const props = defineProps<{
   cardSlots: RenderCardSlot[]
   renderOperations: RenderOperations[]
 }>()
-
-onMounted(() => {
-  console.log('AnswerSlotComponent mounted', props.renderOperations)
-})
 </script>
 
 <template>

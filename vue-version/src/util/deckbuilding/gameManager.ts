@@ -41,7 +41,7 @@ export class Enemy {
   operators: Operations[]
   operatorsCDF: number[]
   currentOperators: Operations[]
-  currentQuestionIndex: number = 0
+  currentQuestionIndex: number
   constructor(
     name: string,
     health: number,
@@ -64,7 +64,7 @@ export class Enemy {
     this.operators = operators
     this.operatorsCDF = operatorCDF
     this.currentOperators = []
-    this.currentQuestionIndex = 0
+    this.currentQuestionIndex = -1
   }
   nextTarget(this: Enemy) {
     this.currentTarget = Math.floor(
@@ -135,12 +135,15 @@ export class BattleState {
     this.currentDeck.sort(() => Math.random() - 0.5)
     this.battleEnd = false
     this.drawCards(5)
+    this.enemy.currentQuestionIndex = 0
   }
 
   resolveQuestion(this: BattleState, cards: PointCard[]) {
     // Based on the operators, calculate the result
+    let totalAnimationTime = 0
     let result = cards[0].value * (cards[0].color === CardColor.DARK ? -1 : 1)
     this.animationStack.push({ duration: CARD_SCORE_ANIMATION_DURATION, value: result })
+    totalAnimationTime += CARD_SCORE_ANIMATION_DURATION
     for (let i = 0; i < this.enemy.currentOperators.length; i++) {
       const value = cards[i + 1].value * (cards[i + 1].color === CardColor.DARK ? -1 : 1)
       switch (this.enemy.currentOperators[i]) {
@@ -155,6 +158,7 @@ export class BattleState {
           break
       }
       this.animationStack.push({ duration: CARD_SCORE_ANIMATION_DURATION, value: result })
+      totalAnimationTime += CARD_SCORE_ANIMATION_DURATION
     }
     // blessing
     this.blessings.forEach((blessing) => {
@@ -164,10 +168,15 @@ export class BattleState {
     const exactHit = result === this.enemy.currentTarget
     const hit = Math.abs(result - this.enemy.currentTarget) <= this.enemy.range
     this.animationStack.push({ duration: ENEMY_DAMAGE_ANIMATION_DURATION })
+    totalAnimationTime += ENEMY_DAMAGE_ANIMATION_DURATION
     if (exactHit) {
-      this.enemy.health -= 2
+      setTimeout(() => {
+        this.enemy.health -= 2
+      }, totalAnimationTime)
     } else if (hit) {
-      this.enemy.health -= 1
+      setTimeout(() => {
+        this.enemy.health -= 1
+      }, totalAnimationTime)
     }
     this.enemy.questionCount--
     // Check gameover

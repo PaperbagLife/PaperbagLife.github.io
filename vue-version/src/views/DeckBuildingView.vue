@@ -21,6 +21,7 @@ import {
 } from '@/util/deckbuilding/consts'
 import AnswerSlotComponent from './components/deckbuildingComponents/AnswerSlotComponent.vue'
 import EnemyComponent from './components/deckbuildingComponents/EnemyComponent.vue'
+import RangeIndicatorComponent from './components/deckbuildingComponents/RangeIndicatorComponent.vue'
 
 const { gameState, initializeGame } = useGameState()
 
@@ -313,8 +314,12 @@ function onMouseUp(e: PointerEvent) {
         <!-- White background -->
         <rect ref="background" width="100%" height="100%" fill="white" />
 
-        <text x="800" y="20" v-if="gameState.currentBattle?.animationStack.length">ANIMATING</text>
-
+        <RangeIndicatorComponent
+          v-if="gameState.currentBattle"
+          :target="gameState.currentBattle.enemy.currentTarget"
+          :range="gameState.currentBattle.enemy.range"
+          :currentValue="gameState.currentBattle.currentValue"
+        />
         <!-- Question Area -->
         <AnswerSlotComponent
           :card-slots="questionCardSlots"
@@ -356,6 +361,7 @@ function onMouseUp(e: PointerEvent) {
 
 .current-value {
   font-size: 50px;
+  text-anchor: middle;
 }
 
 .render-card {
