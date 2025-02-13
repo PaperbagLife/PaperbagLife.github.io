@@ -16,6 +16,7 @@ import {
   type RenderCard,
   type RenderCardSlot,
   type RenderOperations,
+  SIMPLE_DECK,
   SVG_HEIGHT,
   SVG_WIDTH
 } from '@/util/deckbuilding/consts'
@@ -30,34 +31,88 @@ const SUBMIT_BUTTON_PADDING = 160
 const svgElement = ref<SVGElement | null>(null)
 const background = ref<SVGRectElement | null>(null)
 
+const dragging = ref(false)
+const dragCard = ref<RenderCard | null>(null)
+const draggedCardInstancePosition = ref({ instanceID: -1, x: 0, y: 0 })
+
+const existingCards = ref<Set<number>>(new Set())
+const handRenderCards = ref<RenderCard[]>([])
+
+const questionCardSlots = ref<RenderCardSlot[]>([])
+const renderOperations = ref<RenderOperations[]>([])
+
 const submitButtonVisible = computed(() => {
   return questionCardSlots.value.every((slot) => slot.renderCard !== null)
 })
 
-const handRenderCards = computed<RenderCard[]>(() => {
-  if (!gameState.currentBattle) {
-    return []
-  }
-  const currentCards: RenderCard[] = []
-  const handSize = gameState.currentBattle.hand.length
-  // spread the cards evenly across available area
-  const availableWidth = SVG_WIDTH - HAND_AREA_RIGHT_PADDING
-  const effectiveWidth = availableWidth / (handSize + 1)
-  const startX = effectiveWidth
-  gameState.currentBattle.hand.forEach((card, i) => {
-    currentCards.push({
-      card,
-      centerX: startX + i * effectiveWidth,
-      centerY: SVG_HEIGHT - CARD_HEIGHT / 2,
-      dragged: false
+// handRenderCards watcher
+watch(
+  () => gameState.currentBattle?.hand.length,
+  () => {
+    if (!gameState.currentBattle) {
+      return
+    }
+    const handSize = gameState.currentBattle.hand.length
+    const currentCards: RenderCard[] = []
+    // spread the cards evenly across available area
+    const availableWidth = SVG_WIDTH - HAND_AREA_RIGHT_PADDING
+    const effectiveWidth = availableWidth / (handSize + 1)
+    const startX = effectiveWidth
+    gameState.currentBattle.hand.forEach((card, i) => {
+      if (existingCards.value.has(card.instanceID)) {
+        if (card.instanceID === draggedCardInstancePosition.value.instanceID) {
+          currentCards.push({
+            card,
+            centerX: draggedCardInstancePosition.value.x,
+            centerY: draggedCardInstancePosition.value.y,
+            dragged: true
+          })
+          draggedCardInstancePosition.value = { instanceID: -1, x: 0, y: 0 }
+          setTimeout(() => {
+            const renderCard = handRenderCards.value.find(
+              (c) => c.card.instanceID === card.instanceID
+            )
+            if (!renderCard) {
+              console.error('Could not find render card')
+              return
+            }
+            renderCard.centerX = startX + i * effectiveWidth
+            renderCard.centerY = SVG_HEIGHT - CARD_HEIGHT / 2
+          }, 10)
+        } else {
+          currentCards.push({
+            card,
+            centerX: startX + i * effectiveWidth,
+            centerY: SVG_HEIGHT - CARD_HEIGHT / 2,
+            dragged: false
+          })
+        }
+      } else {
+        currentCards.push({
+          card,
+          centerX: 0,
+          centerY: SVG_HEIGHT - CARD_HEIGHT / 2,
+          dragged: false
+        })
+        setTimeout(() => {
+          // Find the corresponding instance id in the handRenderCards
+          const renderCard = handRenderCards.value.find(
+            (c) => c.card.instanceID === card.instanceID
+          )
+          if (!renderCard) {
+            console.error('Could not find render card')
+            return
+          }
+          renderCard.centerX = startX + i * effectiveWidth
+          renderCard.centerY = SVG_HEIGHT - CARD_HEIGHT / 2
+        }, 10)
+        existingCards.value.add(card.instanceID)
+      }
     })
-  })
-
-  return currentCards
-})
-
-const questionCardSlots = ref<RenderCardSlot[]>([])
-const renderOperations = ref<RenderOperations[]>([])
+    handRenderCards.value = currentCards
+  },
+  { immediate: true }
+)
 
 const instanceIDToRenderCard = computed(() => {
   const instanceIDToRenderCard: Map<number, RenderCard> = new Map()
@@ -76,9 +131,7 @@ const instanceIDToRenderCard = computed(() => {
   return instanceIDToRenderCard
 })
 
-const dragging = ref(false)
-const dragCard = ref<RenderCard | null>(null)
-
+// questionCardSlots watcher
 watch(
   () => gameState.currentBattle?.enemy.currentQuestionIndex,
   () => {
@@ -101,9 +154,11 @@ watch(
     }
 
     questionCardSlots.value = cardSlots
-  }
+  },
+  { immediate: true }
 )
 
+// renderOperations watcher
 watch(
   () => gameState.currentBattle?.enemy.currentOperators,
   () => {
@@ -128,60 +183,8 @@ watch(
   }
 )
 
-const cards: Card[] = [
-  {
-    type: CardType.POINT,
-    color: CardColor.LIGHT,
-    value: 1
-  },
-  {
-    type: CardType.POINT,
-    color: CardColor.LIGHT,
-    value: 2
-  },
-  {
-    type: CardType.POINT,
-    color: CardColor.LIGHT,
-    value: 3
-  },
-  {
-    type: CardType.POINT,
-    color: CardColor.LIGHT,
-    value: 4
-  },
-  {
-    type: CardType.POINT,
-    color: CardColor.LIGHT,
-    value: 5
-  },
-  {
-    type: CardType.POINT,
-    color: CardColor.DARK,
-    value: 1
-  },
-  {
-    type: CardType.POINT,
-    color: CardColor.DARK,
-    value: 2
-  },
-  {
-    type: CardType.POINT,
-    color: CardColor.DARK,
-    value: 3
-  },
-  {
-    type: CardType.POINT,
-    color: CardColor.DARK,
-    value: 4
-  },
-  {
-    type: CardType.POINT,
-    color: CardColor.DARK,
-    value: 5
-  }
-]
 onMounted(() => {
-  initializeGame(cards)
+  initializeGame(SIMPLE_DECK)
   window.scrollTo(0, 1)
 })
 
@@ -237,6 +240,7 @@ function submitQuestion() {
   gameState.currentBattle?.resolveQuestion(cards)
   // Add a shaking effect to all cards
   questionCardSlots.value.forEach((cardSlot, i) => {
+    existingCards.value.delete(cardSlot.renderCard?.card.instanceID ?? -1)
     setTimeout(() => {
       if (!cardSlot.renderCard) {
         return
@@ -268,7 +272,6 @@ function onMouseUp(e: PointerEvent) {
       return
     }
     const cardSlot = e.target.closest<SVGGElement>('.render-card-slot')
-    console.log(cardSlot)
     const slotId = cardSlot?.dataset.id
     if (slotId) {
       const slot = questionCardSlots.value.find((slot) => slot.id === slotId)
@@ -286,12 +289,18 @@ function onMouseUp(e: PointerEvent) {
 
     // if we are not over a card slot, then we want to return the card to the hand
     // Push according to the position of the card
+    draggedCardInstancePosition.value = {
+      instanceID: dragCard.value.card.instanceID,
+      x: dragCard.value.centerX,
+      y: dragCard.value.centerY
+    }
     const index = handRenderCards.value.findIndex((card) => card.centerX > dragCard.value!.centerX)
     if (index === -1) {
       gameState.currentBattle?.hand.push(dragCard.value.card as CardInstance)
     } else {
       gameState.currentBattle?.hand.splice(index, 0, dragCard.value.card as CardInstance)
     }
+
     dragCard.value = null
   }
   dragCard.value = null

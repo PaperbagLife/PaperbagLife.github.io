@@ -185,8 +185,6 @@ export class BattleState {
       gameOver(this.enemy)
     }
 
-    // Check if enemy is dead
-
     if (this.enemy.health <= 0) {
       // Enemy is dead
       this.battleEnd = true
@@ -197,16 +195,14 @@ export class BattleState {
 
   nextQuestion(this: BattleState) {
     if (this.animationStack.length !== 0) {
-      console.log('animating')
       const animation = this.animationStack.shift()
-      if (animation?.value) {
+      if (animation && animation.value != undefined) {
         this.currentValue = animation.value
       }
       setTimeout(() => {
         this.nextQuestion()
       }, animation?.duration)
     } else {
-      console.log('animation finished')
       this.currentValue = 0
       this.enemy.nextTarget()
       this.drawCards(3)
