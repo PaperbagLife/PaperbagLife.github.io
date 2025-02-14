@@ -5,6 +5,7 @@ import {
   CARD_WIDTH,
   CardColor,
   CardType,
+  HAND_AREA_RIGHT_PADDING,
   Operations,
   type RenderCard,
   type RenderCardSlot,
@@ -42,7 +43,7 @@ const ticks = computed(() => {
 })
 
 const originTranslate = computed(() => {
-  return `translate(${SVG_WIDTH / 2}px, ${SVG_HEIGHT / 5}px)`
+  return `translate(${(SVG_WIDTH - HAND_AREA_RIGHT_PADDING) / 2}px, ${SVG_HEIGHT / 5}px)`
 })
 </script>
 

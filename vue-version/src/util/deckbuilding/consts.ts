@@ -74,14 +74,18 @@ export type RenderOperations = {
 export const CARD_WIDTH = 150
 export const CARD_HEIGHT = 200
 
-export const HAND_AREA_RIGHT_PADDING = 200
 export const SVG_WIDTH = 1600
 export const SVG_HEIGHT = 900
+export const HAND_AREA_RIGHT_PADDING = 200
+export const SUBMIT_BUTTON_PADDING = 160
 
 export const QUESTION_TOP_PADDING = 400
 
 export const CARD_SCORE_ANIMATION_DURATION = 1500
-export const ENEMY_DAMAGE_ANIMATION_DURATION = 1500
+export const ENEMY_DAMAGE_ANIMATION_DURATION = 1000
+
+export const ENEMY_WIDTH = 200
+export const ENEMY_HEIGHT = 400
 
 export const SIMPLE_DECK: Card[] = [
   {

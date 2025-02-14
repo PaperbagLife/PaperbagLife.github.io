@@ -1,4 +1,5 @@
 import { reactive, ref } from 'vue'
+import mathmanTachie from '@/assets/game/deckbuilding/mathman.png'
 import {
   type Card,
   CARD_SCORE_ANIMATION_DURATION,
@@ -28,10 +29,12 @@ export type Blessing = {
 // Falling within the range is considered a hit, -1 hp
 // Exact target is considered a critical hit, -2 hp
 // Player has to deplete hp within a certain number of questions.
-// Make sure questionCount >= health.
+// Make sure questionCount >= hp.
 export class Enemy {
   name: string
-  health: number
+  tachie: string
+  hp: number
+  maxHp: number
   questionCount: number
   currentTarget: number
   cardCount: number
@@ -42,9 +45,12 @@ export class Enemy {
   operatorsCDF: number[]
   currentOperators: Operations[]
   currentQuestionIndex: number
+  damaged: boolean = false
+  crit: boolean = false
   constructor(
     name: string,
-    health: number,
+    tachie: string,
+    maxHp: number,
     questionCount: number,
     targetMax: number,
     targetMin: number,
@@ -54,7 +60,9 @@ export class Enemy {
     operatorCDF: number[]
   ) {
     this.name = name
-    this.health = health
+    this.tachie = tachie
+    this.hp = maxHp
+    this.maxHp = maxHp
     this.questionCount = questionCount
     this.cardCount = cardCount // operator count = card count - 1
     this.range = range
@@ -79,6 +87,32 @@ export class Enemy {
       }
       this.currentOperators.push(this.operators[op])
     }
+  }
+
+  hit(this: Enemy, delay: number) {
+    setTimeout(() => {
+      this.damaged = true
+      setTimeout(() => {
+        this.hp -= 1
+        setTimeout(() => {
+          this.damaged = false
+        }, ENEMY_DAMAGE_ANIMATION_DURATION / 2)
+      }, ENEMY_DAMAGE_ANIMATION_DURATION / 2)
+    }, delay)
+  }
+
+  exactHit(this: Enemy, delay: number) {
+    setTimeout(() => {
+      this.crit = true
+      this.damaged = true
+      setTimeout(() => {
+        this.hp -= 2
+        setTimeout(() => {
+          this.crit = false
+          this.damaged = false
+        }, ENEMY_DAMAGE_ANIMATION_DURATION / 2)
+      }, ENEMY_DAMAGE_ANIMATION_DURATION / 2)
+    }, delay)
   }
 }
 
@@ -124,7 +158,7 @@ export class BattleState {
       }
       const card = this.currentDeck.pop()
       if (card) {
-        this.hand.push(card)
+        this.hand.splice(0, 0, card)
       }
     }
   }
@@ -168,24 +202,19 @@ export class BattleState {
     const exactHit = result === this.enemy.currentTarget
     const hit = Math.abs(result - this.enemy.currentTarget) <= this.enemy.range
     this.animationStack.push({ duration: ENEMY_DAMAGE_ANIMATION_DURATION })
-    totalAnimationTime += ENEMY_DAMAGE_ANIMATION_DURATION
     if (exactHit) {
-      setTimeout(() => {
-        this.enemy.health -= 2
-      }, totalAnimationTime)
+      this.enemy.exactHit(totalAnimationTime)
     } else if (hit) {
-      setTimeout(() => {
-        this.enemy.health -= 1
-      }, totalAnimationTime)
+      this.enemy.hit(totalAnimationTime)
     }
     this.enemy.questionCount--
     // Check gameover
-    if (this.enemy.questionCount == 0 && this.enemy.health > 0) {
+    if (this.enemy.questionCount == 0 && this.enemy.hp > 0) {
       // Game over
       gameOver(this.enemy)
     }
 
-    if (this.enemy.health <= 0) {
+    if (this.enemy.hp <= 0) {
       // Enemy is dead
       this.battleEnd = true
       return
@@ -223,7 +252,18 @@ export class GameState {
 }
 
 export const enemies = [
-  new Enemy('Slime', 3, 3, 5, 3, 1, 3, [Operations.ADD, Operations.SUBTRACT], [0.5, 1])
+  new Enemy(
+    'mathman',
+    mathmanTachie,
+    3,
+    3,
+    5,
+    3,
+    1,
+    3,
+    [Operations.ADD, Operations.SUBTRACT],
+    [0.5, 1]
+  )
 ]
 
 const gameState = reactive(new GameState())

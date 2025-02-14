@@ -17,6 +17,7 @@ import {
   type RenderCardSlot,
   type RenderOperations,
   SIMPLE_DECK,
+  SUBMIT_BUTTON_PADDING,
   SVG_HEIGHT,
   SVG_WIDTH
 } from '@/util/deckbuilding/consts'
@@ -25,8 +26,6 @@ import EnemyComponent from './components/deckbuildingComponents/EnemyComponent.v
 import RangeIndicatorComponent from './components/deckbuildingComponents/RangeIndicatorComponent.vue'
 
 const { gameState, initializeGame } = useGameState()
-
-const SUBMIT_BUTTON_PADDING = 160
 
 const svgElement = ref<SVGElement | null>(null)
 const background = ref<SVGRectElement | null>(null)
@@ -141,7 +140,7 @@ watch(
     const enemy = gameState.currentBattle.enemy
     const currentQuestionIndex = gameState.currentBattle.enemy.currentQuestionIndex
     const cardSlots: RenderCardSlot[] = []
-    const availableWidth = SVG_WIDTH
+    const availableWidth = SVG_WIDTH - HAND_AREA_RIGHT_PADDING
     const effectiveWidth = availableWidth / (enemy.cardCount + 1)
     const startX = effectiveWidth
     for (let i = 0; i < enemy.cardCount; i++) {
@@ -167,7 +166,7 @@ watch(
     }
     const currentOperators = gameState.currentBattle.enemy.currentOperators
     const renderOps: RenderOperations[] = []
-    const availableWidth = SVG_WIDTH
+    const availableWidth = SVG_WIDTH - HAND_AREA_RIGHT_PADDING
     const effectiveWidth = availableWidth / (currentOperators.length + 2)
     const startX = effectiveWidth
     for (let i = 0; i < currentOperators.length; i++) {
@@ -334,7 +333,7 @@ function onMouseUp(e: PointerEvent) {
           :card-slots="questionCardSlots"
           :render-operations="renderOperations"
         />
-        <text x="800" y="100" class="current-value">
+        <text :x="(SVG_WIDTH - HAND_AREA_RIGHT_PADDING) / 2" :y="100" class="current-value">
           {{ gameState.currentBattle?.currentValue }}
         </text>
         <RenderCardComponent
@@ -345,15 +344,25 @@ function onMouseUp(e: PointerEvent) {
         <RenderCardComponent v-if="dragCard" :renderCard="dragCard" />
 
         <!-- Submit Button -->
-        <rect
+        <circle
           v-if="submitButtonVisible"
           class="submit-button"
-          :x="SVG_WIDTH - HAND_AREA_RIGHT_PADDING"
-          :y="SVG_HEIGHT - SUBMIT_BUTTON_PADDING"
-          rx="10"
+          :cx="SVG_WIDTH - SUBMIT_BUTTON_PADDING"
+          :cy="SVG_HEIGHT - SUBMIT_BUTTON_PADDING"
+          r="90"
           :width="120"
           :height="60"
         />
+        <text
+          v-if="submitButtonVisible"
+          :x="SVG_WIDTH - SUBMIT_BUTTON_PADDING"
+          :y="SVG_HEIGHT - SUBMIT_BUTTON_PADDING"
+          class="submit-button-text"
+          text-anchor="middle"
+          dominant-baseline="middle"
+        >
+          Submit
+        </text>
 
         <!-- Enemy -->
         <EnemyComponent v-if="gameState.currentBattle" :enemy="gameState.currentBattle.enemy" />
@@ -385,8 +394,15 @@ function onMouseUp(e: PointerEvent) {
 }
 
 .submit-button {
-  fill: green;
+  fill: #66ccff;
+  stroke: #006395;
+  stroke-width: 4px;
   cursor: pointer;
+}
+
+.submit-button-text {
+  font-size: 40px;
+  pointer-events: none;
 }
 
 html,
