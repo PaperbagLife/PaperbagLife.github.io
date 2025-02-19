@@ -78,6 +78,7 @@ export const SVG_WIDTH = 1600
 export const SVG_HEIGHT = 900
 export const HAND_AREA_RIGHT_PADDING = 200
 export const SUBMIT_BUTTON_PADDING = 160
+export const SUBMIT_BUTTON_RADIUS = 90
 
 export const QUESTION_TOP_PADDING = 400
 
