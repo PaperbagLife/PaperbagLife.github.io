@@ -21,10 +21,10 @@ const props = defineProps<{
 }>()
 
 const PADDING = 50
-const hpIndicatorGap = computed(() => ENEMY_WIDTH / props.enemy.maxHp)
+const HP_HEIGHT = 20
 
 function createArray(range: number) {
-  return Array.from({ length: range + 1 }, (_, index) => index)
+  return Array.from({ length: range }, (_, index) => index)
 }
 
 const originTranslate = computed(() => {
@@ -65,23 +65,21 @@ const size = 200
       />
     </g>
 
-    <circle
-      v-for="i in createArray(enemy.maxHp)"
-      :key="i"
-      :cx="i * hpIndicatorGap"
-      cy="0"
-      r="10"
-      stroke="black"
-      fill="none"
-    />
-    <circle
-      v-for="i in createArray(enemy.hp)"
-      :key="i"
-      :cx="i * hpIndicatorGap"
-      cy="0"
-      r="8"
-      fill="red"
-    />
+    <!--HP rectangle-->
+    <g class="hp-container">
+      <rect class="hp-outline" x="0" y="0" :width="ENEMY_WIDTH" :height="HP_HEIGHT" fill="black" />
+      <rect
+        class="hp-bar"
+        x="0"
+        y="0"
+        :width="ENEMY_WIDTH * (enemy.hp / enemy.maxHp)"
+        :height="HP_HEIGHT"
+        fill="red"
+      />
+      <text class="hp-text" :x="ENEMY_WIDTH / 2" :y="HP_HEIGHT / 2" fill="white">{{
+        `${enemy.hp}/${enemy.maxHp}`
+      }}</text>
+    </g>
   </g>
 </template>
 
@@ -137,6 +135,20 @@ const size = 200
 .enemy-ui-text {
   text-anchor: middle;
   font-size: 40px;
+  pointer-events: none;
+}
+
+.hp-bar,
+.hp-outline {
+  rx: 5;
+  ry: 5;
+}
+
+.hp-text {
+  text-anchor: middle;
+  alignment-baseline: central;
+  font-size: 20px;
+  font-weight: bolder;
   pointer-events: none;
 }
 </style>

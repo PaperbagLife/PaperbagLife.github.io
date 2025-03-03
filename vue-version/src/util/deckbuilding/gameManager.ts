@@ -15,6 +15,7 @@ import {
 // Some blessings work on range some work on target.
 // Example onNewQuestion can change the target/range, onBattleStart can draw more cards.
 // onCalculation can change the result of the calculated value
+// Some blessings are in the form of increasing attack, revival, etc.
 export type Blessing = {
   name: string
   description: string
@@ -26,8 +27,8 @@ export type Blessing = {
 }
 
 // Enemies will have a list of targets and ranges.
-// Falling within the range is considered a hit, -1 hp
-// Exact target is considered a critical hit, -2 hp
+// Falling within the range is considered a hit, -player.attack hp
+// Exact target is considered a critical hit, -2x player.attack hp
 // Player has to deplete hp within a certain number of questions.
 // Make sure questionCount >= hp.
 export class Enemy {
@@ -45,6 +46,7 @@ export class Enemy {
   operatorsCDF: number[]
   currentOperators: Operations[]
   currentQuestionIndex: number
+  reward: number
   damaged: boolean = false
   crit: boolean = false
   constructor(
@@ -57,7 +59,8 @@ export class Enemy {
     range: number, // always +- same value
     cardCount: number,
     operators: Operations[],
-    operatorCDF: number[]
+    operatorCDF: number[],
+    reward: number
   ) {
     this.name = name
     this.tachie = tachie
@@ -73,6 +76,7 @@ export class Enemy {
     this.operatorsCDF = operatorCDF
     this.currentOperators = []
     this.currentQuestionIndex = -1
+    this.reward = reward
   }
   nextTarget(this: Enemy) {
     this.currentTarget = Math.floor(
@@ -89,11 +93,11 @@ export class Enemy {
     }
   }
 
-  hit(this: Enemy, delay: number) {
+  hit(this: Enemy, delay: number, damage: number) {
     setTimeout(() => {
       this.damaged = true
       setTimeout(() => {
-        this.hp -= 1
+        this.hp -= damage
         setTimeout(() => {
           this.damaged = false
         }, ENEMY_DAMAGE_ANIMATION_DURATION / 2)
@@ -101,12 +105,12 @@ export class Enemy {
     }, delay)
   }
 
-  exactHit(this: Enemy, delay: number) {
+  exactHit(this: Enemy, delay: number, damage: number) {
     setTimeout(() => {
       this.crit = true
       this.damaged = true
       setTimeout(() => {
-        this.hp -= 2
+        this.hp -= damage * 2
         setTimeout(() => {
           this.crit = false
           this.damaged = false
@@ -127,11 +131,26 @@ export class Shop {
   }
 }
 
+export class Player {
+  revival: number
+  attack: number
+  blessing: Blessing[]
+  constructor(revival: number, attack: number, blessing: Blessing[]) {
+    this.revival = revival
+    this.attack = attack
+    this.blessing = blessing
+  }
+}
+
 export type Floor = Enemy | Shop
 
 export type ScoreAnimation = {
   duration: number
   value?: number
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 export class BattleState {
@@ -143,11 +162,13 @@ export class BattleState {
   blessings: Blessing[] = []
   enemy: Enemy
   battleEnd: boolean = false
-  constructor(currentDeck: CardInstance[], enemy: Enemy) {
+  player: Player
+  constructor(currentDeck: CardInstance[], enemy: Enemy, player: Player) {
     this.currentDeck = currentDeck
     this.hand = []
     this.discard = []
     this.enemy = enemy
+    this.player = player
   }
 
   drawCards(this: BattleState, count: number) {
@@ -170,6 +191,9 @@ export class BattleState {
     this.battleEnd = false
     this.drawCards(5)
     this.enemy.currentQuestionIndex = 0
+    this.player.blessing.forEach((blessing) => {
+      blessing.onBattleStart(this)
+    })
   }
 
   resolveQuestion(this: BattleState, cards: PointCard[]) {
@@ -203,23 +227,37 @@ export class BattleState {
     const hit = Math.abs(result - this.enemy.currentTarget) <= this.enemy.range
     this.animationStack.push({ duration: ENEMY_DAMAGE_ANIMATION_DURATION })
     if (exactHit) {
-      this.enemy.exactHit(totalAnimationTime)
+      this.enemy.exactHit(totalAnimationTime, this.player.attack)
     } else if (hit) {
-      this.enemy.hit(totalAnimationTime)
+      this.enemy.hit(totalAnimationTime, this.player.attack)
     }
     this.enemy.questionCount--
     // Check gameover
     if (this.enemy.questionCount == 0 && this.enemy.hp > 0) {
       // Game over
       gameOver(this.enemy)
+      return true
     }
 
     if (this.enemy.hp <= 0) {
       // Enemy is dead
-      this.battleEnd = true
-      return
+      console.log('Enemy is dead')
+      return true
     }
     this.nextQuestion()
+    return false
+  }
+
+  async endBattle(this: BattleState): Promise<number> {
+    while (this.animationStack.length !== 0) {
+      await sleep(1000)
+    }
+    this.battleEnd = true
+    this.blessings.forEach((blessing) => {
+      blessing.onBattleEnd(this)
+    })
+
+    return this.enemy.reward
   }
 
   nextQuestion(this: BattleState) {
@@ -255,14 +293,15 @@ export const enemies = [
   new Enemy(
     'mathman',
     mathmanTachie,
-    3,
+    15,
     3,
     5,
     3,
     1,
     3,
     [Operations.ADD, Operations.SUBTRACT],
-    [0.5, 1]
+    [0.5, 1],
+    5
   )
 ]
 
@@ -276,6 +315,7 @@ function gameOver(enemy: Enemy) {
 }
 
 function initializeGame(deck: Card[]) {
+  const player = new Player(1, 5, [])
   gameState.gold = 0
   gameState.blessings = []
   // Generate a list of floors
@@ -291,7 +331,7 @@ function initializeGame(deck: Card[]) {
   // Temporary for testing
   const currentEnemy = gameState.floors.pop()
   if (currentEnemy instanceof Enemy) {
-    gameState.currentBattle = new BattleState(gameState.deck, currentEnemy)
+    gameState.currentBattle = new BattleState(gameState.deck, currentEnemy, player)
     gameState.currentBattle.startBattle(gameState.blessings)
   }
 }

@@ -227,9 +227,9 @@ function onMouseMove(e: PointerEvent) {
   dragCard.value.centerY = mouseY * scaleY
 }
 
-function submitQuestion() {
+async function submitQuestion() {
   const cards = questionCardSlots.value.map((slot) => slot.renderCard?.card as PointCard)
-  gameState.currentBattle?.resolveQuestion(cards)
+  const battleOver = gameState.currentBattle?.resolveQuestion(cards)
   // Add a shaking effect to all cards
   questionCardSlots.value.forEach((cardSlot, i) => {
     existingCards.value.delete(cardSlot.renderCard?.card.instanceID ?? -1)
@@ -246,7 +246,11 @@ function submitQuestion() {
       }, CARD_SCORE_ANIMATION_DURATION)
     }, i * CARD_SCORE_ANIMATION_DURATION)
   })
-  return
+  if (battleOver) {
+    const goldGained = await gameState.currentBattle?.endBattle()
+    gameState.gold += goldGained ?? 0
+    gameState.currentBattle = null
+  }
 }
 
 function onMouseUp(e: PointerEvent) {
@@ -301,6 +305,17 @@ function onMouseUp(e: PointerEvent) {
 </script>
 
 <template>
+  <div class="overlay col position-absolute">
+    <div class="row mx-0 blessings-container"></div>
+    <div class="row mx-0">
+      <span class="player-stats material-symbols-outlined">swords</span>
+      <span class="player-stats">{{ gameState.currentBattle?.player.attack }}</span>
+    </div>
+    <div class="row mx-0">
+      <span class="player-stats material-symbols-outlined">attach_money</span>
+      <span class="player-stats">{{ gameState.gold }}</span>
+    </div>
+  </div>
   <svg
     ref="svgElement"
     class="svg-container mx-auto my-auto"
@@ -359,6 +374,19 @@ function onMouseUp(e: PointerEvent) {
 </template>
 
 <style lang="scss" scoped>
+.overlay {
+  top: 20px;
+  z-index: 1000;
+}
+.blessings-container {
+  min-height: 20px;
+}
+.player-stats {
+  font-size: 1rem;
+  text-align: center;
+  line-height: 1;
+  color: black;
+}
 .current-value {
   font-size: 50px;
   text-anchor: middle;
