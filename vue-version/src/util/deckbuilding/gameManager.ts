@@ -287,6 +287,9 @@ export class GameState {
   floors: Floor[] = []
   lastEnemy: Enemy | null = null
   idCounter: number = 0
+  player: Player | null = null
+  floorIndex: number = 0
+  currentShop: Shop | null = null
 }
 
 export const enemies = [
@@ -314,13 +317,27 @@ function gameOver(enemy: Enemy) {
   gameState.scene = Scene.GAME_OVER
 }
 
+function climbNextFloor() {
+  gameState.floorIndex++
+  const floor = gameState.floors[gameState.floorIndex]
+  if (floor instanceof Enemy) {
+    gameState.currentBattle = new BattleState(gameState.deck, floor, gameState.player!)
+    gameState.currentBattle.startBattle(gameState.blessings)
+  }
+  if (floor instanceof Shop) {
+    gameState.currentShop = floor
+  }
+}
+
 function initializeGame(deck: Card[]) {
   const player = new Player(1, 5, [])
   gameState.gold = 0
   gameState.blessings = []
+  gameState.player = player
   // Generate a list of floors
+  gameState.floorIndex = 0
   gameState.floors = []
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 8; i++) {
     gameState.floors.push(enemies[0])
   }
   gameState.idCounter = 0
@@ -328,14 +345,14 @@ function initializeGame(deck: Card[]) {
     gameState.deck.push({ ...card, instanceID: gameState.idCounter++ })
   })
 
-  // Temporary for testing
-  const currentEnemy = gameState.floors.pop()
-  if (currentEnemy instanceof Enemy) {
-    gameState.currentBattle = new BattleState(gameState.deck, currentEnemy, player)
-    gameState.currentBattle.startBattle(gameState.blessings)
-  }
+  // // Temporary for testing
+  // const currentEnemy = gameState.floors.shift()
+  // if (currentEnemy instanceof Enemy) {
+  //   gameState.currentBattle = new BattleState(gameState.deck, currentEnemy, gameState.player)
+  //   gameState.currentBattle.startBattle(gameState.blessings)
+  // }
 }
 
 export function useGameState() {
-  return { gameState, initializeGame }
+  return { gameState, initializeGame, climbNextFloor }
 }
