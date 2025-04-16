@@ -187,9 +187,13 @@ function onMouseDown(e: PointerEvent) {
   }
   const card = e.target.closest<SVGGElement>('.render-card')
   if (card) {
-    const instanceID = card.dataset.instanceID
+    let instanceID = card.dataset.instanceID
     if (!instanceID) {
-      return
+      // iOS support
+      instanceID = card.getAttribute('data-instanceID') ?? ''
+      if (!instanceID) {
+        return
+      }
     }
     const renderCard = instanceIDToRenderCard.value.get(parseInt(instanceID))
     if (!renderCard) {
@@ -268,7 +272,11 @@ function onMouseUp(e: PointerEvent) {
       return
     }
     const cardSlot = e.target.closest<SVGGElement>('.render-card-slot')
-    const slotId = cardSlot?.dataset.id
+    let slotId = cardSlot?.dataset.id
+    if (!slotId) {
+      // iOS support
+      slotId = cardSlot?.getAttribute('data-id') ?? ''
+    }
     if (slotId) {
       const slot = questionCardSlots.value.find((slot) => slot.id === slotId)
       if (slot) {
