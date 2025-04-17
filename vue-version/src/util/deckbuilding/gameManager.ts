@@ -142,7 +142,7 @@ export class Player {
   }
 }
 
-export type Floor = Enemy | Shop
+export type Floor = Enemy | Shop | null
 
 export type ScoreAnimation = {
   duration: number
@@ -336,8 +336,8 @@ function initializeGame(deck: Card[]) {
   gameState.player = player
   // Generate a list of floors
   gameState.floorIndex = 0
-  gameState.floors = []
-  for (let i = 0; i < 8; i++) {
+  gameState.floors = [null]
+  for (let i = 0; i < 6; i++) {
     gameState.floors.push(enemies[0])
   }
   gameState.idCounter = 0

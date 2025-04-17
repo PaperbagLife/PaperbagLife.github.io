@@ -15,9 +15,60 @@ onMounted(() => {
 <template>
   <main>
     <div class="col">
+      <div class="overlay col position-absolute">
+        <div class="row mx-0 blessings-container"></div>
+        <div class="row mx-0">
+          <span class="player-stats material-symbols-outlined">swords</span>
+          <span class="player-stats">{{ gameState.player?.attack }}</span>
+        </div>
+        <div class="row mx-0">
+          <span class="player-stats material-symbols-outlined">attach_money</span>
+          <span class="player-stats">{{ gameState.gold }}</span>
+        </div>
+      </div>
       <BattleScene v-if="gameState.currentBattle" />
       <MapScene v-else />
     </div>
   </main>
 </template>
-<style lang="scss" scoped></style>
+<style lang="scss">
+.overlay {
+  top: 20px;
+  z-index: 1000;
+}
+.blessings-container {
+  min-height: 20px;
+}
+
+.player-stats {
+  font-size: 2rem;
+  text-align: center;
+  line-height: 1;
+  color: black;
+  user-select: none;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  position: fixed;
+  -webkit-overflow-scrolling: touch;
+}
+
+.svg-container {
+  width: 100%;
+  max-height: 100dvh;
+  height: 100vh;
+  display: block;
+  touch-action: none;
+}
+
+.svg-container text {
+  user-select: none;
+}
+</style>

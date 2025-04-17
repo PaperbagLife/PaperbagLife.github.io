@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import { useGameState } from '@/util/deckbuilding/gameManager'
 import { SVG_HEIGHT, SVG_WIDTH } from '@/util/deckbuilding/consts'
 
@@ -10,6 +10,9 @@ onMounted(() => {
 })
 
 const svgElement = ref<SVGSVGElement | null>(null)
+const playerX = ref(0)
+const playerY = ref(0)
+const playerVisible = ref(false)
 
 const padding = 50
 // Hexagon properties
@@ -50,9 +53,19 @@ function onMouseUp(e: PointerEvent) {
   const target = e.target.closest<SVGGElement>('.climb-button')
   if (target) {
     console.log('Climb button clicked')
-    climbNextFloor()
+    playerX.value = hexagons.value[gameState.floorIndex + 1].x
+    playerY.value = hexagons.value[gameState.floorIndex + 1].y
+    setTimeout(climbNextFloor, 2000)
   }
 }
+
+onMounted(() => {
+  nextTick(() => {
+    playerX.value = hexagons.value[gameState.floorIndex].x
+    playerY.value = hexagons.value[gameState.floorIndex].y
+    playerVisible.value = true
+  })
+})
 </script>
 
 <template>
@@ -75,10 +88,22 @@ function onMouseUp(e: PointerEvent) {
       />
       <circle :cx="hex.x" :cy="hex.y" r="5" fill="black"></circle>
       <text :x="hex.x" :y="hex.y" text-anchor="middle" dominant-baseline="middle" font-size="20">
-        {{ gameState.floors[index].name }}
+        {{ gameState.floors[index]?.name }}
         {{ index }}
       </text>
     </g>
+    <!-- Player tile-->
+    <g
+      class="player-icon"
+      v-if="playerVisible"
+      :style="{
+        transform: `translate(${playerX}px, ${playerY}px)`,
+        transition: 'transform 1s ease'
+      }"
+    >
+      <circle r="10" fill="red" stroke="black" stroke-width="2" />
+    </g>
+
     <g class="climb-button">
       <polygon
         :points="
@@ -115,7 +140,9 @@ function onMouseUp(e: PointerEvent) {
   display: block;
   touch-action: none;
 }
-
+.player-icon {
+  transition: transform 1s ease;
+}
 .climb-button-text {
   font-size: 40px;
   pointer-events: none;
