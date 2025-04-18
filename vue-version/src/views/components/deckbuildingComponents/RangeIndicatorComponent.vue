@@ -20,7 +20,7 @@ const props = defineProps<{
   currentValue: number
 }>()
 
-const RANGE_INDICATOR_WIDTH = 1000
+const RANGE_INDICATOR_WIDTH = 800
 const RANGE_INDICATOR_HEIGHT = 20
 const EXACT_TARGET_WIDTH = 10
 
@@ -43,7 +43,7 @@ const ticks = computed(() => {
 })
 
 const originTranslate = computed(() => {
-  return `translate(${(SVG_WIDTH - HAND_AREA_RIGHT_PADDING) / 2}px, ${SVG_HEIGHT / 5}px)`
+  return `translate(${(SVG_WIDTH - HAND_AREA_RIGHT_PADDING) / 2}px, ${SVG_HEIGHT / 4}px)`
 })
 </script>
 

@@ -20,6 +20,7 @@ import {
 import AnswerSlotComponent from '@/views/components/deckbuildingComponents/AnswerSlotComponent.vue'
 import EnemyComponent from '@/views/components/deckbuildingComponents/EnemyComponent.vue'
 import RangeIndicatorComponent from '@/views/components/deckbuildingComponents/RangeIndicatorComponent.vue'
+import OverlayComponent from '../deckbuildingComponents/OverlayComponent.vue'
 
 const { gameState } = useGameState()
 
@@ -138,9 +139,9 @@ watch(
     const enemy = gameState.currentBattle.enemy
     const currentQuestionIndex = gameState.currentBattle.enemy.currentQuestionIndex
     const cardSlots: RenderCardSlot[] = []
-    const availableWidth = SVG_WIDTH - HAND_AREA_RIGHT_PADDING
+    const availableWidth = SVG_WIDTH - HAND_AREA_RIGHT_PADDING * 2
     const effectiveWidth = availableWidth / (enemy.cardCount + 1)
-    const startX = effectiveWidth
+    const startX = effectiveWidth + HAND_AREA_RIGHT_PADDING / 2
     for (let i = 0; i < enemy.cardCount; i++) {
       cardSlots.push({
         renderCard: null,
@@ -164,9 +165,9 @@ watch(
     }
     const currentOperators = gameState.currentBattle.enemy.currentOperators
     const renderOps: RenderOperations[] = []
-    const availableWidth = SVG_WIDTH - HAND_AREA_RIGHT_PADDING
+    const availableWidth = SVG_WIDTH - HAND_AREA_RIGHT_PADDING * 2
     const effectiveWidth = availableWidth / (currentOperators.length + 2)
-    const startX = effectiveWidth
+    const startX = effectiveWidth + HAND_AREA_RIGHT_PADDING / 2
     for (let i = 0; i < currentOperators.length; i++) {
       renderOps.push({
         operation: currentOperators[i],
@@ -334,7 +335,7 @@ function onMouseUp(e: PointerEvent) {
     />
     <!-- Question Area -->
     <AnswerSlotComponent :card-slots="questionCardSlots" :render-operations="renderOperations" />
-    <text :x="(SVG_WIDTH - HAND_AREA_RIGHT_PADDING) / 2" :y="100" class="current-value">
+    <text :x="(SVG_WIDTH - HAND_AREA_RIGHT_PADDING) / 2" :y="180" class="current-value">
       {{ gameState.currentBattle?.currentValue }}
     </text>
     <RenderCardComponent
@@ -367,12 +368,14 @@ function onMouseUp(e: PointerEvent) {
 
     <!-- Enemy -->
     <EnemyComponent v-if="gameState.currentBattle" :enemy="gameState.currentBattle.enemy" />
+
+    <OverlayComponent />
   </svg>
 </template>
 
 <style lang="scss" scoped>
 .current-value {
-  font-size: 50px;
+  font-size: 64px;
   text-anchor: middle;
 }
 

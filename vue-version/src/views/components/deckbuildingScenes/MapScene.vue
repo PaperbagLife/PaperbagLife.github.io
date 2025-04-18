@@ -2,6 +2,7 @@
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { useGameState } from '@/util/deckbuilding/gameManager'
 import { SVG_HEIGHT, SVG_WIDTH } from '@/util/deckbuilding/consts'
+import OverlayComponent from '../deckbuildingComponents/OverlayComponent.vue'
 
 const { gameState, climbNextFloor } = useGameState()
 
@@ -24,7 +25,7 @@ const hexagons = computed(() => {
   const availableWidth = SVG_WIDTH - padding * 2
   const effectiveWidth = availableWidth / (gameState.floors.length + 1)
   const startX = effectiveWidth
-  const availableHeight = SVG_HEIGHT - padding * 8
+  const availableHeight = SVG_HEIGHT * 0.8
   const effectiveHeight = availableHeight / (gameState.floors.length + 1)
   const startY = SVG_HEIGHT - effectiveHeight
   return gameState.floors.map((_, index) => {
@@ -128,8 +129,8 @@ onMounted(() => {
         Climb
       </text>
     </g>
+    <OverlayComponent />
   </svg>
-  <div>{{ gameState.floors }}</div>
 </template>
 
 <style lang="scss" scoped>

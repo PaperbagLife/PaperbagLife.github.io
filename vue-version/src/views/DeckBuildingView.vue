@@ -15,17 +15,6 @@ onMounted(() => {
 <template>
   <main>
     <div class="col">
-      <div class="overlay col position-absolute">
-        <div class="row mx-0 blessings-container"></div>
-        <div class="row mx-0">
-          <span class="player-stats material-symbols-outlined">swords</span>
-          <span class="player-stats">{{ gameState.player?.attack }}</span>
-        </div>
-        <div class="row mx-0">
-          <span class="player-stats material-symbols-outlined">attach_money</span>
-          <span class="player-stats">{{ gameState.gold }}</span>
-        </div>
-      </div>
       <BattleScene v-if="gameState.currentBattle" />
       <MapScene v-else />
     </div>
@@ -33,8 +22,9 @@ onMounted(() => {
 </template>
 <style lang="scss">
 .overlay {
-  top: 20px;
+  position: fixed;
   z-index: 1000;
+  pointer-events: none;
 }
 .blessings-container {
   min-height: 20px;
@@ -66,7 +56,6 @@ onMounted(() => {
   width: 100%;
   max-height: 100dvh;
   height: 100vh;
-  display: block;
   touch-action: none;
 }
 
