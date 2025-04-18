@@ -48,16 +48,18 @@ onMounted(() => {
   user-select: none;
 }
 
-html,
-body {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
+.no-scroll {
+  html,
+  body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
 
-body {
-  position: fixed;
-  -webkit-overflow-scrolling: touch;
+  body {
+    position: fixed;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 .svg-container {

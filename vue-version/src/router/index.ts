@@ -64,10 +64,26 @@ const router = createRouter({
       name: 'deckbuilding',
       component: DeckBuildingView,
       meta: {
-        hideHeader: true
+        hideHeader: true,
+        bodyClass: 'no-scroll'
       }
     }
   ]
+})
+
+// router/index.js or wherever you set up Vue Router
+router.beforeEach((to, from, next) => {
+  // Remove all previously applied route-specific body classes
+  if (from.meta?.bodyClass) {
+    document.documentElement.classList.remove(from.meta.bodyClass as string)
+  }
+
+  // Add the new one if it exists
+  if (to.meta?.bodyClass) {
+    document.documentElement.classList.add(to.meta.bodyClass as string)
+  }
+
+  next()
 })
 
 export default router
