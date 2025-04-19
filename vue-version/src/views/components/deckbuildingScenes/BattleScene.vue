@@ -39,6 +39,8 @@ const handRenderCards = ref<RenderCard[]>([])
 const questionCardSlots = ref<RenderCardSlot[]>([])
 const renderOperations = ref<RenderOperations[]>([])
 
+const showDeckOverlay = ref(false)
+
 const submitButtonVisible = computed(() => {
   return questionCardSlots.value.every((slot) => slot.renderCard !== null)
 })
@@ -88,7 +90,7 @@ watch(
       } else {
         currentCards.push({
           card,
-          centerX: 0,
+          centerX: SVG_WIDTH,
           centerY: SVG_HEIGHT - CARD_HEIGHT / 2,
           dragged: false
         })
@@ -369,7 +371,12 @@ function onMouseUp(e: PointerEvent) {
     <!-- Enemy -->
     <EnemyComponent v-if="gameState.currentBattle" :enemy="gameState.currentBattle.enemy" />
 
-    <OverlayComponent />
+    <OverlayComponent
+      @close-overlay="showDeckOverlay = false"
+      @open-overlay="showDeckOverlay = true"
+      :show-cards="showDeckOverlay"
+      :cards="gameState.deck"
+    />
   </svg>
 </template>
 

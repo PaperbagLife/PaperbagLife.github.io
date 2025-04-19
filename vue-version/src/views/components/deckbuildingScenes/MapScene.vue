@@ -15,6 +15,8 @@ const playerX = ref(0)
 const playerY = ref(0)
 const playerVisible = ref(false)
 
+const showDeckOverlay = ref(false)
+
 const padding = 50
 // Hexagon properties
 const HEX_RADIUS = 50 // Radius of each hexagon
@@ -129,7 +131,12 @@ onMounted(() => {
         Climb
       </text>
     </g>
-    <OverlayComponent />
+    <OverlayComponent
+      @close-overlay="showDeckOverlay = false"
+      @open-overlay="showDeckOverlay = true"
+      :show-cards="showDeckOverlay"
+      :cards="gameState.deck"
+    />
   </svg>
 </template>
 

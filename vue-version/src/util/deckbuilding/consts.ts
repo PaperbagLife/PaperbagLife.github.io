@@ -116,6 +116,56 @@ export const SIMPLE_DECK: Card[] = [
   },
   {
     type: CardType.POINT,
+    color: CardColor.LIGHT,
+    value: 1
+  },
+  {
+    type: CardType.POINT,
+    color: CardColor.LIGHT,
+    value: 2
+  },
+  {
+    type: CardType.POINT,
+    color: CardColor.LIGHT,
+    value: 3
+  },
+  {
+    type: CardType.POINT,
+    color: CardColor.LIGHT,
+    value: 4
+  },
+  {
+    type: CardType.POINT,
+    color: CardColor.LIGHT,
+    value: 5
+  },
+  {
+    type: CardType.POINT,
+    color: CardColor.DARK,
+    value: 1
+  },
+  {
+    type: CardType.POINT,
+    color: CardColor.DARK,
+    value: 2
+  },
+  {
+    type: CardType.POINT,
+    color: CardColor.DARK,
+    value: 3
+  },
+  {
+    type: CardType.POINT,
+    color: CardColor.DARK,
+    value: 4
+  },
+  {
+    type: CardType.POINT,
+    color: CardColor.DARK,
+    value: 5
+  },
+  {
+    type: CardType.POINT,
     color: CardColor.DARK,
     value: 1
   },
