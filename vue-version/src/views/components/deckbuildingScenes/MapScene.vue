@@ -152,6 +152,9 @@ onMounted(() => {
 .player-icon {
   transition: transform 1s ease;
 }
+.climb-button {
+  cursor: pointer;
+}
 .climb-button-text {
   font-size: 40px;
   pointer-events: none;

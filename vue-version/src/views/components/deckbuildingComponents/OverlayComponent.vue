@@ -238,6 +238,10 @@ const DECK_ICON_HEIGHT = DECK_ICON_WIDTH * 1.5
   user-select: none;
 }
 
+.deck-icon {
+  cursor: pointer;
+}
+
 .scrollbar-thumb {
   cursor: pointer;
   &:hover {
