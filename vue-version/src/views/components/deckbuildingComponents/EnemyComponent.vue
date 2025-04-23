@@ -1,36 +1,24 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed } from 'vue'
 import {
-  CARD_HEIGHT,
   CARD_WIDTH,
-  CardColor,
-  CardType,
   ENEMY_HEIGHT,
   ENEMY_WIDTH,
-  Operations,
-  type RenderCard,
-  type RenderCardSlot,
-  type RenderOperations,
   SVG_HEIGHT,
   SVG_WIDTH
 } from '@/util/deckbuilding/consts'
 import { type Enemy } from '@/util/deckbuilding/gameManager'
 
-const props = defineProps<{
+defineProps<{
   enemy: Enemy
 }>()
 
 const PADDING = 50
 const HP_HEIGHT = 20
 
-function createArray(range: number) {
-  return Array.from({ length: range }, (_, index) => index)
-}
-
 const originTranslate = computed(() => {
   return `translate(${SVG_WIDTH - ENEMY_WIDTH - PADDING}px, ${(SVG_HEIGHT - ENEMY_HEIGHT) / 2}px)`
 })
-const size = 200
 </script>
 
 <template>
@@ -46,21 +34,21 @@ const size = 200
       <!-- Slash animation from top left to bottom right -->
       <line
         v-if="enemy.damaged"
-        :x1="0"
+        :x1="ENEMY_WIDTH / 2"
         :y1="0"
-        :x2="ENEMY_WIDTH"
-        :y2="ENEMY_HEIGHT / 2"
-        class="slash-line normal"
+        :x2="ENEMY_WIDTH / 2"
+        :y2="ENEMY_HEIGHT * 0.8"
+        class="slash-line"
       />
     </g>
-    <g class="mirrored-animation">
+    <g class="damage-animation">
       <!-- Slash animation from top right to bottom left -->
       <line
         v-if="enemy.crit"
         :x1="0"
-        :y1="0"
+        :y1="ENEMY_HEIGHT * 0.4"
         :x2="ENEMY_WIDTH"
-        :y2="ENEMY_HEIGHT / 2"
+        :y2="ENEMY_HEIGHT * 0.4"
         class="slash-line mirrored"
       />
     </g>
@@ -86,39 +74,35 @@ const size = 200
 <style scoped>
 @keyframes slashAnimation {
   0% {
-    transform: scale(0);
+    transform: scaleY(0);
     opacity: 1;
   }
   60% {
-    transform: scale(1);
+    transform: scaleY(1);
     opacity: 1;
   }
   100% {
-    transform: scale(1);
+    transform: scaleY(1);
     opacity: 0;
   }
 }
 @keyframes mirroredSlash {
   0% {
-    transform: scale(0) rotate(90deg);
+    transform: scaleX(0);
     opacity: 1;
   }
   60% {
-    transform: scale(1) rotate(90deg);
+    transform: scaleX(1);
     opacity: 1;
   }
   100% {
-    transform: scale(1) rotate(90deg);
+    transform: scaleX(1);
     opacity: 0;
   }
 }
 
 .damage-animation {
   transform: translate(0, 50px);
-}
-
-.mirrored-animation {
-  transform: translate(200px, 50px);
 }
 
 .slash-line {

@@ -2,6 +2,7 @@
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { useGameState } from '@/util/deckbuilding/gameManager'
 import { SVG_HEIGHT, SVG_WIDTH } from '@/util/deckbuilding/consts'
+import { type Enemy } from '@/util/deckbuilding/gameManager'
 import OverlayComponent from '../deckbuildingComponents/OverlayComponent.vue'
 
 const { gameState, climbNextFloor } = useGameState()
@@ -91,7 +92,7 @@ onMounted(() => {
       />
       <circle :cx="hex.x" :cy="hex.y" r="5" fill="black"></circle>
       <text :x="hex.x" :y="hex.y" text-anchor="middle" dominant-baseline="middle" font-size="20">
-        {{ gameState.floors[index]?.name }}
+        {{ (gameState.floors[index] as Enemy)?.name ?? 'bruh' }}
         {{ index }}
       </text>
     </g>

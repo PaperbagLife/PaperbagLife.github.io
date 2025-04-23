@@ -1,18 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
-import {
-  CARD_HEIGHT,
-  CARD_WIDTH,
-  CardColor,
-  CardType,
-  HAND_AREA_RIGHT_PADDING,
-  Operations,
-  type RenderCard,
-  type RenderCardSlot,
-  type RenderOperations,
-  SVG_HEIGHT,
-  SVG_WIDTH
-} from '@/util/deckbuilding/consts'
+import { computed } from 'vue'
+import { HAND_AREA_RIGHT_PADDING, SVG_HEIGHT, SVG_WIDTH } from '@/util/deckbuilding/consts'
 
 const props = defineProps<{
   target: number

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import {
   CARD_HEIGHT,
   CARD_WIDTH,
@@ -14,8 +14,7 @@ const props = defineProps<{
   originY?: number
 }>()
 
-const POINT_CARD_TEXT_TOP_PADDING = 15
-const POINT_CARD_TEXT_SIDE_PADDING = 20
+const POINT_CARD_TEXT_TOP_PADDING = 50
 
 const origin = computed(() => {
   return {
@@ -38,21 +37,18 @@ const originTranslate = computed(() => {
     :data-instanceID="renderCard.card.instanceID"
   >
     <g v-if="renderCard.card.type === CardType.POINT" :class="{ shake: renderCard.shake }">
-      <rect
-        class="render-card-rect"
-        :class="{ dark: renderCard.card.color === CardColor.DARK }"
+      <image
+        :href="renderCard.card.cardArt"
         :width="CARD_WIDTH"
         :height="CARD_HEIGHT"
         :x="-CARD_WIDTH / 2"
         :y="-CARD_HEIGHT / 2"
-        rx="5"
-        stroke="black"
       />
       <text
         class="card-number"
         :class="{ dark: renderCard.card.color === CardColor.DARK }"
-        :x="POINT_CARD_TEXT_TOP_PADDING - CARD_WIDTH / 2"
-        :y="POINT_CARD_TEXT_SIDE_PADDING - CARD_HEIGHT / 2"
+        :x="0"
+        :y="POINT_CARD_TEXT_TOP_PADDING - CARD_HEIGHT / 2"
         dominant-baseline="middle"
         text-anchor="middle"
       >
@@ -64,7 +60,8 @@ const originTranslate = computed(() => {
 
 <style scoped>
 .card-number {
-  font-size: 25px;
+  font-size: 3rem;
+  font-weight: bold;
   user-select: none;
 }
 
@@ -92,14 +89,6 @@ const originTranslate = computed(() => {
 
 .dragging .render-card {
   pointer-events: none;
-}
-
-.render-card-rect {
-  fill: rgb(251, 255, 206);
-}
-
-.render-card-rect.dark {
-  fill: rgb(4, 0, 49);
 }
 
 .render-card {

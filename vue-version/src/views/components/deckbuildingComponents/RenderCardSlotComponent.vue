@@ -1,12 +1,6 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import {
-  CARD_HEIGHT,
-  CARD_WIDTH,
-  CardColor,
-  CardType,
-  type RenderCardSlot
-} from '@/util/deckbuilding/consts'
+import { computed, watch } from 'vue'
+import { CARD_HEIGHT, CARD_WIDTH, type RenderCardSlot } from '@/util/deckbuilding/consts'
 import RenderCardComponent from './RenderCardComponent.vue'
 
 const props = defineProps<{
@@ -21,15 +15,22 @@ const originTranslate = computed(() => {
   return `translate(${relOrigin.originX}px, ${relOrigin.originY}px)`
 })
 
-watch(() => props.renderCardSlot, () => {
-  console.log('renderCardSlot changed')
-})
+watch(
+  () => props.renderCardSlot,
+  () => {
+    console.log('renderCardSlot changed')
+  }
+)
 </script>
 
 <template>
   <!-- This will be in an svg-->
-  <g >
-    <g :style="{ transform: originTranslate }" :data-id="renderCardSlot.id" class="render-card-slot">
+  <g>
+    <g
+      :style="{ transform: originTranslate }"
+      :data-id="renderCardSlot.id"
+      class="render-card-slot"
+    >
       <rect
         :width="CARD_WIDTH"
         :height="CARD_HEIGHT"

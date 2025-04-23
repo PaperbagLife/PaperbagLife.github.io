@@ -10,7 +10,6 @@ import {
 } from '../../../util/starrail/consts'
 
 const ENEMY_HP_BAR_WIDTH = 48
-const BOSS_HP_WIDTH = 100
 const ENEMY_HP_TOP_OFFSET = 20
 const ENEMY_HP_BAR_HEIGHT = 6
 const ENEMY_TOUGHNESS_BAR_HEIGHT = 4

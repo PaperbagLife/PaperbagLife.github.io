@@ -12,8 +12,9 @@ import {
   type RenderCard,
   type RenderCardSlot,
   type RenderOperations,
+  SUBMIT_BUTTON_HEIGHT,
   SUBMIT_BUTTON_PADDING,
-  SUBMIT_BUTTON_RADIUS,
+  SUBMIT_BUTTON_WIDTH,
   SVG_HEIGHT,
   SVG_WIDTH
 } from '@/util/deckbuilding/consts'
@@ -348,24 +349,24 @@ function onMouseUp(e: PointerEvent) {
     <RenderCardComponent v-if="dragCard" :renderCard="dragCard" />
 
     <!-- Submit Button -->
-    <circle
+    <rect
       v-if="submitButtonVisible"
       class="submit-button"
-      :cx="SVG_WIDTH - SUBMIT_BUTTON_PADDING"
-      :cy="SVG_HEIGHT - SUBMIT_BUTTON_PADDING"
-      :r="SUBMIT_BUTTON_RADIUS"
-      :width="120"
-      :height="60"
+      :x="SVG_WIDTH - SUBMIT_BUTTON_PADDING"
+      :y="SVG_HEIGHT - SUBMIT_BUTTON_PADDING"
+      rx="10"
+      :width="SUBMIT_BUTTON_WIDTH"
+      :height="SUBMIT_BUTTON_HEIGHT"
     />
     <text
       v-if="submitButtonVisible"
-      :x="SVG_WIDTH - SUBMIT_BUTTON_PADDING"
-      :y="SVG_HEIGHT - SUBMIT_BUTTON_PADDING"
+      :x="SVG_WIDTH - SUBMIT_BUTTON_PADDING + SUBMIT_BUTTON_WIDTH / 2"
+      :y="SVG_HEIGHT - SUBMIT_BUTTON_PADDING + SUBMIT_BUTTON_HEIGHT / 2"
       class="submit-button-text"
       text-anchor="middle"
       dominant-baseline="middle"
     >
-      Submit
+      =
     </text>
 
     <!-- Enemy -->
@@ -403,7 +404,7 @@ function onMouseUp(e: PointerEvent) {
 }
 
 .submit-button-text {
-  font-size: 40px;
+  font-size: 5rem;
   pointer-events: none;
 }
 </style>

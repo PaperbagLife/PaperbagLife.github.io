@@ -1,21 +1,10 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
-import {
-  CARD_HEIGHT,
-  CARD_WIDTH,
-  CardColor,
-  CardType,
-  Operations,
-  type RenderCard,
-  type RenderCardSlot,
-  type RenderOperations
-} from '@/util/deckbuilding/consts'
-import { type Enemy } from '@/util/deckbuilding/gameManager'
+import { Operations, type RenderCardSlot, type RenderOperations } from '@/util/deckbuilding/consts'
 import RenderCardSlotComponent from './RenderCardSlotComponent.vue'
 
 const operatorSize = 30
 
-const props = defineProps<{
+defineProps<{
   cardSlots: RenderCardSlot[]
   renderOperations: RenderOperations[]
 }>()
