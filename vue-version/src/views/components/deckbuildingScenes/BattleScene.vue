@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useGameState } from '@/util/deckbuilding/gameManager'
+import { GameState, useGameState } from '@/util/deckbuilding/gameManager'
 import RenderCardComponent from '@/views/components/deckbuildingComponents/RenderCardComponent.vue'
 import {
   CARD_HEIGHT,
@@ -12,6 +12,7 @@ import {
   type RenderCard,
   type RenderCardSlot,
   type RenderOperations,
+  Scene,
   SUBMIT_BUTTON_HEIGHT,
   SUBMIT_BUTTON_PADDING,
   SUBMIT_BUTTON_WIDTH,
@@ -255,9 +256,12 @@ async function submitQuestion() {
     }, i * CARD_SCORE_ANIMATION_DURATION)
   })
   if (battleOver) {
+    console.log('Battle is over')
     const goldGained = await gameState.currentBattle?.endBattle()
+    console.log('Gold gained:', goldGained)
     gameState.gold += goldGained ?? 0
     gameState.currentBattle = null
+    gameState.scene = Scene.MAP
   }
 }
 

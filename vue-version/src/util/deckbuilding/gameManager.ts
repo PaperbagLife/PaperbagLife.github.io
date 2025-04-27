@@ -78,6 +78,7 @@ export class Enemy {
     this.currentQuestionIndex = -1
     this.reward = reward
   }
+
   nextTarget(this: Enemy) {
     this.currentTarget = Math.floor(
       Math.random() * (this.targetMax - this.targetMin) + this.targetMin
@@ -93,7 +94,7 @@ export class Enemy {
     }
   }
 
-  hit(this: Enemy, delay: number, damage: number) {
+  hitAnimation(this: Enemy, delay: number, damage: number) {
     setTimeout(() => {
       this.damaged = true
       setTimeout(() => {
@@ -105,7 +106,7 @@ export class Enemy {
     }, delay)
   }
 
-  exactHit(this: Enemy, delay: number, damage: number) {
+  exactHitAnimation(this: Enemy, delay: number, damage: number) {
     setTimeout(() => {
       this.crit = true
       this.damaged = true
@@ -226,40 +227,53 @@ export class BattleState {
     const exactHit = result === this.enemy.currentTarget
     const hit = Math.abs(result - this.enemy.currentTarget) <= this.enemy.range
     this.animationStack.push({ duration: ENEMY_DAMAGE_ANIMATION_DURATION })
+    let enemyHp = this.enemy.hp
     if (exactHit) {
-      this.enemy.exactHit(totalAnimationTime, this.player.attack)
+      enemyHp -= this.player.attack * 2
+      this.enemy.exactHitAnimation(totalAnimationTime, this.player.attack)
     } else if (hit) {
-      this.enemy.hit(totalAnimationTime, this.player.attack)
+      enemyHp -= this.player.attack
+      this.enemy.hitAnimation(totalAnimationTime, this.player.attack)
     }
     this.enemy.questionCount--
+    if (enemyHp <= 0) {
+      // Enemy is dead
+      console.log('Enemy is dead')
+      return true
+    }
+
     // Check gameover
-    if (this.enemy.questionCount == 0 && this.enemy.hp > 0) {
+    if (this.enemy.questionCount == 0 && enemyHp > 0) {
       // Game over
       gameOver(this.enemy)
       return true
     }
 
-    if (this.enemy.hp <= 0) {
-      // Enemy is dead
-      console.log('Enemy is dead')
-      return true
-    }
     this.nextQuestion()
     return false
   }
 
+  // Example of async handling animation stack with async keyword and await
   async endBattle(this: BattleState): Promise<number> {
     while (this.animationStack.length !== 0) {
-      await sleep(1000)
+      console.log('Waiting for animation stack to finish')
+      const animation = this.animationStack.shift()
+      if (animation && animation.value != undefined) {
+        this.currentValue = animation.value
+      }
+      if (animation) {
+        await sleep(animation.duration)
+      }
     }
     this.battleEnd = true
     this.blessings.forEach((blessing) => {
       blessing.onBattleEnd(this)
     })
-
+    console.log('Battle ended, return reward')
     return this.enemy.reward
   }
 
+  // Example of async handling animation stack with recursion
   nextQuestion(this: BattleState) {
     if (this.animationStack.length !== 0) {
       const animation = this.animationStack.shift()
@@ -338,7 +352,22 @@ function initializeGame(deck: Card[]) {
   gameState.floorIndex = 0
   gameState.floors = [null]
   for (let i = 0; i < 6; i++) {
-    gameState.floors.push(enemies[0])
+    const enemy = enemies[0]
+    gameState.floors.push(
+      new Enemy(
+        enemy.name,
+        enemy.tachie,
+        enemy.maxHp,
+        enemy.questionCount,
+        enemy.targetMax,
+        enemy.targetMin,
+        enemy.range,
+        enemy.cardCount,
+        enemy.operators,
+        enemy.operatorsCDF,
+        enemy.reward
+      )
+    )
   }
   gameState.idCounter = 0
   deck.forEach((card) => {
