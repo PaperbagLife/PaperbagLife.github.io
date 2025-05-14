@@ -1,15 +1,15 @@
-import { Player, Bullet } from './classes'
+import { Bullet, Player } from './classes'
 import { rotate } from './helpers'
 
 import {
   BASIC_ENEMY_BULLET_SPEED,
   BLUE,
   GREEN,
+  type MovePattern,
   NUM_CENTER_SPRAY,
   NUM_CENTER_SPREAD,
   NUM_ROTATED,
   RED,
-  type MovePattern
 } from './const'
 
 // const for move patterns
@@ -19,16 +19,16 @@ export const triangleMove = [
   { duration: 268, xVel: 1, yVel: 0 },
   { duration: 80, xVel: 0, yVel: 0 },
   { duration: 300, xVel: -1, yVel: -2 },
-  { duration: 80, xVel: 0, yVel: 0 }
+  { duration: 80, xVel: 0, yVel: 0 },
 ]
 
 export const downRight: MovePattern[] = [
   { xVel: 0, yVel: 1, duration: 200 },
-  { xVel: 1, yVel: 0.5, duration: -1 }
+  { xVel: 1, yVel: 0.5, duration: -1 },
 ]
 export const downLeft: MovePattern[] = [
   { xVel: 0, yVel: 1, duration: 200 },
-  { xVel: -1, yVel: 0.5, duration: -1 }
+  { xVel: -1, yVel: 0.5, duration: -1 },
 ]
 
 export const straightDown: MovePattern[] = [{ xVel: 0, yVel: 1, duration: -1 }]
@@ -100,7 +100,7 @@ export function basicCenterSpreadAttack(cx: number, cy: number, enemyBullets: Bu
     const patternDirectional: MovePattern = {
       duration: -1,
       xVel: xVel * bulletSpeed,
-      yVel: yVel * bulletSpeed
+      yVel: yVel * bulletSpeed,
     }
     const bullet = new Bullet(cx, cy, 3, 3, [patternDirectional], RED, Date.now(), i)
     enemyBullets.push(bullet)
@@ -125,7 +125,7 @@ export function basicCenterSprayAttack(
     const patternDirectional: MovePattern = {
       duration: -1,
       xVel: xVel * bulletSpeed,
-      yVel: yVel * bulletSpeed
+      yVel: yVel * bulletSpeed,
     }
     const bullet = new Bullet(
       cx,
@@ -159,12 +159,12 @@ export function basicRotatedAttack(
     const patternDirectional: MovePattern = {
       duration: 80,
       xVel: xVel * bulletSpeed,
-      yVel: yVel * bulletSpeed
+      yVel: yVel * bulletSpeed,
     }
     const patternStop: MovePattern = {
       duration: 100,
       xVel: xVel * 0.05,
-      yVel: yVel * 0.05
+      yVel: yVel * 0.05,
     }
     const alternator = color === RED ? 1 : -1
     const rotated = rotate(xVel, yVel, (-Math.PI * alternator) / 2)
@@ -173,7 +173,7 @@ export function basicRotatedAttack(
       xVel: rotated.x * (bulletSpeed * 1.4),
       yVel: rotated.y * (bulletSpeed * 1.4),
       rotation: (-Math.PI * alternator) / 4,
-      rotationDuration: 400
+      rotationDuration: 400,
     }
 
     const movePatterns = [patternDirectional, patternStop, patternRotated]

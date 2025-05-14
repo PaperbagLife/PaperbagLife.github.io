@@ -20,7 +20,7 @@ camera.position.x = -10
 const orbitControls = new OrbitControls(camera, renderer.domElement)
 orbitControls.mouseButtons = {
   MIDDLE: THREE.MOUSE.ROTATE,
-  RIGHT: THREE.MOUSE.PAN
+  RIGHT: THREE.MOUSE.PAN,
 }
 orbitControls.enableDamping = true
 orbitControls.enablePan = true

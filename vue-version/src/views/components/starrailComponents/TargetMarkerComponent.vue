@@ -7,7 +7,7 @@ import {
   ENEMY_CENTER_Y,
   ENEMY_SIZE,
   PLAYER_IMAGE_HEIGHT,
-  PLAYER_IMAGE_WIDTH
+  PLAYER_IMAGE_WIDTH,
 } from '../../../util/starrail/consts'
 defineProps<{
   turnCharacter: Character | null

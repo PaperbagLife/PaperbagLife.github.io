@@ -17,7 +17,7 @@ import {
   SUBMIT_BUTTON_PADDING,
   SUBMIT_BUTTON_WIDTH,
   SVG_HEIGHT,
-  SVG_WIDTH
+  SVG_WIDTH,
 } from '@/util/deckbuilding/consts'
 import AnswerSlotComponent from '@/views/components/deckbuildingComponents/AnswerSlotComponent.vue'
 import EnemyComponent from '@/views/components/deckbuildingComponents/EnemyComponent.vue'
@@ -67,7 +67,7 @@ watch(
             card,
             centerX: draggedCardInstancePosition.value.x,
             centerY: draggedCardInstancePosition.value.y,
-            dragged: true
+            dragged: true,
           })
           draggedCardInstancePosition.value = { instanceID: -1, x: 0, y: 0 }
           setTimeout(() => {
@@ -86,7 +86,7 @@ watch(
             card,
             centerX: startX + i * effectiveWidth,
             centerY: SVG_HEIGHT - CARD_HEIGHT / 2,
-            dragged: false
+            dragged: false,
           })
         }
       } else {
@@ -94,7 +94,7 @@ watch(
           card,
           centerX: SVG_WIDTH,
           centerY: SVG_HEIGHT - CARD_HEIGHT / 2,
-          dragged: false
+          dragged: false,
         })
         setTimeout(() => {
           // Find the corresponding instance id in the handRenderCards
@@ -151,7 +151,7 @@ watch(
         renderCard: null,
         id: `${currentQuestionIndex}-${i}`,
         centerX: startX + i * effectiveWidth,
-        centerY: QUESTION_TOP_PADDING
+        centerY: QUESTION_TOP_PADDING,
       })
     }
 
@@ -177,7 +177,7 @@ watch(
         operation: currentOperators[i],
         id: i,
         centerX: startX + (i + 0.5) * effectiveWidth,
-        centerY: QUESTION_TOP_PADDING
+        centerY: QUESTION_TOP_PADDING,
       })
     }
     renderOperations.value = renderOps
@@ -304,7 +304,7 @@ function onMouseUp(e: PointerEvent) {
     draggedCardInstancePosition.value = {
       instanceID: dragCard.value.card.instanceID,
       x: dragCard.value.centerX,
-      y: dragCard.value.centerY
+      y: dragCard.value.centerY,
     }
     const index = handRenderCards.value.findIndex((card) => card.centerX > dragCard.value!.centerX)
     if (index === -1) {

@@ -5,7 +5,7 @@ import {
   CARD_WIDTH,
   CardColor,
   CardType,
-  type RenderCard
+  type RenderCard,
 } from '@/util/deckbuilding/consts'
 
 const props = defineProps<{
@@ -19,7 +19,7 @@ const POINT_CARD_TEXT_TOP_PADDING = 50
 const origin = computed(() => {
   return {
     originX: props.originX ? props.originX : props.renderCard.centerX,
-    originY: props.originY ? props.originY : props.renderCard.centerY
+    originY: props.originY ? props.originY : props.renderCard.centerY,
   }
 })
 

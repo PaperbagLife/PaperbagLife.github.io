@@ -6,7 +6,7 @@ import {
   ENEMY_SIZE,
   ENEMY_TOP_PADDING,
   GAME_HEIGHT,
-  PLAYER_DEFAULT_X_POSITION
+  PLAYER_DEFAULT_X_POSITION,
 } from '../../../util/starrail/consts'
 
 const ENEMY_HP_BAR_WIDTH = 48

@@ -207,7 +207,7 @@ function update() {
             target.hp -= currentActor.attack
             game.timeline.push({
               character: currentActor,
-              timeUntil: Math.floor(game.lapLength / currentActor.speed)
+              timeUntil: Math.floor(game.lapLength / currentActor.speed),
             })
             console.log('you hit enemy!', target.name, target.hp)
             if (game.skillPoints < MAX_SKILLPOINTS) game.skillPoints += 1
@@ -244,7 +244,7 @@ function update() {
             }
             game.timeline.push({
               character: currentActor,
-              timeUntil: Math.floor(game.lapLength / currentActor.speed)
+              timeUntil: Math.floor(game.lapLength / currentActor.speed),
             })
             break
           }
@@ -266,7 +266,7 @@ function update() {
       game.inAnimation = false
       game.timeline.push({
         character: currentActor,
-        timeUntil: game.lapLength / currentActor.speed
+        timeUntil: game.lapLength / currentActor.speed,
       })
       console.log('enemy attacked you!', target.name, target.hp)
       game.inAnimation = false
@@ -288,7 +288,7 @@ const playerTeam: Character[] = [
     {
       target: SkillTarget.ENEMY,
       aoe: false,
-      damage: 20
+      damage: 20,
     },
     'outbound'
   ),
@@ -302,14 +302,14 @@ const playerTeam: Character[] = [
     {
       target: SkillTarget.ALLY,
       aoe: false,
-      heal: 10
+      heal: 10,
     },
     'local_hospital'
-  )
+  ),
 ]
 const enemyTeam: Character[] = [
   new Character('enemy', frostSpawnImage, false, 40, 100, 10),
-  new Character('enemy2', fireShadewalkerImage, false, 40, 100, 10)
+  new Character('enemy2', fireShadewalkerImage, false, 40, 100, 10),
 ]
 const game = reactive(new GameState(playerTeam, enemyTeam))
 

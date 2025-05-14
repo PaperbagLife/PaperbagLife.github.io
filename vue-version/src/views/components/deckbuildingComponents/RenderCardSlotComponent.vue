@@ -10,7 +10,7 @@ const props = defineProps<{
 const originTranslate = computed(() => {
   const relOrigin = {
     originX: props.renderCardSlot.centerX,
-    originY: props.renderCardSlot.centerY
+    originY: props.renderCardSlot.centerY,
   }
   return `translate(${relOrigin.originX}px, ${relOrigin.originY}px)`
 })

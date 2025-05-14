@@ -14,7 +14,7 @@ import {
   PlayerCharacter,
   SkillEffect,
   SubTurnType,
-  TargetType
+  TargetType,
 } from './consts'
 
 export const stelle = new PlayerCharacter(
@@ -31,7 +31,7 @@ export const stelle = new PlayerCharacter(
     effect: SkillEffect.DAMAGE,
     attackType: AttackType.MELEE,
     modifier: 1.2,
-    breakEfficiency: 2
+    breakEfficiency: 2,
   },
   120,
   100,
@@ -41,7 +41,7 @@ export const stelle = new PlayerCharacter(
     effect: SkillEffect.DAMAGE,
     attackType: AttackType.RANGED,
     modifier: 2,
-    breakEfficiency: 1
+    breakEfficiency: 1,
   }
 )
 export const bailu = new PlayerCharacter(
@@ -56,7 +56,7 @@ export const bailu = new PlayerCharacter(
   {
     targetType: TargetType.SINGLE_ALLY,
     effect: SkillEffect.HEAL,
-    modifier: 10
+    modifier: 10,
   },
   110,
   100,
@@ -64,7 +64,7 @@ export const bailu = new PlayerCharacter(
     targetType: TargetType.ALL_ALLIES,
     hits: 3,
     effect: SkillEffect.HEAL,
-    modifier: 20
+    modifier: 20,
   }
 )
 
@@ -80,7 +80,7 @@ export const march = new PlayerCharacter(
   {
     targetType: TargetType.SINGLE_ALLY,
     effect: SkillEffect.SHIELD,
-    modifier: 20
+    modifier: 20,
   },
   130,
   100,
@@ -89,7 +89,7 @@ export const march = new PlayerCharacter(
     effect: SkillEffect.DAMAGE,
     attackType: AttackType.RANGED,
     modifier: 2,
-    breakEfficiency: 2
+    breakEfficiency: 2,
   },
   2,
   (trigger: string, self: Character) => {

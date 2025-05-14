@@ -1,4 +1,4 @@
-import { Player, Bullet } from './classes'
+import { Bullet, Player } from './classes'
 // type defs
 export type ControlsPressed = {
   up: boolean

@@ -10,7 +10,7 @@ import {
   type PlayerCharacter,
   PlayerTurnAction,
   TargetType,
-  TURN_TIME
+  TURN_TIME,
 } from '../../../util/starrail/consts'
 import {
   ALLY_VIEW_TOP_PADDING,
@@ -23,7 +23,7 @@ import {
   PROFILE_PIC_HEIGHT,
   PROFILE_PIC_SIDE_OFFSET,
   PROFILE_PIC_WIDTH,
-  ULT_GAUGE_BASE_OFFSET
+  ULT_GAUGE_BASE_OFFSET,
 } from '../../../util/starrail/consts'
 
 const BASE_HEIGHT = 280
@@ -101,7 +101,7 @@ watch(
                 x: PLAYER_DEFAULT_X_POSITION + PLAYER_IMAGE_WIDTH,
                 y: GAME_HEIGHT / 2,
                 color: getElementColor(player.element),
-                id: projectileID
+                id: projectileID,
               }
               projectiles.value = [projectile]
               // need enemyXposition here lol rip
@@ -127,7 +127,7 @@ watch(
                   x: PLAYER_DEFAULT_X_POSITION + PLAYER_IMAGE_WIDTH,
                   y: GAME_HEIGHT / 2,
                   color: getElementColor(player.element),
-                  id: projectileID
+                  id: projectileID,
                 }
                 projectiles.value.push(projectile)
                 setTimeout(() => {

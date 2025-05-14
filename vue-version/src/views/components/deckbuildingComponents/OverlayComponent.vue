@@ -58,7 +58,7 @@ const renderCards = computed<RenderCard[]>(() => {
       card,
       centerX: x,
       centerY: y,
-      dragged: false
+      dragged: false,
     })
   }
   return renderCards

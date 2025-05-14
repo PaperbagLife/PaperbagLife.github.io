@@ -24,7 +24,7 @@ const ticks = computed(() => {
   for (let i = 0; i <= 10; i++) {
     ticks.push({
       x: (RANGE_INDICATOR_WIDTH * i) / 10 - RANGE_INDICATOR_WIDTH / 2,
-      label: `${minValue.value + (fullRange.value * i) / 10}`
+      label: `${minValue.value + (fullRange.value * i) / 10}`,
     })
   }
   return ticks

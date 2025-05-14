@@ -10,15 +10,15 @@ export default defineConfig({
       template: {
         compilerOptions: {
           // treat all tags with a dash as custom elements
-          isCustomElement: (tag) => tag.startsWith('swiper')
-        }
-      }
-    })
+          isCustomElement: (tag) => tag.startsWith('swiper'),
+        },
+      },
+    }),
   ],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
-    }
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+    },
   },
-  assetsInclude: ['*.png', '**/*.glb']
+  assetsInclude: ['*.png', '**/*.glb'],
 })

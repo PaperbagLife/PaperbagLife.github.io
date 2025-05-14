@@ -5,7 +5,7 @@ import {
   ENEMY_HEIGHT,
   ENEMY_WIDTH,
   SVG_HEIGHT,
-  SVG_WIDTH
+  SVG_WIDTH,
 } from '@/util/deckbuilding/consts'
 import { type Enemy } from '@/util/deckbuilding/gameManager'
 

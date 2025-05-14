@@ -14,6 +14,6 @@ export const useHeaderVisibility = () => {
   )
 
   return {
-    headerVisible
+    headerVisible,
   }
 }

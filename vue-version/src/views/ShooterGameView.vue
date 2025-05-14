@@ -78,7 +78,7 @@ const player = ref<Player>({
   x: (canvas.width - playerWidth) / 2,
   y: canvas.height - playerHeight - 10,
   hp: 5,
-  invulTimer: 0
+  invulTimer: 0,
 })
 
 type ControlsPressed = {
@@ -163,7 +163,7 @@ function handlePlayerUpdate() {
       xVel: 0,
       yVel: -playerBulletSpeed,
       color: '#66ccff',
-      timestamp: Date.now()
+      timestamp: Date.now(),
     })
   }
   if (player.value.invulTimer > 0) {
@@ -214,7 +214,7 @@ function boss1Attack(boss: Boss) {
         xVel,
         yVel,
         timestamp: Date.now(),
-        color: '#ed2b2a'
+        color: '#ed2b2a',
       }
       enemyBullets.value.push(bullet)
     }
@@ -240,7 +240,7 @@ function spawnBoss() {
       console.log(boss.y)
       if (boss.y < PADDING * 2) return 0.3
       return 0
-    }
+    },
   }
   liveBoss.value = boss1
   bossSpawned = true
@@ -261,7 +261,7 @@ function handleEnemy() {
       hp: 3 + Math.floor(Math.random() * 2),
       color: Math.random() > 0.5 ? '#a0d8b3' : '#9384d1',
       attackCounter: 0,
-      attackInterval: 60 + Math.random() * 30
+      attackInterval: 60 + Math.random() * 30,
     }
     liveEnemies.value.push(randomEnemy)
     enemySpawnTimer = 0
@@ -283,7 +283,7 @@ function handleEnemy() {
         xVel: (deltaX / hypo) * playerBulletSpeed,
         yVel: (deltaY / hypo) * playerBulletSpeed,
         timestamp: Date.now(),
-        color: '#ed2b2a'
+        color: '#ed2b2a',
       })
       enemy.attackCounter = 0
     }
@@ -386,7 +386,7 @@ function resetGame() {
     x: (canvas.width - playerWidth) / 2,
     y: canvas.height - playerHeight - 10,
     hp: 5,
-    invulTimer: 0
+    invulTimer: 0,
   }
   playerScore.value = 0
   live.value = true

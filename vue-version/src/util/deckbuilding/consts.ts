@@ -98,120 +98,120 @@ export const SIMPLE_DECK: Card[] = [
     type: CardType.POINT,
     color: CardColor.LIGHT,
     value: 1,
-    cardArt: LIGHT_CARD_ART
+    cardArt: LIGHT_CARD_ART,
   },
   {
     type: CardType.POINT,
     color: CardColor.LIGHT,
     value: 2,
-    cardArt: LIGHT_CARD_ART
+    cardArt: LIGHT_CARD_ART,
   },
   {
     type: CardType.POINT,
     color: CardColor.LIGHT,
     value: 3,
-    cardArt: LIGHT_CARD_ART
+    cardArt: LIGHT_CARD_ART,
   },
   {
     type: CardType.POINT,
     color: CardColor.LIGHT,
     value: 4,
-    cardArt: LIGHT_CARD_ART
+    cardArt: LIGHT_CARD_ART,
   },
   {
     type: CardType.POINT,
     color: CardColor.LIGHT,
     value: 5,
-    cardArt: LIGHT_CARD_ART
+    cardArt: LIGHT_CARD_ART,
   },
   {
     type: CardType.POINT,
     color: CardColor.LIGHT,
     value: 1,
-    cardArt: LIGHT_CARD_ART
+    cardArt: LIGHT_CARD_ART,
   },
   {
     type: CardType.POINT,
     color: CardColor.LIGHT,
     value: 2,
-    cardArt: LIGHT_CARD_ART
+    cardArt: LIGHT_CARD_ART,
   },
   {
     type: CardType.POINT,
     color: CardColor.LIGHT,
     value: 3,
-    cardArt: LIGHT_CARD_ART
+    cardArt: LIGHT_CARD_ART,
   },
   {
     type: CardType.POINT,
     color: CardColor.LIGHT,
     value: 4,
-    cardArt: LIGHT_CARD_ART
+    cardArt: LIGHT_CARD_ART,
   },
   {
     type: CardType.POINT,
     color: CardColor.LIGHT,
     value: 5,
-    cardArt: LIGHT_CARD_ART
+    cardArt: LIGHT_CARD_ART,
   },
   {
     type: CardType.POINT,
     color: CardColor.DARK,
     value: 1,
-    cardArt: DARK_CARD_ART
+    cardArt: DARK_CARD_ART,
   },
   {
     type: CardType.POINT,
     color: CardColor.DARK,
     value: 2,
-    cardArt: DARK_CARD_ART
+    cardArt: DARK_CARD_ART,
   },
   {
     type: CardType.POINT,
     color: CardColor.DARK,
     value: 3,
-    cardArt: DARK_CARD_ART
+    cardArt: DARK_CARD_ART,
   },
   {
     type: CardType.POINT,
     color: CardColor.DARK,
     value: 4,
-    cardArt: DARK_CARD_ART
+    cardArt: DARK_CARD_ART,
   },
   {
     type: CardType.POINT,
     color: CardColor.DARK,
     value: 5,
-    cardArt: DARK_CARD_ART
+    cardArt: DARK_CARD_ART,
   },
   {
     type: CardType.POINT,
     color: CardColor.DARK,
     value: 1,
-    cardArt: DARK_CARD_ART
+    cardArt: DARK_CARD_ART,
   },
   {
     type: CardType.POINT,
     color: CardColor.DARK,
     value: 2,
-    cardArt: DARK_CARD_ART
+    cardArt: DARK_CARD_ART,
   },
   {
     type: CardType.POINT,
     color: CardColor.DARK,
     value: 3,
-    cardArt: DARK_CARD_ART
+    cardArt: DARK_CARD_ART,
   },
   {
     type: CardType.POINT,
     color: CardColor.DARK,
     value: 4,
-    cardArt: DARK_CARD_ART
+    cardArt: DARK_CARD_ART,
   },
   {
     type: CardType.POINT,
     color: CardColor.DARK,
     value: 5,
-    cardArt: DARK_CARD_ART
-  }
+    cardArt: DARK_CARD_ART,
+  },
 ]

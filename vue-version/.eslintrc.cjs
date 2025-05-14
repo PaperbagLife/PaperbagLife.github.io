@@ -9,18 +9,28 @@ module.exports = {
       "error", 
       { 
         "ignoreCase": true, 
-        "ignoreDeclarationSort": true 
-      }
+        "ignoreDeclarationSort": true,
+      },
     ], 
+    "comma-dangle": [
+      "error",
+      {
+        arrays: "always-multiline",
+        objects: "always-multiline",
+        imports: "always-multiline",
+        exports: "always-multiline",
+        functions: "only-multiline",
+      },
+    ],
  },
   root: true,
   'extends': [
     'plugin:vue/vue3-essential',
     'eslint:recommended',
     '@vue/eslint-config-typescript',
-    '@vue/eslint-config-prettier/skip-formatting'
+    '@vue/eslint-config-prettier/skip-formatting',
   ],
   parserOptions: {
-    ecmaVersion: 'latest'
-  }
+    ecmaVersion: 'latest',
+  },
 }

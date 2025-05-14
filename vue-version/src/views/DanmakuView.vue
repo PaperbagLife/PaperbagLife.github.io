@@ -1,26 +1,26 @@
 <script setup lang="ts">
 import { useBreakpoints } from '../util/dimensions'
-import { ref, reactive, onMounted, onUnmounted, watch } from 'vue'
+import { onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import powerupPNG from '../assets/game/img/powerup.png'
 
 import {
   BOSS_COLOR,
   BULLET_SCREEN_PADDING,
+  CANVAS_HEIGHT,
+  CANVAS_WIDTH,
+  type ControlsPressed,
   GENERIC_ENEMY_COLOR,
   PLAYER_HEIGHT,
   PLAYER_HIT_HEIGHT,
   PLAYER_HIT_WIDTH,
   PLAYER_WIDTH,
   POWERUP_BASE_SIZE,
-  CANVAS_WIDTH,
-  CANVAS_HEIGHT,
   POWERUP_SIZE_FACTOR,
-  type ControlsPressed
 } from '../util/shooter/const'
 
-import { leftWave, rightWave, bossWave, randomWave } from '../util/shooter/levels'
+import { bossWave, leftWave, randomWave, rightWave } from '../util/shooter/levels'
 
-import { Player, Bullet, Enemy, Powerup } from '../util/shooter/classes'
+import { Bullet, Enemy, Player, Powerup } from '../util/shooter/classes'
 
 const { type } = useBreakpoints()
 let ctx: null | CanvasRenderingContext2D = null

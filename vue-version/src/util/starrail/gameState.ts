@@ -2,17 +2,21 @@ import { computed, reactive } from 'vue'
 import {
   ALLY_VIEW_TOP_PADDING,
   BASIC_ATTACK_ENERGY_GAIN,
+  BREAK_DAMAGE,
+  BREAK_DELAY,
   CameraMode,
+  type CameraState,
   Character,
   CharacterType,
+  type DamageNumber,
+  Elements,
+  Enemy,
   ENEMY_BETWEEN_PADDING,
   ENEMY_CENTER_Y,
   ENEMY_SIZE,
-  Elements,
-  Enemy,
-  BREAK_DAMAGE,
-  BREAK_DELAY,
+  type FocusedTarget,
   GAME_WIDTH,
+  type HealNumber,
   HIT_ENERGY_REGEN,
   MAX_SKILLPOINTS,
   MULTIHIT_DELAY,
@@ -23,27 +27,23 @@ import {
   PLAYER_IMAGE_WIDTH,
   PlayerButton,
   PlayerCharacter,
+  type PlayerInput,
   PlayerTurnAction,
   SkillEffect,
-  SubTurnType,
-  TIMELINE_DISTANCE,
-  TURN_TIME,
-  TargetType,
-  TurnStateEnum,
-  type CameraState,
-  type DamageNumber,
-  type FocusedTarget,
-  type HealNumber,
-  type PlayerInput,
   type SubTurn,
+  SubTurnType,
+  type TargetMarkers,
+  TargetType,
+  TIMELINE_DISTANCE,
   type TimelineTurn,
+  TURN_TIME,
   type TurnState,
-  type TargetMarkers
+  TurnStateEnum,
 } from './consts'
-import { march, stelle, bailu } from './playerCharacters'
-import { frostSpawn, frostSpawn2, frostSpawn4, fireShadeWalker, flameSpawn } from './enemies'
+import { bailu, march, stelle } from './playerCharacters'
+import { fireShadeWalker, flameSpawn, frostSpawn, frostSpawn2, frostSpawn4 } from './enemies'
 
-import { delay, getRandomInt, range, findCharacterIndex } from './utils'
+import { delay, findCharacterIndex, getRandomInt, range } from './utils'
 
 // Combat, Damage related logic
 class CombatManager {
@@ -375,9 +375,9 @@ class TurnManager {
           subTurns: [
             {
               type: SubTurnType.ULT,
-              character: gameState.playerCharacters[gameState.ultSignaled]
-            }
-          ]
+              character: gameState.playerCharacters[gameState.ultSignaled],
+            },
+          ],
         }
         gameState.turnCharacter = null
         gameState.ultSignaled = null
@@ -410,9 +410,9 @@ class TurnManager {
             subTurns: [
               {
                 type: SubTurnType.ULT,
-                character: gameState.playerCharacters[gameState.ultSignaled]
-              }
-            ]
+                character: gameState.playerCharacters[gameState.ultSignaled],
+              },
+            ],
           }
           gameState.turnCharacter = null
           gameState.ultSignaled = null
@@ -547,7 +547,7 @@ class Timeline {
       character,
       index,
       timeUntil: TIMELINE_DISTANCE / character.speed,
-      subTurns: []
+      subTurns: [],
     })
   }
 
@@ -575,7 +575,7 @@ class Timeline {
       } else {
         gameState.currentTurn?.subTurns.push({
           type: SubTurnType.ULT,
-          character: gameState.playerCharacters[index]
+          character: gameState.playerCharacters[index],
         })
       }
     }
@@ -604,7 +604,7 @@ export class GameState {
   constructor(playerCharacters: PlayerCharacter[], enemies: Enemy[]) {
     this.cameraState = {
       mode: CameraMode.DEFAULT,
-      focus: 0
+      focus: 0,
     }
     this.queue = []
     this.playerCharacters = playerCharacters
@@ -657,7 +657,7 @@ function makeDamageNumber(
           ? ENEMY_CENTER_Y + 10
           : ENEMY_CENTER_Y
         : ALLY_VIEW_TOP_PADDING * 3,
-    type: element
+    type: element,
   }
   damageNumbers.set(damageNumberIndex, damageNumber)
   const thisIdx = damageNumberIndex
@@ -689,7 +689,7 @@ function makeHealNumber(
         ? differntLocation
           ? ENEMY_CENTER_Y + 10
           : ENEMY_CENTER_Y
-        : ALLY_VIEW_TOP_PADDING * 3
+        : ALLY_VIEW_TOP_PADDING * 3,
   }
   healNumbers.set(healNumberIndex, healNumber)
   const thisIdx = healNumberIndex
@@ -712,7 +712,7 @@ const targetMarkers = computed<TargetMarkers>(() => {
     case TargetType.ALL_ALLIES: {
       return {
         main: range(gameState.playerCharacters.length),
-        sub: []
+        sub: [],
       }
     }
     case TargetType.SINGLE_ENEMY:
@@ -731,7 +731,7 @@ const targetMarkers = computed<TargetMarkers>(() => {
     case TargetType.RANDOM_ENEMY: {
       return {
         main: range(gameState.enemies.length),
-        sub: []
+        sub: [],
       }
     }
     default:
@@ -789,6 +789,6 @@ export function useGameState() {
     targetMarkers,
     healNumbers,
     damageNumbers,
-    activateUlt
+    activateUlt,
   }
 }

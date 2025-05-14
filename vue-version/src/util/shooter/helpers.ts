@@ -5,6 +5,6 @@ export function getPowerLevel(power: number) {
 export function rotate(x: number, y: number, rotation: number) {
   return {
     x: Math.cos(rotation) * x - Math.sin(rotation) * y,
-    y: Math.sin(rotation) * x + Math.cos(rotation) * y
+    y: Math.sin(rotation) * x + Math.cos(rotation) * y,
   }
 }

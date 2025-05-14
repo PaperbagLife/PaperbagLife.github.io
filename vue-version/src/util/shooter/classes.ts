@@ -1,8 +1,11 @@
 import {
+  type AttackPattern,
   BASE_PLAYER_ATTACK_INTERVAL,
   BULLET_SCREEN_PADDING,
   CANVAS_HEIGHT,
   CANVAS_WIDTH,
+  type ControlsPressed,
+  type MovePattern,
   PLAYER_HEIGHT,
   PLAYER_SPEED,
   PLAYER_WIDTH,
@@ -12,9 +15,6 @@ import {
   POWERUP_SIZE_FACTOR,
   POWERUP_TERMINAL_VEL,
   Target,
-  type AttackPattern,
-  type ControlsPressed,
-  type MovePattern
 } from './const'
 import { getPowerLevel, rotate } from './helpers'
 

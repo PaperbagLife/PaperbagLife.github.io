@@ -6,7 +6,7 @@ import {
   GAME_HEIGHT,
   GAME_WIDTH,
   PlayerButton,
-  TurnStateEnum
+  TurnStateEnum,
 } from '../util/starrail/consts'
 import { useGameState } from '../util/starrail/gameState'
 import { getElementColor } from '../util/starrail/utils'
@@ -24,7 +24,7 @@ const {
   targetMarkers,
   healNumbers,
   damageNumbers,
-  activateUlt
+  activateUlt,
 } = useGameState()
 
 function attackButton() {
@@ -141,7 +141,7 @@ function onGameTouch(e: MouseEvent | TouchEvent) {
 const uiElements = reactive({
   show0SkillPoint: false,
   showWinMessage: false,
-  showLoseMessage: false
+  showLoseMessage: false,
 })
 
 watch(gameState, () => {

@@ -8,7 +8,7 @@ import {
   ENEMY_DAMAGE_ANIMATION_DURATION,
   Operations,
   type PointCard,
-  Scene
+  Scene,
 } from './consts'
 
 // Target is a score range, e.g Target = 5, range = +- 1.
@@ -319,7 +319,7 @@ export const enemies = [
     [Operations.ADD, Operations.SUBTRACT],
     [0.5, 1],
     5
-  )
+  ),
 ]
 
 const gameState = reactive(new GameState())

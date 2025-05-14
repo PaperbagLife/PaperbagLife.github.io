@@ -7,6 +7,7 @@ import ShooterGameView from '../views/ShooterGameView.vue'
 import DanmakuView from '../views/DanmakuView.vue'
 import GamesView from '../views/GamesView.vue'
 import DeckBuildingView from '@/views/DeckBuildingView.vue'
+import TimerView from '@/views/TimerView.vue'
 
 const StarRailView = () => import('../views/StarRailView.vue')
 const ThreeView = () => import('../views/ThreeView.vue')
@@ -17,47 +18,47 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView
+      component: HomeView,
     },
     {
       path: '/coursework',
       name: 'coursework',
-      component: CourseWorkView
+      component: CourseWorkView,
     },
     {
       path: '/projects',
       name: 'projects',
-      component: ProjectsView
+      component: ProjectsView,
     },
     {
       path: '/interests',
       name: 'interests',
-      component: InterestsView
+      component: InterestsView,
     },
     {
       path: '/games/shooter',
       name: 'shooter',
-      component: ShooterGameView
+      component: ShooterGameView,
     },
     {
       path: '/games/danmaku',
       name: 'danmaku',
-      component: DanmakuView
+      component: DanmakuView,
     },
     {
       path: '/games/starrail',
       name: 'starrail',
-      component: StarRailView
+      component: StarRailView,
     },
     {
       path: '/games',
       name: 'games',
-      component: GamesView
+      component: GamesView,
     },
     {
       path: '/demo',
       name: 'demo',
-      component: ThreeView
+      component: ThreeView,
     },
     {
       path: '/games/deckbuilding',
@@ -65,10 +66,15 @@ const router = createRouter({
       component: DeckBuildingView,
       meta: {
         hideHeader: true,
-        bodyClass: 'no-scroll'
-      }
-    }
-  ]
+        bodyClass: 'no-scroll',
+      },
+    },
+    {
+      path: '/timer',
+      name: 'timer',
+      component: TimerView,
+    },
+  ],
 })
 
 // router/index.js or wherever you set up Vue Router
