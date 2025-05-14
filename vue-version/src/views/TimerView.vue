@@ -23,7 +23,7 @@ type Rest = {
   duration: number
 }
 
-const exercises: ExerciseEntry[] = [
+const TotalBodyB: ExerciseEntry[] = [
   { name: 'Treadmill', type: ExerciseType.Interval, duration: 300 },
   { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
   { name: 'Inchworm', type: ExerciseType.Interval, duration: 20 },
@@ -38,7 +38,25 @@ const exercises: ExerciseEntry[] = [
   { name: 'Rest', type: ExerciseType.Rest, duration: 60 },
   { name: 'Machine Hamstring Curl', type: ExerciseType.Reps, reps: 12, weight: '40lbs' },
   { name: 'Rest', type: ExerciseType.Rest, duration: 60 },
+  { name: 'Machine Bench Press', type: ExerciseType.Reps, reps: 12, weight: '40lbs' },
+  { name: 'Rest', type: ExerciseType.Rest, duration: 60 },
+  { name: 'Machine Bench Press', type: ExerciseType.Reps, reps: 12, weight: '40lbs' },
+  { name: 'Rest', type: ExerciseType.Rest, duration: 60 },
+  { name: 'Machine Arm Curl', type: ExerciseType.Reps, reps: 12, weight: '20lbs' },
+  { name: 'Rest', type: ExerciseType.Rest, duration: 60 },
+  { name: 'Machine Arm Curl', type: ExerciseType.Reps, reps: 12, weight: '20lbs' },
+  { name: 'Rest', type: ExerciseType.Rest, duration: 60 },
+  { name: 'Flutter Kick', type: ExerciseType.Interval, duration: 30 },
+  { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+  { name: 'Flutter Kick', type: ExerciseType.Interval, duration: 30 },
+  { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+  { name: 'Flutter Kick', type: ExerciseType.Interval, duration: 30 },
+  { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+  { name: 'Cat Cow', type: ExerciseType.Interval, duration: 45 },
 ]
+
+const exercises = TotalBodyB
+
 const currentExerciseIndex = ref(0)
 const currentExercise = computed(() => exercises[currentExerciseIndex.value])
 
@@ -156,7 +174,12 @@ function fullReset() {
           ></div>
         </div>
         <h1>{{ currentExercise.name }}</h1>
-        <h2 v-if="currentExercise.type === ExerciseType.Reps">Reps: {{ currentExercise.reps }}</h2>
+        <h2 v-if="currentExercise.type === ExerciseType.Reps">
+          {{
+            `${currentExercise.reps} reps` +
+            (currentExercise.weight != null ? ` with ${currentExercise.weight}` : '')
+          }}
+        </h2>
         <h2 v-else-if="currentExercise.type === ExerciseType.Interval">
           Duration: {{ currentExercise.duration }} seconds
         </h2>
