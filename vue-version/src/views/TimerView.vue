@@ -248,6 +248,8 @@ function deleteCurrentWorkout() {
   }
 }
 
+const seePreview = ref(false)
+
 onMounted(() => {
   fullReset()
 })
@@ -255,8 +257,36 @@ onMounted(() => {
 
 <template>
   <div class="container mt-4">
-    <div class="row justify-content-center exercise-display">
+    <div class="row justify-content-center exercise-display overflow-hidden">
       <!-- Current Exercise Display -->
+      <div v-if="seePreview" class="workout-preview-container mb-4">
+        <div class="workout-preview-list">
+          <h3 class="mb-3 list-title">{{ workout.name }}</h3>
+          <ul class="list-group">
+            <li
+              v-for="(ex, exIndex) in workout.exercises"
+              :key="exIndex"
+              class="list-group-item d-flex align-items-center"
+            >
+              <span class="fw-bold me-2">{{ exIndex + 1 }}.</span>
+              <span class="flex-grow-1">
+                <span v-if="ex.type === ExerciseType.Reps">
+                  {{ ex.name }}: <span class="badge bg-primary">{{ ex.reps }} reps</span>
+                  <span v-if="ex.weight" class="text-muted ms-2">({{ ex.weight }})</span>
+                </span>
+                <span v-else-if="ex.type === ExerciseType.Interval">
+                  {{ ex.name }}: <span class="badge bg-success">{{ ex.duration }} sec</span>
+                </span>
+                <span v-else-if="ex.type === ExerciseType.Rest">
+                  <span class="text-secondary">{{ ex.name }}</span
+                  >:
+                  <span class="badge bg-warning text-dark">{{ ex.duration }} sec</span>
+                </span>
+              </span>
+            </li>
+          </ul>
+        </div>
+      </div>
       <div class="col-12 text-center mb-3">
         <select v-model="workout" class="form-select mb-3">
           <option v-for="(workout, index) in workoutList" :key="index" :value="workout">
@@ -346,10 +376,16 @@ onMounted(() => {
           <button class="btn btn-info material-icons-outlined" @click="previousExercise">
             skip_previous
           </button>
-          <button v-if="!isTimerRunning" class="btn material-icons-outlined" @click="playTimer">
+          <button
+            v-if="!isTimerRunning"
+            class="btn btn-secondary material-icons-outlined"
+            @click="playTimer"
+          >
             play_arrow
           </button>
-          <button v-else class="btn material-icons-outlined" @click="pauseTimer">pause</button>
+          <button v-else class="btn btn-secondary material-icons-outlined" @click="pauseTimer">
+            pause
+          </button>
           <button class="btn btn-info material-icons-outlined" @click="nextExercise">
             skip_next
           </button>
@@ -359,6 +395,9 @@ onMounted(() => {
       <button v-if="!editing" @click="editing = true" class="btn btn-primary">Edit</button>
       <button v-if="editing" @click="applyEdit" class="btn btn-primary">Finish</button>
       <button class="btn btn-primary" @click="deleteCurrentWorkout">Delete</button>
+      <button @click="seePreview = !seePreview" class="btn btn-primary">
+        {{ seePreview ? 'Hide Preview' : 'See Preview' }}
+      </button>
     </div>
   </div>
 </template>
@@ -391,5 +430,23 @@ button {
 .rest-bar {
   background-color: #f0ad4e;
   transition: width 1s linear;
+}
+
+.workout-preview-container {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.list-title {
+  color: #66ccff;
+}
+
+.workout-preview-list {
+  max-height: 350px;
+  overflow-y: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fafbfc;
+  padding: 1rem;
 }
 </style>
