@@ -3,7 +3,6 @@ import danmakuImg from '../assets/img/danmaku.png'
 import shooterImg from '../assets/img/shooter.png'
 import starrailImg from '../assets/img/starrail.png'
 import youtubeImg from '../assets/img/youtube_channel.png'
-import coupleImg from '../assets/img/couple_trouble.png'
 import bruhImg from '../assets/img/bruh.png'
 
 export const COLUMN_FILL_RATIO = 0.84
@@ -36,7 +35,6 @@ export const projectEntries: Project[] = [
   {
     title: 'Couple Trouble - Python, Pygames, OpenCV',
     timeline: 'Feb 2020',
-    img: coupleImg,
     description:
       'I lead a team of 4 in Tartan Hacks 2020 and we won the "Best Valentines Hack" award. I was the main programmer for the game system. I used OpenCV to implement a control system that detects two different colors. The players has to hold hands wearing rings to control the car and avoid obstacles. This was an interesting take on the valentine theme, so we stood out and won.',
     youtube: 'https://www.youtube.com/embed/w7r6SNbJifU?si=n6_rSGrgoQ2iCHCF',
