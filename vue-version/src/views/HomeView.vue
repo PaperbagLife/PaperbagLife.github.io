@@ -29,7 +29,7 @@ function openYoutube() {
             <h1 class="row">Yunkun (Ricky) Lu</h1>
             <div class="row">
               <div :class="type === 'xs' ? 'col-12' : 'col-6'">
-                <a class="resume-button btn button" :href="resumeUrl"> Resume </a>
+                <a class="resume-button btn btn-dark" :href="resumeUrl"> Resume </a>
               </div>
               <div :class="type === 'xs' ? 'col-12' : 'col-6'">
                 <a class="icon-link" href="https://www.linkedin.com/in/yunkun-lu/">
@@ -107,7 +107,7 @@ function openYoutube() {
   </main>
 </template>
 
-<style>
+<style scoped lang="scss">
 .youtube-img {
   border: 2px solid #66ccff;
   border-radius: 1rem;
@@ -121,10 +121,21 @@ function openYoutube() {
 
 .resume-button {
   padding: 0.25rem 1rem;
+  border: 2px solid #66ccff;
+  background: aliceblue;
+  color: #66ccff;
+  &:hover {
+    background: aliceblue;
+    color: #66ccff;
+    border-color: #66ccff;
+    filter: brightness(0.8);
+  }
 }
 
 .icon-link {
   font-size: 1.25rem;
+  text-decoration: none;
+  margin-top: 0.25rem;
 }
 
 .swe-title {
@@ -150,10 +161,6 @@ function openYoutube() {
 .bio-xs {
   margin-left: auto;
   margin-right: auto;
-}
-.button {
-  border: 2px solid #66ccff;
-  color: #66ccff;
 }
 .fa-icon {
   color: #66ccff;

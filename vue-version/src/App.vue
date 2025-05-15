@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useBreakpoints } from './util/dimensions'
 import { RouterLink, RouterView } from 'vue-router'
 import { useHeaderVisibility } from './util/headerVisibility'
@@ -35,20 +35,30 @@ function onMoreMenuClick() {
 function onRouterLinkClick() {
   morePagesExpanded.value = false
 }
+
+onMounted(() => {
+  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+
+  document.body.setAttribute('data-bs-theme', isDark ? 'dark' : 'light')
+})
 </script>
 
 <template>
   <header v-if="headerVisible">
     <div v-if="type !== 'xs'" class="p-2 nav-bar d-flex align-items-center justify-content-end">
       <template v-for="page in pages" :key="page.name">
-        <router-link @click="onRouterLinkClick" class="router-link mx-2 px-2" :to="page.route">
+        <router-link
+          @click="onRouterLinkClick"
+          class="router-link btn btn-dark mx-2 py-0 px-2"
+          :to="page.route"
+        >
           <label class="d-flex my-1">
             <span class="material-icons-outlined">{{ page.icon }}</span>
             <span class="page-name">{{ page.name }}</span>
           </label>
         </router-link>
       </template>
-      <button class="more-pages-btn btn mx-2 py-0 btn-sm d-flex" @click="onMoreMenuClick">
+      <button class="more-pages-btn btn btn-dark mx-2 py-0 btn-sm d-flex" @click="onMoreMenuClick">
         <label class="d-flex my-1">
           <span class="material-icons-outlined" :class="{ rotate: morePagesExpanded }"
             >more_horiz</span
@@ -56,12 +66,12 @@ function onRouterLinkClick() {
           <span class="page-name">{{ morePagesExpanded ? 'Close' : 'More' }}</span>
         </label>
       </button>
-      <div class="expanded-menu d-flex" :class="{ show: morePagesExpanded }">
-        <div class="col px-0">
+      <div class="expanded-menu" :class="{ show: morePagesExpanded }">
+        <div class="d-flex flex-column">
           <template v-for="page in morePages" :key="page.name">
             <router-link
               @click="onRouterLinkClick"
-              class="router-link row my-1 mx-2 px-2"
+              class="router-link btn btn-dark row my-1 mx-2 px-2 py-0"
               :to="page.route"
             >
               <label class="d-flex my-1">
@@ -75,7 +85,7 @@ function onRouterLinkClick() {
     </div>
     <div v-else>
       <button
-        class="more-pages-btn mobile-more-btn btn mt-2 mx-2 py-0 btn-sm d-flex"
+        class="more-pages-btn mobile-more-btn btn btn-dark mt-2 mx-2 py-0 btn-sm d-flex"
         @click="onMoreMenuClick"
       >
         <label class="d-flex my-1">
@@ -102,7 +112,7 @@ function onRouterLinkClick() {
     </div>
     <router-link
       @click="onRouterLinkClick"
-      class="mt-2 home-route router-link ml-3 px-2"
+      class="mt-2 home-route btn btn-dark router-link ml-3 px-2 py-0"
       :to="homePage.route"
     >
       <label class="d-flex my-1">
@@ -123,6 +133,7 @@ function onRouterLinkClick() {
   width: 100%;
   z-index: 2;
 }
+
 .home-route {
   position: fixed;
   z-index: 2;
@@ -137,15 +148,19 @@ function onRouterLinkClick() {
   box-shadow: none;
 }
 
+.more-pages-btn:hover,
+.more-pages-btn.btn:active {
+  color: #66ccff;
+  background-color: aliceblue;
+  filter: brightness(80%);
+}
+
 .mobile-more-btn {
   z-index: 2;
   right: 1rem;
   position: fixed;
 }
 
-.more-pages-btn:hover {
-  filter: brightness(80%);
-}
 .more-pages-btn label {
   cursor: pointer;
 }
@@ -215,10 +230,19 @@ span.material-icons-outlined {
 
 .router-link {
   color: #66ccff;
-  cursor: pointer;
   background-color: aliceblue;
   border-radius: 1rem;
   align-items: center;
+}
+
+.router-link.btn {
+  border: none;
+}
+
+.router-link.btn:hover {
+  color: #66ccff;
+  background: aliceblue;
+  filter: brightness(80%);
 }
 
 .router-link label {
@@ -227,8 +251,8 @@ span.material-icons-outlined {
 
 .router-link:hover {
   text-decoration: none;
-  filter: brightness(80%);
 }
+
 .xs-nav span.material-icons-outlined {
   align-self: center;
   color: white;

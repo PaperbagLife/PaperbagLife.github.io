@@ -22,3 +22,7 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+
+.material-icons-outlined {
+  font-family: 'Material Icons Outlined' !important;
+}
