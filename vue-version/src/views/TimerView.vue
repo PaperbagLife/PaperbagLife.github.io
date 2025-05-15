@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
+type Workout = {
+  name: string
+  exercises: ExerciseEntry[]
+}
 type ExerciseEntry = IntervalExercise | RepsExercise | Rest
 enum ExerciseType {
   Reps = 'reps',
@@ -23,50 +27,114 @@ type Rest = {
   duration: number
 }
 
-const TotalBodyB: ExerciseEntry[] = [
-  { name: 'Treadmill', type: ExerciseType.Interval, duration: 300 },
-  { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
-  { name: 'Inchworm', type: ExerciseType.Interval, duration: 20 },
-  { name: 'Rest', type: ExerciseType.Rest, duration: 10 },
-  { name: 'Alternating Arm Leg reach', type: ExerciseType.Reps, reps: 20 },
-  { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
-  { name: 'Inchworm', type: ExerciseType.Interval, duration: 20 },
-  { name: 'Rest', type: ExerciseType.Rest, duration: 10 },
-  { name: 'Alternating Arm Leg reach', type: ExerciseType.Reps, reps: 20 },
-  { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
-  { name: 'Machine Hamstring Curl', type: ExerciseType.Reps, reps: 12, weight: '40lbs' },
-  { name: 'Rest', type: ExerciseType.Rest, duration: 60 },
-  { name: 'Machine Hamstring Curl', type: ExerciseType.Reps, reps: 12, weight: '40lbs' },
-  { name: 'Rest', type: ExerciseType.Rest, duration: 60 },
-  { name: 'Machine Bench Press', type: ExerciseType.Reps, reps: 12, weight: '40lbs' },
-  { name: 'Rest', type: ExerciseType.Rest, duration: 60 },
-  { name: 'Machine Bench Press', type: ExerciseType.Reps, reps: 12, weight: '40lbs' },
-  { name: 'Rest', type: ExerciseType.Rest, duration: 60 },
-  { name: 'Machine Arm Curl', type: ExerciseType.Reps, reps: 12, weight: '20lbs' },
-  { name: 'Rest', type: ExerciseType.Rest, duration: 60 },
-  { name: 'Machine Arm Curl', type: ExerciseType.Reps, reps: 12, weight: '20lbs' },
-  { name: 'Rest', type: ExerciseType.Rest, duration: 60 },
-  { name: 'Flutter Kick', type: ExerciseType.Interval, duration: 30 },
-  { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
-  { name: 'Flutter Kick', type: ExerciseType.Interval, duration: 30 },
-  { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
-  { name: 'Flutter Kick', type: ExerciseType.Interval, duration: 30 },
-  { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
-  { name: 'Cat Cow', type: ExerciseType.Interval, duration: 45 },
-]
+const totalBodyB: Workout = {
+  name: 'total body b',
+  exercises: [
+    { name: 'Treadmill', type: ExerciseType.Interval, duration: 300 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'Inchworm', type: ExerciseType.Interval, duration: 20 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 10 },
+    { name: 'Alternating Arm Leg reach', type: ExerciseType.Reps, reps: 20 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'Inchworm', type: ExerciseType.Interval, duration: 20 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 10 },
+    { name: 'Alternating Arm Leg reach', type: ExerciseType.Reps, reps: 20 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'Machine Hamstring Curl', type: ExerciseType.Reps, reps: 12, weight: '40lbs' },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 60 },
+    { name: 'Machine Hamstring Curl', type: ExerciseType.Reps, reps: 12, weight: '40lbs' },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 60 },
+    { name: 'Machine Bench Press', type: ExerciseType.Reps, reps: 12, weight: '40lbs' },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 60 },
+    { name: 'Machine Bench Press', type: ExerciseType.Reps, reps: 12, weight: '40lbs' },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 60 },
+    { name: 'Machine Arm Curl', type: ExerciseType.Reps, reps: 12, weight: '20lbs' },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 60 },
+    { name: 'Machine Arm Curl', type: ExerciseType.Reps, reps: 12, weight: '20lbs' },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 60 },
+    { name: 'Flutter Kick', type: ExerciseType.Interval, duration: 30 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'Flutter Kick', type: ExerciseType.Interval, duration: 30 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'Flutter Kick', type: ExerciseType.Interval, duration: 30 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'Cat Cow', type: ExerciseType.Interval, duration: 45 },
+  ],
+}
 
-const exercises = TotalBodyB
+const totalBodyC: Workout = {
+  name: 'total body C',
+  exercises: [
+    { name: 'Spin bike', type: ExerciseType.Interval, duration: 300 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'Dumbbell Halo', type: ExerciseType.Reps, reps: 10, weight: '15lbs' },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'Glute March (lying down leg raise)', type: ExerciseType.Reps, reps: 10 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'Dumbbell Halo', type: ExerciseType.Reps, reps: 10, weight: '15lbs' },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'Glute March (lying down leg raise)', type: ExerciseType.Reps, reps: 10 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'Body weight forward lunge hold (left)', type: ExerciseType.Interval, duration: 30 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 10 },
+    { name: 'Body weight forward lunge hold (right)', type: ExerciseType.Interval, duration: 30 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'Dumbbell 1 arm row (left)', type: ExerciseType.Reps, reps: 10, weight: '20lbs' },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 10 },
+    { name: 'Dumbbell 1 arm row (right)', type: ExerciseType.Reps, reps: 10, weight: '20lbs' },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 60 },
+    { name: 'Dumbbell 1 arm row (left)', type: ExerciseType.Reps, reps: 8, weight: '25lbs' },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 10 },
+    { name: 'Dumbbell 1 arm row (right)', type: ExerciseType.Reps, reps: 8, weight: '25lbs' },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 60 },
+    { name: 'Cable tricep pushdown', type: ExerciseType.Reps, reps: 12, weight: '15lbs' },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 60 },
+    { name: 'Cable tricep pushdown', type: ExerciseType.Reps, reps: 10, weight: '15lbs' },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 60 },
+    { name: 'Yoga ball crunch', type: ExerciseType.Reps, reps: 10 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 15 },
+    { name: 'Spiderman', type: ExerciseType.Interval, duration: 30 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'Yoga ball crunch', type: ExerciseType.Reps, reps: 10 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 15 },
+    { name: 'Spiderman', type: ExerciseType.Interval, duration: 30 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'Yoga ball crunch', type: ExerciseType.Reps, reps: 10 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 15 },
+    { name: 'Spiderman', type: ExerciseType.Interval, duration: 30 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    {
+      name: 'Kneeingly overhead oblique stretch (left)',
+      type: ExerciseType.Interval,
+      duration: 30,
+    },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 10 },
+    {
+      name: 'Kneeingly overhead oblique stretch (right)',
+      type: ExerciseType.Interval,
+      duration: 30,
+    },
+  ],
+}
+const editing = ref(false)
+
+const workoutList = ref([totalBodyB, totalBodyC])
+
+const workout = ref<Workout>(totalBodyB)
 
 const currentExerciseIndex = ref(0)
-const currentExercise = computed(() => exercises[currentExerciseIndex.value])
+const currentExercise = computed(() => workout.value.exercises[currentExerciseIndex.value])
 
 const nextExercisePreview = computed(() => {
   // Find next non-rest exercise
   let nextIndex = currentExerciseIndex.value + 1
-  while (nextIndex < exercises.length && exercises[nextIndex].type === ExerciseType.Rest) {
+  while (
+    nextIndex < workout.value.exercises.length &&
+    workout.value.exercises[nextIndex].type === ExerciseType.Rest
+  ) {
     nextIndex++
   }
-  return nextIndex < exercises.length ? exercises[nextIndex] : null
+  return nextIndex < workout.value.exercises.length ? workout.value.exercises[nextIndex] : null
 })
 
 const totalSeconds = ref(0)
@@ -120,9 +188,9 @@ function pauseTimer() {
 }
 
 function nextExercise() {
-  if (currentExerciseIndex.value < exercises.length - 1) {
+  if (currentExerciseIndex.value < workout.value.exercises.length - 1) {
     currentExerciseIndex.value++
-    const nextExercise = exercises[currentExerciseIndex.value]
+    const nextExercise = workout.value.exercises[currentExerciseIndex.value]
     if (nextExercise.type === ExerciseType.Interval || nextExercise.type === ExerciseType.Rest) {
       setTimer(nextExercise.duration)
       playTimer()
@@ -134,7 +202,7 @@ function nextExercise() {
 function previousExercise() {
   if (currentExerciseIndex.value > 0) {
     currentExerciseIndex.value--
-    const previousExercise = exercises[currentExerciseIndex.value]
+    const previousExercise = workout.value.exercises[currentExerciseIndex.value]
     if (
       previousExercise.type === ExerciseType.Interval ||
       previousExercise.type === ExerciseType.Rest
@@ -150,7 +218,39 @@ function previousExercise() {
 function fullReset() {
   currentExerciseIndex.value = 0
   clearTimer()
+  if (
+    workout.value.exercises[0].type === ExerciseType.Interval ||
+    workout.value.exercises[0].type === ExerciseType.Rest
+  ) {
+    setTimer(workout.value.exercises[0].duration)
+  }
 }
+
+function applyEdit() {
+  if (editing.value) {
+    editing.value = false
+  }
+  if (
+    currentExercise.value.type === ExerciseType.Interval ||
+    currentExercise.value.type === ExerciseType.Rest
+  ) {
+    setTimer(currentExercise.value.duration)
+  }
+}
+
+function deleteCurrentWorkout() {
+  const index = workoutList.value.indexOf(workout.value)
+  if (index > -1) {
+    workoutList.value.splice(index, 1)
+    if (workoutList.value.length > 0) {
+      workout.value = workoutList.value[0]
+    }
+  }
+}
+
+onMounted(() => {
+  fullReset()
+})
 </script>
 
 <template>
@@ -158,6 +258,11 @@ function fullReset() {
     <div class="row justify-content-center exercise-display">
       <!-- Current Exercise Display -->
       <div class="col-12 text-center mb-3">
+        <select v-model="workout" class="form-select mb-3">
+          <option v-for="(workout, index) in workoutList" :key="index" :value="workout">
+            {{ workout.name }}
+          </option>
+        </select>
         <!--Progress bar-->
         <div class="progress">
           <div
@@ -186,6 +291,38 @@ function fullReset() {
         <h2 v-else-if="currentExercise.type === ExerciseType.Rest">
           Rest for {{ currentExercise.duration }} seconds
         </h2>
+      </div>
+
+      <!-- Edit panel -->
+      <div v-if="editing">
+        <div class="col-12 text-center mb-3">
+          <h2>Edit Exercise</h2>
+
+          <input
+            v-if="currentExercise.type === ExerciseType.Reps"
+            v-model.number="currentExercise.reps"
+            type="number"
+            placeholder="Reps"
+            class="form-control mb-2"
+          />
+          <input
+            v-if="currentExercise.type === ExerciseType.Reps"
+            v-model="currentExercise.weight"
+            type="text"
+            placeholder="Weight (optional)"
+            class="form-control mb-2"
+          />
+          <input
+            v-if="
+              currentExercise.type === ExerciseType.Interval ||
+              currentExercise.type === ExerciseType.Rest
+            "
+            v-model.number="currentExercise.duration"
+            type="number"
+            placeholder="Duration (seconds)"
+            class="form-control mb-2"
+          />
+        </div>
       </div>
       <div
         v-if="currentExercise.type !== ExerciseType.Reps"
@@ -219,6 +356,9 @@ function fullReset() {
         </div>
       </div>
       <button @click="fullReset" class="btn btn-primary">Full reset</button>
+      <button v-if="!editing" @click="editing = true" class="btn btn-primary">Edit</button>
+      <button v-if="editing" @click="applyEdit" class="btn btn-primary">Finish</button>
+      <button class="btn btn-primary" @click="deleteCurrentWorkout">Delete</button>
     </div>
   </div>
 </template>
