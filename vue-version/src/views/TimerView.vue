@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 type Workout = {
   name: string
   exercises: ExerciseEntry[]
@@ -20,6 +20,7 @@ type IntervalExercise = {
   name: string
   type: ExerciseType.Interval
   duration: number
+  weight?: string
 }
 type Rest = {
   name: string
@@ -27,8 +28,101 @@ type Rest = {
   duration: number
 }
 
+const totalBodyA: Workout = {
+  name: 'Total Body A',
+  exercises: [
+    { name: 'Elliptical', type: ExerciseType.Interval, duration: 300 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'Arm Circle', type: ExerciseType.Interval, duration: 20 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'Kneeling Fire Hydrant left (dog pee)', type: ExerciseType.Reps, reps: 10 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 10 },
+    { name: 'Kneeling Fire Hydrant right (dog pee)', type: ExerciseType.Reps, reps: 10 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 10 },
+    { name: 'Arm Circle', type: ExerciseType.Interval, duration: 20 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'Kneeling Fire Hydrant left (dog pee)', type: ExerciseType.Reps, reps: 10 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 10 },
+    { name: 'Kneeling Fire Hydrant right (dog pee)', type: ExerciseType.Reps, reps: 10 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 10 },
+    { name: 'Lat pulldown', type: ExerciseType.Reps, reps: 10, weight: '55lbs' },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 60 },
+    { name: 'Seated machine overhead press', type: ExerciseType.Reps, reps: 10, weight: '20lbs' },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 60 },
+    { name: 'Box squat', type: ExerciseType.Reps, reps: 8 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'Box squat', type: ExerciseType.Reps, reps: 10 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'Slow bicycle', type: ExerciseType.Interval, duration: 30 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'plank', type: ExerciseType.Interval, duration: 30 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'Slow bicycle', type: ExerciseType.Interval, duration: 30 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'plank', type: ExerciseType.Interval, duration: 30 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'Hip flexor stretch (left)', type: ExerciseType.Interval, duration: 45 },
+    { name: 'Hip flexor stretch (right)', type: ExerciseType.Interval, duration: 45 },
+  ],
+}
+
+const conditioning: Workout = {
+  name: 'Conditioning',
+  exercises: [
+    { name: 'Stair climb', type: ExerciseType.Interval, duration: 600 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'Rowing', type: ExerciseType.Interval, duration: 30 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    {
+      name: 'Dumbell curl to press',
+      type: ExerciseType.Interval,
+      duration: 30,
+      weight: '15lbs each hand',
+    },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'Mountain climber', type: ExerciseType.Interval, duration: 30 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'Seal crunch', type: ExerciseType.Interval, duration: 30 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'Rowing', type: ExerciseType.Interval, duration: 30 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    {
+      name: 'Dumbell curl to press',
+      type: ExerciseType.Interval,
+      duration: 30,
+      weight: '15lbs each hand',
+    },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'Mountain climber', type: ExerciseType.Interval, duration: 30 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'Seal crunch', type: ExerciseType.Interval, duration: 30 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'Standing Quad Stretch (left)', type: ExerciseType.Interval, duration: 45 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 10 },
+    { name: 'Standing Quad Stretch (right)', type: ExerciseType.Interval, duration: 45 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 10 },
+    { name: 'Standing Calf Stretch (left)', type: ExerciseType.Interval, duration: 45 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 10 },
+    { name: 'Standing Calf Stretch (right)', type: ExerciseType.Interval, duration: 45 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 10 },
+    { name: 'Childs pose', type: ExerciseType.Interval, duration: 45 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 10 },
+    {
+      name: 'Lat Stretch left (hand on top of each other)',
+      type: ExerciseType.Interval,
+      duration: 45,
+    },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 10 },
+    {
+      name: 'Lat Stretch right (hand on top of each other)',
+      type: ExerciseType.Interval,
+      duration: 45,
+    },
+  ],
+}
+
 const totalBodyB: Workout = {
-  name: 'total body b',
+  name: 'Total Body B',
   exercises: [
     { name: 'Treadmill', type: ExerciseType.Interval, duration: 300 },
     { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
@@ -63,7 +157,7 @@ const totalBodyB: Workout = {
 }
 
 const totalBodyC: Workout = {
-  name: 'total body C',
+  name: 'Total Body C',
   exercises: [
     { name: 'Spin bike', type: ExerciseType.Interval, duration: 300 },
     { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
@@ -118,7 +212,9 @@ const totalBodyC: Workout = {
 }
 const editing = ref(false)
 
-const workoutList = ref([totalBodyB, totalBodyC])
+const baseList = [totalBodyA, conditioning, totalBodyB, totalBodyC]
+
+const workoutList = ref<Workout[]>([totalBodyA, conditioning, totalBodyB, totalBodyC])
 
 const workout = ref<Workout>(totalBodyB)
 
@@ -242,8 +338,37 @@ function deleteCurrentWorkout() {
   const index = workoutList.value.indexOf(workout.value)
   if (index > -1) {
     workoutList.value.splice(index, 1)
+    saveWorkoutsToLocalStorage()
     if (workoutList.value.length > 0) {
       workout.value = workoutList.value[0]
+    }
+  }
+}
+
+function saveWorkoutsToLocalStorage() {
+  localStorage.setItem('workoutList', JSON.stringify(workoutList.value))
+}
+
+function loadWorkoutsFromLocalStorage() {
+  const data = localStorage.getItem('workoutList')
+  if (data) {
+    try {
+      const parsed = JSON.parse(data)
+      // Optionally validate structure here
+      workoutList.value = parsed
+      baseList.forEach((workout) => {
+        if (!workoutList.value.some((w) => w.name === workout.name)) {
+          workoutList.value.push(workout)
+        }
+      })
+
+      // Set current workout to first in list if not present
+      if (!workoutList.value.includes(workout.value)) {
+        workout.value = workoutList.value[0]
+      }
+    } catch (e) {
+      // fallback if corrupted
+      localStorage.removeItem('workoutList')
     }
   }
 }
@@ -251,6 +376,7 @@ function deleteCurrentWorkout() {
 const seePreview = ref(false)
 
 onMounted(() => {
+  loadWorkoutsFromLocalStorage()
   fullReset()
 })
 </script>
@@ -276,11 +402,11 @@ onMounted(() => {
                 </span>
                 <span v-else-if="ex.type === ExerciseType.Interval">
                   {{ ex.name }}: <span class="badge bg-success">{{ ex.duration }} sec</span>
+                  <span v-if="ex.weight" class="text-muted ms-2">({{ ex.weight }})</span>
                 </span>
                 <span v-else-if="ex.type === ExerciseType.Rest">
-                  <span class="text-secondary">{{ ex.name }}</span
-                  >:
-                  <span class="badge bg-warning text-dark">{{ ex.duration }} sec</span>
+                  <span class="text-secondary">{{ ex.name }}</span> :
+                  <span class="badge bg-warning text-dark">{{ ex.duration }} sec </span>
                 </span>
               </span>
             </li>
@@ -317,6 +443,7 @@ onMounted(() => {
         </h2>
         <h2 v-else-if="currentExercise.type === ExerciseType.Interval">
           Duration: {{ currentExercise.duration }} seconds
+          {{ currentExercise.weight != null ? `with ${currentExercise.weight}` : '' }}
         </h2>
         <h2 v-else-if="currentExercise.type === ExerciseType.Rest">
           Rest for {{ currentExercise.duration }} seconds
@@ -336,7 +463,7 @@ onMounted(() => {
             class="form-control mb-2"
           />
           <input
-            v-if="currentExercise.type === ExerciseType.Reps"
+            v-if="currentExercise.type !== ExerciseType.Rest && currentExercise.weight != null"
             v-model="currentExercise.weight"
             type="text"
             placeholder="Weight (optional)"
@@ -394,10 +521,11 @@ onMounted(() => {
       <button @click="fullReset" class="btn btn-primary">Full reset</button>
       <button v-if="!editing" @click="editing = true" class="btn btn-primary">Edit</button>
       <button v-if="editing" @click="applyEdit" class="btn btn-primary">Finish</button>
-      <button class="btn btn-primary" @click="deleteCurrentWorkout">Delete</button>
+      <!-- <button class="btn btn-primary" @click="deleteCurrentWorkout">Delete</button> -->
       <button @click="seePreview = !seePreview" class="btn btn-primary">
         {{ seePreview ? 'Hide Preview' : 'See Preview' }}
       </button>
+      <button class="btn btn-success" @click="saveWorkoutsToLocalStorage">Save</button>
     </div>
   </div>
 </template>
