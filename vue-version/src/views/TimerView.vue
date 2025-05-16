@@ -414,7 +414,7 @@ onMounted(() => {
         </div>
       </div>
       <div class="col-12 text-center mb-3">
-        <select v-model="workout" class="form-select mb-3">
+        <select @change="fullReset" v-model="workout" class="form-select mb-3">
           <option v-for="(workout, index) in workoutList" :key="index" :value="workout">
             {{ workout.name }}
           </option>
