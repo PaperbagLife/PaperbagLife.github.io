@@ -47,7 +47,11 @@ const totalBodyA: Workout = {
     { name: 'Rest', type: ExerciseType.Rest, duration: 10 },
     { name: 'Lat pulldown', type: ExerciseType.Reps, reps: 10, weight: '55lbs' },
     { name: 'Rest', type: ExerciseType.Rest, duration: 60 },
-    { name: 'Seated machine overhead press', type: ExerciseType.Reps, reps: 10, weight: '20lbs' },
+    { name: 'Seated machine overhead press', type: ExerciseType.Reps, reps: 10, weight: '40lbs' },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 60 },
+    { name: 'Lat pulldown', type: ExerciseType.Reps, reps: 10, weight: '55lbs' },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 60 },
+    { name: 'Seated machine overhead press', type: ExerciseType.Reps, reps: 10, weight: '40lbs' },
     { name: 'Rest', type: ExerciseType.Rest, duration: 60 },
     { name: 'Box squat', type: ExerciseType.Reps, reps: 8 },
     { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
@@ -322,6 +326,13 @@ function fullReset() {
   }
 }
 
+function clearLocalStorageAndReset() {
+  localStorage.removeItem('workoutList')
+  workoutList.value = [...baseList]
+  workout.value = workoutList.value[0]
+  fullReset()
+}
+
 function applyEdit() {
   if (editing.value) {
     editing.value = false
@@ -331,17 +342,6 @@ function applyEdit() {
     currentExercise.value.type === ExerciseType.Rest
   ) {
     setTimer(currentExercise.value.duration)
-  }
-}
-
-function deleteCurrentWorkout() {
-  const index = workoutList.value.indexOf(workout.value)
-  if (index > -1) {
-    workoutList.value.splice(index, 1)
-    saveWorkoutsToLocalStorage()
-    if (workoutList.value.length > 0) {
-      workout.value = workoutList.value[0]
-    }
   }
 }
 
@@ -518,7 +518,6 @@ onMounted(() => {
           </button>
         </div>
       </div>
-      <button @click="fullReset" class="btn btn-primary">Full reset</button>
       <button v-if="!editing" @click="editing = true" class="btn btn-primary">Edit</button>
       <button v-if="editing" @click="applyEdit" class="btn btn-primary">Finish</button>
       <!-- <button class="btn btn-primary" @click="deleteCurrentWorkout">Delete</button> -->
@@ -526,6 +525,26 @@ onMounted(() => {
         {{ seePreview ? 'Hide Preview' : 'See Preview' }}
       </button>
       <button class="btn btn-success" @click="saveWorkoutsToLocalStorage">Save</button>
+      <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#clearStorage">
+        Clear Storage
+      </button>
+    </div>
+    <div id="clearStorage" class="modal">
+      <div class="modal-dialog">
+        <div class="modal-content p-4 text-center">
+          <h4>Are you sure you want to clear all workouts and reset to default?</h4>
+          <div class="mt-3">
+            <button
+              class="btn btn-danger me-2"
+              @click="clearLocalStorageAndReset"
+              data-bs-dismiss="modal"
+            >
+              Yes, clear all
+            </button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
