@@ -205,4 +205,10 @@ export const games: WebGameProject[] = [
     description: 'Deck building game',
     route: '/games/deckbuilding',
   },
+  {
+    title: 'Latency Planner',
+    img: bruhImg,
+    description: 'Learn networking topology and plan latency',
+    route: '/games/latency-planner',
+  },
 ]

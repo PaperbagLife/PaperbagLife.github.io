@@ -8,6 +8,7 @@ import DanmakuView from '../views/DanmakuView.vue'
 import GamesView from '../views/GamesView.vue'
 import DeckBuildingView from '@/views/DeckBuildingView.vue'
 import TimerView from '@/views/TimerView.vue'
+import LatencyPlanner from '@/views/LatencyPlanner.vue'
 
 const StarRailView = () => import('../views/StarRailView.vue')
 const ThreeView = () => import('../views/ThreeView.vue')
@@ -68,6 +69,11 @@ const router = createRouter({
         hideHeader: true,
         bodyClass: 'no-scroll',
       },
+    },
+    {
+      path: '/games/latency-planner',
+      name: 'latency-planner',
+      component: LatencyPlanner,
     },
     {
       path: '/timer',
