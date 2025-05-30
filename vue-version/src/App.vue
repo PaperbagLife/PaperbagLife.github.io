@@ -101,9 +101,13 @@ onMounted(() => {
         :class="{ show: morePagesExpanded }"
       >
         <template v-for="page in [...pages, ...morePages]" :key="page.name">
-          <div class="xs-nav row mx-2">
-            <span class="material-icons-outlined">{{ page.icon }}</span>
-            <router-link @click="onRouterLinkClick" :to="page.route" class="xs-nav row mx-2">
+          <div class="xs-nav row mx-3">
+            <span class="material-icons-outlined col-auto px-0">{{ page.icon }}</span>
+            <router-link
+              @click="onRouterLinkClick"
+              :to="page.route"
+              class="col-auto px-0 xs-nav mx-2"
+            >
               {{ page.name }}
             </router-link>
           </div>
@@ -206,6 +210,7 @@ onMounted(() => {
 }
 
 .nav-menu {
+  min-width: 60vw;
   background: #66ccff;
   position: fixed;
   z-index: 1;
@@ -220,7 +225,7 @@ onMounted(() => {
 }
 
 .xs-nav {
-  font-size: larger;
+  font-size: large;
   color: white;
 }
 
