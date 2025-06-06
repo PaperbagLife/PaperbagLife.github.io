@@ -10,7 +10,7 @@ onMounted(() => {
 <template>
   <main>
     <div class="col mt-2">
-      <h1 class="ml-2">Projects</h1>
+      <h1 class="mx-2">Projects</h1>
       <ProjectsComponent :entries="projectEntries" />
     </div>
   </main>

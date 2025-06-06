@@ -81,7 +81,7 @@ function openYoutube() {
           </div>
         </div>
       </div>
-      <div class="row mx-2 py-4 d-flex">
+      <div class="row mx-0 py-4 d-flex">
         <div class="section-title col-auto">Fun Stuff</div>
         <div class="col-12">
           <SlideShowComponenet
@@ -91,7 +91,7 @@ function openYoutube() {
           />
         </div>
       </div>
-      <div class="row mx-2 py-4 d-flex">
+      <div class="row mx-0 py-4 d-flex">
         <div class="section-title col-auto">More than Code</div>
         <div class="col-12">
           <a href="#/interests">Read more </a>or check me out on YouTube! <br />
@@ -99,7 +99,7 @@ function openYoutube() {
             @click="openYoutube"
             class="youtube-img"
             :src="youtubeImg"
-            :width="type === 'xs' ? width * 0.7 : width * 0.8"
+            :width="type === 'xs' ? width * 0.5 : width * 0.6"
           />
         </div>
       </div>

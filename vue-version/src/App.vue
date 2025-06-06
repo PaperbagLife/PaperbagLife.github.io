@@ -45,11 +45,11 @@ onMounted(() => {
 
 <template>
   <header v-if="headerVisible">
-    <div v-if="type !== 'xs'" class="p-2 nav-bar d-flex align-items-center justify-content-end">
+    <div v-if="type !== 'xs'" class="nav-bar mt-2 d-flex align-items-center justify-content-end">
       <template v-for="page in pages" :key="page.name">
         <router-link
           @click="onRouterLinkClick"
-          class="router-link btn btn-dark mx-2 py-0 px-2"
+          class="router-link btn btn-dark mx-2 py-0 btn-sm"
           :to="page.route"
         >
           <label class="d-flex my-1">
@@ -85,7 +85,7 @@ onMounted(() => {
     </div>
     <div v-else>
       <button
-        class="more-pages-btn mobile-more-btn btn btn-dark mt-2 mx-2 py-0 btn-sm d-flex"
+        class="more-pages-btn mobile-more-btn btn btn-dark mt-2 mx-2 btn-sm d-flex"
         @click="onMoreMenuClick"
       >
         <label class="d-flex my-1">
@@ -116,7 +116,7 @@ onMounted(() => {
     </div>
     <router-link
       @click="onRouterLinkClick"
-      class="mt-2 home-route btn btn-dark router-link ml-3 px-2 py-0"
+      class="mt-2 home-route btn btn-dark router-link btn-sm py-0 mx-2"
       :to="homePage.route"
     >
       <label class="d-flex my-1">
