@@ -2,6 +2,10 @@
 import { onMounted, ref, shallowRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { getPostBySlug } from '@/util/postLoader'
+import CommentComponent from './CommentComponent.vue'
+
+import { useRouter } from 'vue-router'
+const router = useRouter()
 
 const route = useRoute()
 const PostComponent = shallowRef<null | object>(null)
@@ -31,21 +35,24 @@ watch(
     if (newSlug) loadPost(newSlug as string)
   }
 )
+
+function backToBlogs() {
+  router.push('/blogs/')
+}
 </script>
 
 <template>
   <div class="blog-post">
+    <button @click="backToBlogs" class="btn btn-dark border py-1">Go back</button>
     <div v-if="error" class="error-message">{{ error }}</div>
-
-    <component v-else-if="PostComponent" :is="PostComponent" />
-
+    <component class="mt-2" v-else-if="PostComponent" :is="PostComponent" />
     <div v-else>Loading...</div>
+    <CommentComponent />
   </div>
 </template>
 
 <style scoped>
 .blog-post {
-  max-width: 800px;
   margin: 0 auto;
   padding: 1rem;
 }

@@ -1,22 +1,32 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 
 const commentsContainer = ref<HTMLElement | null>(null)
+const route = useRoute()
 
-onMounted(() => {
+function loadUtterances() {
+  if (!commentsContainer.value) return
+  commentsContainer.value.innerHTML = ''
+  const issueName = route.path.split('/').pop() || 'comments'
+
   const script = document.createElement('script')
   script.src = 'https://utteranc.es/client.js'
-  script.setAttribute('repo', 'paperbaglife/paperbaglife.github.io') // ← replace this
-  script.setAttribute('issue-term', 'pathname') // or 'title', 'url', etc.
-  script.setAttribute('theme', 'github-light') // or 'github-dark'
+  script.setAttribute('repo', 'paperbaglife/paperbaglife.github.io')
+  script.setAttribute('issue-term', issueName) // or 'title', 'url', etc.
+  script.setAttribute('theme', 'github-light')
   script.crossOrigin = 'anonymous'
   script.async = true
+  commentsContainer.value.appendChild(script)
+}
 
-  if (commentsContainer.value) {
-    commentsContainer.value.innerHTML = '' // Clear any existing script if remounting
-    commentsContainer.value.appendChild(script)
+onMounted(loadUtterances)
+watch(
+  () => route.fullPath,
+  () => {
+    loadUtterances()
   }
-})
+)
 </script>
 
 <template>
