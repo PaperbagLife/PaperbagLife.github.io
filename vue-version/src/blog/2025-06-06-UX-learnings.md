@@ -1,5 +1,5 @@
 ---
-title: User Experience
+title: User Experience, a Case Study
 date: 2025-06-06
 tags: [vue, blog]
 ---
@@ -33,5 +33,7 @@ I implemented a cache to fetch the status every 30 seconds, save the results, an
 #### Time to Content: <1 second
 
 At this point, I was pretty satisfied with the website. Over time, I added buttons to help organize various documents and internal links relevant to the project, as well as a cookbook of common commands and knowledge specific to our internal cluster.
+
+Engineers use it daily (at least from 2025-04-20 to the day this was written) to access documents or find commands to run from the Cookbook.
 
 The Cookbook<sup>TM</sup> is another fantastic case study in user experience, and I shall discuss it in the next blog.
