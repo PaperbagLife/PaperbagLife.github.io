@@ -15,6 +15,7 @@ type Page = {
 
 const homePage: Page = { name: 'Home', icon: 'home', route: '/' }
 const pages: Page[] = [
+  { name: 'Blogs', icon: 'article', route: '/blogs' },
   { name: 'Coursework', icon: 'book', route: '/coursework' },
   { name: 'Projects', icon: 'collections', route: '/projects' },
 ]
@@ -85,7 +86,7 @@ onMounted(() => {
     </div>
     <div v-else>
       <button
-        class="more-pages-btn mobile-more-btn btn btn-dark mt-2 mx-2 btn-sm d-flex"
+        class="more-pages-btn mobile-more-btn btn btn-dark mt-2 mx-2 py-0 btn-sm d-flex"
         @click="onMoreMenuClick"
       >
         <label class="d-flex my-1">

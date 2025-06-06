@@ -80,6 +80,16 @@ const router = createRouter({
       name: 'timer',
       component: TimerView,
     },
+    {
+      path: '/blogs',
+      name: 'blogs',
+      component: () => import('../views/BlogsView.vue'),
+    },
+    {
+      path: '/blogs/:slug',
+      name: 'blog-post',
+      component: () => import('@/views/components/BlogPostComponent.vue'),
+    },
   ],
 })
 
