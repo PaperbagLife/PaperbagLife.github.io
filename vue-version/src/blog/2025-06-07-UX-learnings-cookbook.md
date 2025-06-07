@@ -1,5 +1,5 @@
 ---
-title: User Experience: Another Case Study
+title: User Experience - Another Case Study
 date: 2025-06-07
 tags: [vue, blog]
 ---
