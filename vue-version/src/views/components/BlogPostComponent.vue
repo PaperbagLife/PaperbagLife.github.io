@@ -54,6 +54,7 @@ function backToBlogs() {
 <style scoped>
 .blog-post {
   margin: 0 auto;
+  max-width: 640px;
   padding: 1rem;
 }
 

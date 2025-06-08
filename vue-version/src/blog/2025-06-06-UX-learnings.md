@@ -1,7 +1,7 @@
 ---
 title: User Experience - a Case Study
 date: 2025-06-06
-tags: [vue, blog]
+tags: [Vue, Flask, UX]
 ---
 
 # {{frontmatter.title}}

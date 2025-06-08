@@ -1,18 +1,16 @@
 export interface MarkdownModule {
   title: string
   date: string
-  [key: string]: any // in case you use tags, description, etc.
+  tags: string[]
   default: any // or `DefineComponent<{}, {}, any>` if you want to be more strict
 }
 // postLoader.ts
 const modules = import.meta.glob('@/blog/*.md')
 
 export async function getAllPosts() {
-  console.log('modules', modules)
   const posts = await Promise.all(
     Object.entries(modules).map(async ([path, loader]) => {
       const mod = (await loader()) as MarkdownModule
-      console.log('mod', mod)
       return {
         slug: path.split('/').pop()?.replace('.md', '') ?? '',
         component: mod.default,
@@ -20,7 +18,9 @@ export async function getAllPosts() {
       }
     })
   )
-  console.log('posts', posts)
+  posts.sort((a, b) => {
+    return new Date(b.date).getTime() - new Date(a.date).getTime()
+  })
   return posts
 }
 

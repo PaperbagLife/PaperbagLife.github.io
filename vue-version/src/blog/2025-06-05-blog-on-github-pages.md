@@ -1,7 +1,7 @@
 ---
 title: Making a Blog on GitHub Pages
 date: 2025-06-05
-tags: [vue, blog]
+tags: [Vue, Pinned]
 ---
 
 # {{frontmatter.title}}
