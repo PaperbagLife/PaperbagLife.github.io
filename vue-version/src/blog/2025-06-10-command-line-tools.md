@@ -1,7 +1,7 @@
 ---
 title: Command Line Tools - A Toolbox for Myself and Others
-date: 2025-06-0x
-tags: [command-line tools]
+date: 2025-06-10
+tags: [command line tools]
 ---
 
 # {{frontmatter.title}}

@@ -1,7 +1,7 @@
 ---
 title: Game Dev - Turn Basd Combat
 date: 2025-06-0x
-tags: [Game Dev]
+tags: [WIP, Game Dev]
 ---
 
 # {{frontmatter.title}}

@@ -18,10 +18,12 @@ export async function getAllPosts() {
       }
     })
   )
-  posts.sort((a, b) => {
+  console.log('Loaded posts:', posts)
+  const filteredPosts = posts.filter((post) => !post.tags.includes('WIP'))
+  filteredPosts.sort((a, b) => {
     return new Date(b.date).getTime() - new Date(a.date).getTime()
   })
-  return posts
+  return filteredPosts
 }
 
 export async function getPostBySlug(slug: string) {
