@@ -123,6 +123,15 @@ Mutiple screen sessions can be viewed through `screen -ls`
 
 Similarly, `nohup \<long command\> &` will run a command in the background and have it keep running, even if the ssh connection is cut off (ie due to spotty internet).
 
+### git related commands (updated 2025-06-12)
+
+Squashing commits into a single one or multiple important ones (to make a clean commit history)
+
+```bash
+git rebase -i HEAD~5
+git rebase -i master #(or whatever branch you are based on)
+```
+
 ## Conclusion
 
 I've shared some tools I find useful, at work or in my personal projects.
