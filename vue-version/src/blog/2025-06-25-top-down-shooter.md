@@ -9,9 +9,13 @@ tags: [Game Dev]
 ## My Journey and Approaches for Top Down Shooters
 
 From Flash games on random websites to triple-A titles, I’ve played all kinds of video games.
-Ever since writing my first line of code in college, I’ve been drawn to the idea of creating games myself.
+I've always wanted to However, I had no programming experience and I don't know where to start.
+So I looked around and found RPG Maker. This framework allowed me to make games by drag and drop with a simple turn based combat engine.
+That exploration is for another day in [the next blogpost](https://paperbaglife.github.io/#/blogs/2025-07-05-turn-based-combat)
 
-My very first game was a top-down shooter developed in Unity. It became a foundation for many future experiments, using other engines and frameworks.
+Ever since writing my first line of code in college, I’ve been thinking about making a game myself.
+My very first game from scratch (with code) was a top-down shooter developed in Unity. 
+It became a foundation for many future experiments, using other engines and frameworks.
 This post gives a high-level overview of how I approached this genre across different tools and languages. I won’t go deep into code tutorials—there are plenty of great YouTube videos if you want to learn Unity or similar engines in detail.
 
 ---
