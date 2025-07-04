@@ -51,11 +51,20 @@ function backToBlogs() {
   </div>
 </template>
 
-<style scoped>
+<style lang="scss">
 .blog-post {
   margin: 0 auto;
   max-width: 640px;
   padding: 1rem;
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+img {
+  max-width: 100%;
+  height: auto;
 }
 
 .error-message {
