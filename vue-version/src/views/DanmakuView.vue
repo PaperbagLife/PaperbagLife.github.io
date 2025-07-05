@@ -286,22 +286,22 @@ onUnmounted(() => {
 
 <template>
   <main :class="type">
-    <div class="col mt-2">
-      <div class="row justify-content-center">
-        <div class="game-viewport">
+    <div class="mt-2">
+      <div class="d-flex justify-content-center">
+        <div class="game-viewport p-0">
           <canvas id="game-canvas" :height="CANVAS_HEIGHT" :width="CANVAS_WIDTH"></canvas>
-          <div class="stats col-auto">
+          <div class="stats">
             <div class="row my-0">{{ `HP: ${player.hp}` }}</div>
             <div class="row">{{ `Pow: ${player.power}` }}</div>
           </div>
         </div>
       </div>
-      <div class="row controls justify-content-center" :class="type === 'xs' ? 'mt-2' : ''">
-        <div class="col">
-          <div v-if="type !== 'xs'" class="row justify-content-center hint">
+      <div class="d-flex controls justify-content-center" :class="type === 'xs' ? 'mt-2' : ''">
+        <div class="col p-0">
+          <div v-if="type !== 'xs'" class="d-flex justify-content-center hint">
             You can use WASD/Arrow Keys too
           </div>
-          <div class="row justify-content-center">
+          <div class="d-flex justify-content-center">
             <button
               @mousedown="controlsPressed.up = true"
               @mouseup="controlsPressed.up = false"
@@ -312,7 +312,7 @@ onUnmounted(() => {
               expand_less
             </button>
           </div>
-          <div class="row justify-content-center">
+          <div class="d-flex justify-content-center">
             <button
               @mousedown="controlsPressed.left = true"
               @mouseup="controlsPressed.left = false"
@@ -359,17 +359,17 @@ onUnmounted(() => {
   font-size: 12px;
   color: white;
   position: absolute;
-  bottom: -2px;
-  left: 3px;
+  bottom: 2px;
+  left: 16px;
 }
 
 .controls .btn {
   box-shadow: none;
   border: 2px solid #66ccff;
+  max-width: 50px;
 }
 
 .controls div {
   user-select: none;
 }
 </style>
-../util/shooter/classes ../util/shooter/const ../util/shooter/levels
