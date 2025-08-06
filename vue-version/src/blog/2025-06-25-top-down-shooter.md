@@ -9,7 +9,7 @@ tags: [Game Dev]
 ## My Journey and Approaches for Top Down Shooters
 
 From Flash games on random websites to triple-A titles, I’ve played all kinds of video games.
-I've always wanted to However, I had no programming experience and I don't know where to start.
+I've always wanted to make a game myself, however, I had no programming experience and I don't know where to start.
 So I looked around and found RPG Maker. This framework allowed me to make games by drag and drop with a simple turn based combat engine.
 That exploration is for another day in [the next blogpost](https://paperbaglife.github.io/#/blogs/2025-07-05-turn-based-combat)
 
