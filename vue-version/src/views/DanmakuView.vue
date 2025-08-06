@@ -68,7 +68,9 @@ const powerups = ref<Powerup[]>([])
 const controlsPressed = ref<ControlsPressed>({ up: false, down: false, left: false, right: false })
 const controlKeys = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd'])
 
-const currentLevel = ref<Spawn[]>([...leftWave, ...rightWave, ...randomWave, bossWave])
+// const currentLevel = ref<Spawn[]>([...leftWave, ...rightWave, ...randomWave, bossWave])
+// For demo purposes we should only show bossWave
+const currentLevel = ref<Spawn[]>([bossWave])
 const currentInterval = ref(200)
 
 function handleSpawn() {
