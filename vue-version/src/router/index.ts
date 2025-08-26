@@ -9,6 +9,7 @@ import GamesView from '../views/GamesView.vue'
 import DeckBuildingView from '@/views/DeckBuildingView.vue'
 import TimerView from '@/views/TimerView.vue'
 import LatencyPlanner from '@/views/LatencyPlanner.vue'
+import ResumeView from '@/views/ResumeView.vue'
 
 const StarRailView = () => import('../views/StarRailView.vue')
 const ThreeView = () => import('../views/ThreeView.vue')
@@ -20,6 +21,11 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
+    },
+    {
+      path: '/resume',
+      name: 'resume',
+      component: ResumeView
     },
     {
       path: '/coursework',

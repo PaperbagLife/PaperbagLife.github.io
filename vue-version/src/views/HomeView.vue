@@ -2,7 +2,6 @@
 import { onMounted, ref } from 'vue'
 import { useBreakpoints } from '../util/dimensions'
 import dpUrl from '../assets/img/dp.jpg'
-import resumeUrl from '../assets/docs/Lu-Yunkun.pdf'
 import youtubeImg from '../assets/img/youtube_channel.png'
 import { projectEntries } from '@/util/consts'
 import SlideShowComponenet from './components/SlideShowComponenet.vue'
@@ -29,7 +28,10 @@ function openYoutube() {
             <h1 class="row">Yunkun (Ricky) Lu</h1>
             <div class="row">
               <div :class="type === 'xs' ? 'col-12' : 'col-6'">
-                <a class="resume-button btn btn-dark" :href="resumeUrl"> Resume </a>
+                <router-link to="/resume"> <button class="btn resume-button">
+                    Resume
+                  </button>
+                </router-link>
               </div>
               <div :class="type === 'xs' ? 'col-12' : 'col-6'">
                 <a class="icon-link" href="https://www.linkedin.com/in/yunkun-lu/">

@@ -16,14 +16,15 @@ type Page = {
 const homePage: Page = { name: 'Home', icon: 'home', route: '/' }
 const pages: Page[] = [
   { name: 'Blogs', icon: 'article', route: '/blogs' },
-  { name: 'Coursework', icon: 'book', route: '/coursework' },
+  { name: 'Resume', icon: 'description', route: '/resume' },
   { name: 'Projects', icon: 'collections', route: '/projects' },
 ]
 
 const morePages: Page[] = [
+  { name: 'Coursework', icon: 'book', route: '/coursework' },
   { name: 'Interests', icon: 'interests', route: '/interests' },
-  { name: 'Demo', icon: 'construction', route: '/demo' },
   { name: 'Web Games', icon: 'gamepad', route: '/games' },
+  { name: 'Demo', icon: 'construction', route: '/demo' },
   { name: 'Timer', icon: 'timer', route: '/timer' },
 ]
 
