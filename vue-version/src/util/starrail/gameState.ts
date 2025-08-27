@@ -359,7 +359,10 @@ class TurnManager {
   static async resolveTurn(turn: TimelineTurn) {
     gameState.currentTurn = turn
     gameState.focusedTarget.targetType = TargetType.SINGLE_ENEMY
-    gameState.focusedTarget.mainTarget = Math.min(gameState.focusedTarget.mainTarget, gameState.enemies.length - 1)
+    gameState.focusedTarget.mainTarget = Math.min(
+      gameState.focusedTarget.mainTarget,
+      gameState.enemies.length - 1
+    )
     gameState.currentResolvingSubTurn = null
     let enemyIdx = -1
     if (!turn.character) return

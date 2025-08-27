@@ -102,7 +102,7 @@ onMounted(() => {
       v-if="playerVisible"
       :style="{
         transform: `translate(${playerX}px, ${playerY}px)`,
-        transition: 'transform 1s ease'
+        transition: 'transform 1s ease',
       }"
     >
       <circle r="10" fill="red" stroke="black" stroke-width="2" />

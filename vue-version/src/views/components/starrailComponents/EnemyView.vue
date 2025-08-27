@@ -35,7 +35,7 @@ const attackingTransform = computed(() => {
     <image
       class="enemy-image"
       :style="{
-        transform: attackingEnemy != null && i === attackingEnemy ? attackingTransform : ''
+        transform: attackingEnemy != null && i === attackingEnemy ? attackingTransform : '',
       }"
       :href="enemy.avatar"
       :height="attackingEnemy != null && i === attackingEnemy ? ENEMY_SIZE * 1.5 : ENEMY_SIZE"

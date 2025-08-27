@@ -25,7 +25,7 @@ const router = createRouter({
     {
       path: '/resume',
       name: 'resume',
-      component: ResumeView
+      component: ResumeView,
     },
     {
       path: '/coursework',

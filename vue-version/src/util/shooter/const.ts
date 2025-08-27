@@ -9,7 +9,7 @@ export type ControlsPressed = {
 
 export enum Target {
   PLAYER,
-  ENEMY
+  ENEMY,
 }
 
 export type MovePattern = {

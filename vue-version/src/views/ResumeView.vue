@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref } from 'vue'
 import resumeUrl from '../assets/docs/Lu-Yunkun.pdf'
 
-
 type LifeEvent = {
-  startDate: Date;
-  endDate?: Date;
-  title: string;
-  description: string[];
+  startDate: Date
+  endDate?: Date
+  title: string
+  description: string[]
   type: string // 'education' | 'experience' | 'project';
-};
+}
 
 const lifeEvents: LifeEvent[] = [
   // Education
@@ -70,7 +69,8 @@ const lifeEvents: LifeEvent[] = [
   {
     startDate: new Date('2020-05-01'),
     endDate: new Date('2020-08-01'),
-    title: 'Evaluating the Validity of Automatic Speech Recognition Technologies for Online Medical Counseling',
+    title:
+      'Evaluating the Validity of Automatic Speech Recognition Technologies for Online Medical Counseling',
     description: [
       'Transcribed medical videos using ASR APIs from Google, IBM, and Microsoft',
       'Evaluated performance using word error rate and Levenshtein distance',
@@ -80,28 +80,27 @@ const lifeEvents: LifeEvent[] = [
   },
 ].sort((a, b) => {
   if (a.endDate && b.endDate) {
-    return b.endDate.getTime() - a.endDate.getTime();
+    return b.endDate.getTime() - a.endDate.getTime()
   } else if (a.endDate) {
-    return 1;
+    return 1
   } else if (b.endDate) {
-    return -1;
+    return -1
   } else {
-    return b.startDate.getTime() - a.startDate.getTime();
+    return b.startDate.getTime() - a.startDate.getTime()
   }
-});
+})
 
-
-const filterOptions = ['all', 'education', 'experience', 'project'];
-const filter = ref('all');
+const filterOptions = ['all', 'education', 'experience', 'project']
+const filter = ref('all')
 const filteredLifeEvents = computed(() => {
   if (filter.value === 'all') {
-    return lifeEvents;
+    return lifeEvents
   }
-  return lifeEvents.filter(event => event.type === filter.value);
-});
+  return lifeEvents.filter((event) => event.type === filter.value)
+})
 
 function openResume() {
-  window.open(resumeUrl, '_blank');
+  window.open(resumeUrl, '_blank')
 }
 </script>
 
@@ -128,14 +127,16 @@ function openResume() {
         </span>
       </span>
 
-      <button class="btn btn-sm btn-outline-secondary mx-2" @click="openResume">
-        pdf version
-      </button>
+      <button class="btn btn-sm btn-outline-info mx-2" @click="openResume">pdf version</button>
     </div>
     <div>
       <div class="filter-tabs my-3 d-flex">
-        <div v-for="option in filterOptions" :key="option" :class="['tab', option, { active: filter === option }]"
-          @click="filter = option">
+        <div
+          v-for="option in filterOptions"
+          :key="option"
+          :class="['tab', option, { active: filter === option }]"
+          @click="filter = option"
+        >
           {{ option.charAt(0).toUpperCase() + option.slice(1) }}
         </div>
       </div>

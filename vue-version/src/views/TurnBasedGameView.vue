@@ -13,7 +13,7 @@ const MAX_SKILLPOINTS = 5
 enum PlayerActionType {
   ATTACK = 'attack',
   SKILL = 'skill',
-  ULTIMATE = 'ultimate'
+  ULTIMATE = 'ultimate',
 }
 
 type PlayerAction = {
@@ -23,7 +23,7 @@ type PlayerAction = {
 
 enum SkillTarget {
   ALLY = 'ally',
-  ENEMY = 'enemy'
+  ENEMY = 'enemy',
 }
 type Heal = {
   target: SkillTarget.ALLY
@@ -351,7 +351,7 @@ const canvas = { width: 740, height: 360 }
                 target:
                   activeActor?.skill?.target === SkillTarget.ALLY
                     ? focusedAllyCharcter
-                    : focusedEnemyCharcter
+                    : focusedEnemyCharcter,
               })
             "
           >

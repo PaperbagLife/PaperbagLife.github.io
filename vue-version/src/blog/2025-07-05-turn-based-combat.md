@@ -35,7 +35,7 @@ Well, I brainstormed about the turn based combat states, and found it really dif
 I found it hard to reason about the game state back then.
 
 So finally, I made a turn based combat proof of concept on [my personal website](http://localhost:5173/#/games/starrail).
-I followed the popular game Honkai Starrail, where there is a timeline on the left hand side, showing the turn order. 
+I followed the popular game Honkai Starrail, where there is a timeline on the left hand side, showing the turn order.
 After a unit takes their turn, they are placed into a 10000m runway and run towards the finish line. The unit that crosses the finish line first get to take the turn.
 
 The interesting piece is turn state. This tracks the ongoing gamestate to inform the renderer what to display on screen, and also tells the turn manager how to proceed with the next piece of action (a turn).
@@ -66,7 +66,7 @@ This is a very important lesson: If you fail to plan, you plan to fail.
 Previously, I built my games bit by bit, wrote out exact details for a few functions and see what the game looked like.
 Then, I implement features like applying bandages or tape on top of a falling tower.
 
-If you read the code above, you would notice that the `resolveTurn` function is one big abomination. 
+If you read the code above, you would notice that the `resolveTurn` function is one big abomination.
 It's the result of not fully planning out every detail between state transitions, and having to add lines to fix some weird behaviors as I tested.
 
 From now on, I think I should focus on making the big idea functions, place them together to see if they make sense, then work out the details for each function. Top-down design seems easier for game design.

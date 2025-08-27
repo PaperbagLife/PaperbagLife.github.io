@@ -85,7 +85,7 @@ const originTranslate = computed(() => {
       :style="{
         transform: `translate(${
           -RANGE_INDICATOR_WIDTH / 2 + RANGE_INDICATOR_WIDTH * currentPercentage
-        }px, 0)`
+        }px, 0)`,
       }"
     >
       <path class="indicator-triangle" d="M-10 -10 L10 -10 L0 10 Z" fill="black" />

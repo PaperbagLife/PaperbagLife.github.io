@@ -14,7 +14,7 @@ So I looked around and found RPG Maker. This framework allowed me to make games 
 That exploration is for another day in [the next blogpost](https://paperbaglife.github.io/#/blogs/2025-07-05-turn-based-combat)
 
 Ever since writing my first line of code in college, I’ve been thinking about making a game myself.
-My very first game from scratch (with code) was a top-down shooter developed in Unity. 
+My very first game from scratch (with code) was a top-down shooter developed in Unity.
 It became a foundation for many future experiments, using other engines and frameworks.
 This post gives a high-level overview of how I approached this genre across different tools and languages. I won’t go deep into code tutorials—there are plenty of great YouTube videos if you want to learn Unity or similar engines in detail.
 
@@ -77,12 +77,7 @@ Following the same approach, I created types to represent enemies, players, and 
 Example of rendering enemies:
 
 ```html
-<g
-  v-for="enemy in liveEnemies"
-  :key="enemy.id"
-  :x="enemy.x"
-  :y="enemy.y"
->
+<g v-for="enemy in liveEnemies" :key="enemy.id" :x="enemy.x" :y="enemy.y">
   <rect
     :style="{ '--color': enemy.color }"
     class="enemy"
@@ -91,11 +86,7 @@ Example of rendering enemies:
     :x="enemy.x"
     :y="enemy.y"
   />
-  <text
-    :x="enemy.x + enemy.width / 2"
-    :y="enemy.y + enemy.height / 2"
-    class="small hp-display"
-  >
+  <text :x="enemy.x + enemy.width / 2" :y="enemy.y + enemy.height / 2" class="small hp-display">
     {{ enemy.hp }}
   </text>
 </g>
@@ -131,7 +122,7 @@ enemies.value.forEach((enemy) => {
 })
 ```
 
-This change gave me a huge performance boost and finally allowed me to create beautiful bullet patterns, like in *Touhou* games.
+This change gave me a huge performance boost and finally allowed me to create beautiful bullet patterns, like in _Touhou_ games.
 
 To support complex movement, I introduced a `MovePattern` type. Each bullet follows a sequence of patterns—moving and rotating over time:
 

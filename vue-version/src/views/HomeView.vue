@@ -28,9 +28,8 @@ function openYoutube() {
             <h1 class="row">Yunkun (Ricky) Lu</h1>
             <div class="row">
               <div :class="type === 'xs' ? 'col-12' : 'col-6'">
-                <router-link to="/resume"> <button class="btn resume-button">
-                    Resume
-                  </button>
+                <router-link to="/resume">
+                  <button class="btn resume-button">Resume</button>
                 </router-link>
               </div>
               <div :class="type === 'xs' ? 'col-12' : 'col-6'">

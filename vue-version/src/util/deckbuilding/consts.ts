@@ -3,12 +3,12 @@ import DARK_CARD_ART from '@/assets/game/deckbuilding/dark.png'
 
 export enum CardColor {
   DARK,
-  LIGHT
+  LIGHT,
 }
 
 export enum CardType {
   POINT,
-  UTILITY
+  UTILITY,
 }
 
 export type PointCard = {
@@ -58,13 +58,13 @@ export enum Scene {
   MAP,
   BATTLE,
   SHOP,
-  GAME_OVER
+  GAME_OVER,
 }
 
 export enum Operations {
   ADD = 'ADD',
   SUBTRACT = 'SUBTRACT',
-  MULTIPLY = 'MULTIPLY'
+  MULTIPLY = 'MULTIPLY',
 }
 
 export type RenderOperations = {

@@ -37,7 +37,7 @@ export const NUMBER_DELETE_DELAY = 700
 
 export enum CameraMode {
   DEFAULT = 'default view',
-  ALLIES = 'allies view'
+  ALLIES = 'allies view',
 }
 
 // focus for now is always friendly character, the one getting hit or the one attacking
@@ -72,7 +72,7 @@ export enum TurnStateEnum {
   ENEMY_TURN = 'enemy_turn',
   PLAYER_TURN_DEFAULT = 'default',
   PLAYER_TURN_SKILL_PENDING = 'skill pending',
-  PLAYER_ULT_PENDING = 'ult pending'
+  PLAYER_ULT_PENDING = 'ult pending',
 }
 
 export type TurnState = {
@@ -82,18 +82,18 @@ export type TurnState = {
 
 export enum CharacterType {
   PLAYER,
-  ENEMY
+  ENEMY,
 }
 
 export enum AttackType {
   MELEE = 'melee',
-  RANGED = 'ranged'
+  RANGED = 'ranged',
 }
 
 export enum PlayerTurnAction {
   ATTACK = 'attacking',
   SKILL = 'using skill',
-  ULT = 'ulting'
+  ULT = 'ulting',
 }
 
 export enum TargetType {
@@ -102,7 +102,7 @@ export enum TargetType {
   SINGLE_ENEMY = 'single enemy',
   SPLASH_ENEMY = 'splash enemy',
   ALL_ENEMIES = 'all enemies',
-  RANDOM_ENEMY = 'random enemy'
+  RANDOM_ENEMY = 'random enemy',
 }
 
 export type FocusedTarget = {
@@ -113,7 +113,7 @@ export type FocusedTarget = {
 export enum SkillEffect {
   DAMAGE,
   HEAL,
-  SHIELD
+  SHIELD,
 }
 // For now we assume scaling goes as follows:
 // Damage <- attack
@@ -136,7 +136,7 @@ export enum Elements {
   WIND = 'wind',
   QUANTUM = 'quantum',
   IMAGINARY = 'imaginary',
-  PHYSICAL = 'physical'
+  PHYSICAL = 'physical',
 }
 
 export class Character {
@@ -280,7 +280,7 @@ export type SubTurn = {
 
 export enum PlayerButton {
   ATTACK,
-  SKILL
+  SKILL,
 }
 
 export type PlayerInput = {
@@ -290,5 +290,5 @@ export type PlayerInput = {
 
 export enum SubTurnType {
   REACTION,
-  ULT
+  ULT,
 }
