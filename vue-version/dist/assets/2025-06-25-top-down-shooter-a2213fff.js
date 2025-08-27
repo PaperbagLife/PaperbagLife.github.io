@@ -1,4 +1,4 @@
-import{o,a,e as n,t as i,D as r}from"./index-ec99ad0a.js";const s={class:"markdown-body"},l=r(`<h2>My Journey and Approaches for Top Down Shooters</h2><p>From Flash games on random websites to triple-A titles, I’ve played all kinds of video games. I’ve always wanted to make a game myself, however, I had no programming experience and I don’t know where to start. So I looked around and found RPG Maker. This framework allowed me to make games by drag and drop with a simple turn based combat engine. That exploration is for another day in <a href="https://paperbaglife.github.io/#/blogs/2025-07-05-turn-based-combat">the next blogpost</a></p><p>Ever since writing my first line of code in college, I’ve been thinking about making a game myself. My very first game from scratch (with code) was a top-down shooter developed in Unity. It became a foundation for many future experiments, using other engines and frameworks. This post gives a high-level overview of how I approached this genre across different tools and languages. I won’t go deep into code tutorials—there are plenty of great YouTube videos if you want to learn Unity or similar engines in detail.</p><hr><h3>Unity: Using <code>GameObject</code>s</h3><p>In Unity, the fundamental building block of any game is the <code>GameObject</code>. In a top-down shooter, a <code>GameObject</code> with a behavior script attached to it can represent a player, enemy, or bullet.</p><p>Here’s a simple example:</p><pre><code class="language-csharp">using UnityEngine;
+import{o,a,e as n,t as i,D as r}from"./index-73593571.js";const s={class:"markdown-body"},l=r(`<h2>My Journey and Approaches for Top Down Shooters</h2><p>From Flash games on random websites to triple-A titles, I’ve played all kinds of video games. I’ve always wanted to make a game myself, however, I had no programming experience and I don’t know where to start. So I looked around and found RPG Maker. This framework allowed me to make games by drag and drop with a simple turn based combat engine. That exploration is for another day in <a href="https://paperbaglife.github.io/#/blogs/2025-07-05-turn-based-combat">the next blogpost</a></p><p>Ever since writing my first line of code in college, I’ve been thinking about making a game myself. My very first game from scratch (with code) was a top-down shooter developed in Unity. It became a foundation for many future experiments, using other engines and frameworks. This post gives a high-level overview of how I approached this genre across different tools and languages. I won’t go deep into code tutorials—there are plenty of great YouTube videos if you want to learn Unity or similar engines in detail.</p><hr><h3>Unity: Using <code>GameObject</code>s</h3><p>In Unity, the fundamental building block of any game is the <code>GameObject</code>. In a top-down shooter, a <code>GameObject</code> with a behavior script attached to it can represent a player, enemy, or bullet.</p><p>Here’s a simple example:</p><pre><code class="language-csharp">using UnityEngine;
 
 public class Example_GameObject : MonoBehaviour
 {
@@ -15,12 +15,7 @@ public class Example_GameObject : MonoBehaviour
     enemy.update()
   for bullet in enemyBulletGroup:
     bullet.update()
-</code></pre><p>The Unity structure translated nicely into Pygame. You can try this game in <a href="https://paperbaglife.github.io/#/projects">the projects section</a>.</p><hr><h3>Vue/TypeScript: <code>Type</code>s and <code>Class</code>es as GameObjects</h3><p>After joining the UI team at work and picking up Vue/TypeScript, I wondered: could I build a game with this stack too?</p><p>Following the same approach, I created types to represent enemies, players, and bullets, then used SVG for rendering. Each enemy was a constant of a given type, represented as a <code>&lt;rect&gt;</code> in the SVG DOM.</p><p>Example of rendering enemies:</p><pre><code class="language-html">&lt;g
-  v-for=&quot;enemy in liveEnemies&quot;
-  :key=&quot;enemy.id&quot;
-  :x=&quot;enemy.x&quot;
-  :y=&quot;enemy.y&quot;
-&gt;
+</code></pre><p>The Unity structure translated nicely into Pygame. You can try this game in <a href="https://paperbaglife.github.io/#/projects">the projects section</a>.</p><hr><h3>Vue/TypeScript: <code>Type</code>s and <code>Class</code>es as GameObjects</h3><p>After joining the UI team at work and picking up Vue/TypeScript, I wondered: could I build a game with this stack too?</p><p>Following the same approach, I created types to represent enemies, players, and bullets, then used SVG for rendering. Each enemy was a constant of a given type, represented as a <code>&lt;rect&gt;</code> in the SVG DOM.</p><p>Example of rendering enemies:</p><pre><code class="language-html">&lt;g v-for=&quot;enemy in liveEnemies&quot; :key=&quot;enemy.id&quot; :x=&quot;enemy.x&quot; :y=&quot;enemy.y&quot;&gt;
   &lt;rect
     :style=&quot;{ &#39;--color&#39;: enemy.color }&quot;
     class=&quot;enemy&quot;
@@ -29,11 +24,7 @@ public class Example_GameObject : MonoBehaviour
     :x=&quot;enemy.x&quot;
     :y=&quot;enemy.y&quot;
   /&gt;
-  &lt;text
-    :x=&quot;enemy.x + enemy.width / 2&quot;
-    :y=&quot;enemy.y + enemy.height / 2&quot;
-    class=&quot;small hp-display&quot;
-  &gt;
+  &lt;text :x=&quot;enemy.x + enemy.width / 2&quot; :y=&quot;enemy.y + enemy.height / 2&quot; class=&quot;small hp-display&quot;&gt;
     {{ enemy.hp }}
   &lt;/text&gt;
 &lt;/g&gt;
