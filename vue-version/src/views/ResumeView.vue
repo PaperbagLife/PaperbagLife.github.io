@@ -109,28 +109,22 @@ function openResume() {
     <h1>Ricky (Yunkun) Lu</h1>
     <h5>USC 2027 May, SWE with 3 years experience</h5>
     <div>
-      <span class="location-text">
+      <span class="me-3">
         <span class="material-icons-outlined" style="vertical-align: middle">location_on</span>
         Los Angeles, CA
       </span>
-      <span>
-        <span class="icon-link" href="https://www.linkedin.com/in/yunkun-lu/">
-          <i class="mx-1 fa-icon fa fa-linkedin fa-lg" />
-          <a href="https://www.linkedin.com/in/yunkun-lu/">link</a>
-        </span>
+      <span class="url-link me-3">
+        <a href="https://www.linkedin.com/in/yunkun-lu/">LinkedIn</a>
       </span>
-
-      <span>
-        <span class="icon-link" href="https://github.com/PaperbagLife">
-          <i class="mx-1 fa-icon fa fa-github fa-lg" />
-          <a href="https://github.com/PaperbagLife">link</a>
-        </span>
+      <span class="url-link me-3">
+        <a href="https://github.com/PaperbagLife">GitHub</a>
       </span>
-
-      <button class="btn btn-sm btn-outline-info mx-2" @click="openResume">pdf version</button>
+      <span class="url-link me-3">
+        <a :href="resumeUrl"> PDF resume </a>
+      </span>
     </div>
     <div>
-      <div class="filter-tabs my-3 d-flex">
+      <div class="filter-tabs my-2 d-flex">
         <div
           v-for="option in filterOptions"
           :key="option"
@@ -160,52 +154,46 @@ function openResume() {
 </template>
 
 <style scoped lang="scss">
+$blue: #66ccff;
+$purple: #e566ff;
+$orange: #ff9966;
+$green: #80ff66;
+
 .location-icon {
   vertical-align: text-bottom;
 }
 
+.url-link {
+  a {
+    color: $blue;
+    text-decoration: none;
+  }
+}
+
 .filter-tabs {
   .tab {
-    padding: 5px 10px;
-    margin-right: 10px;
-    border-radius: 5px;
+    padding: 0px 10px;
     cursor: pointer;
     user-select: none;
-
-    &.all {
-      border: 1px solid #66ccff;
-    }
-
+    border-bottom: 2px solid;
     &.active {
-      background-color: #007bff;
-      color: white;
+      border-bottom: 4px solid;
     }
-
+    &.all {
+      color: $blue;
+      border-color: $blue;
+    }
     &.education {
-      border: 1px solid red;
-
-      &.active {
-        background-color: red;
-        color: white;
-      }
+      border-color: $purple;
+      color: $purple;
     }
-
     &.experience {
-      border: 1px solid green;
-
-      &.active {
-        background-color: green;
-        color: white;
-      }
+      border-color: $green;
+      color: $green;
     }
-
     &.project {
-      border: 1px solid blue;
-
-      &.active {
-        background-color: blue;
-        color: white;
-      }
+      border-color: $orange;
+      color: $orange;
     }
   }
 }
@@ -215,15 +203,15 @@ function openResume() {
   padding-left: 10px;
 
   &.education {
-    border-color: red;
+    border-color: $purple;
   }
 
   &.experience {
-    border-color: green;
+    border-color: $green;
   }
 
   &.project {
-    border-color: blue;
+    border-color: $orange;
   }
 }
 </style>
