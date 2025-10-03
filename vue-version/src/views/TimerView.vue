@@ -312,11 +312,11 @@ const Kat3: Workout = {
 
 const editing = ref(false)
 
-const baseList = [totalBodyA, conditioning, totalBodyB, totalBodyC, Kat1, Kat2, Kat3]
+const baseList = [Kat1, Kat2, Kat3, totalBodyA, conditioning, totalBodyB, totalBodyC]
 
-const workoutList = ref<Workout[]>([totalBodyA, conditioning, totalBodyB, totalBodyC])
+const workoutList = ref<Workout[]>(baseList)
 
-const workout = ref<Workout>(totalBodyB)
+const workout = ref<Workout>(Kat1)
 
 const currentExerciseIndex = ref(0)
 const currentExercise = computed(() => workout.value.exercises[currentExerciseIndex.value])
