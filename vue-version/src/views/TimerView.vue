@@ -1,5 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
+import fiveCountDown from '@/assets/audio/5countdown.mp3'
+import mamboAudio from '@/assets/audio/mambo.mp3'
+import baubauAudio from '@/assets/audio/baubau.mp3'
+import harikiteAudio from '@/assets/audio/harikite.mp3'
+import bakushinAudio from '@/assets/audio/bakushin.mp3'
 type Workout = {
   name: string
   exercises: ExerciseEntry[]
@@ -337,6 +342,14 @@ const totalSeconds = ref(0)
 const timer = ref<number | null>(null)
 const isTimerRunning = ref(false)
 
+const startAudio = [
+  new Audio(mamboAudio),
+  new Audio(baubauAudio),
+  new Audio(harikiteAudio),
+  new Audio(bakushinAudio),
+]
+const countDownAudio = new Audio(fiveCountDown)
+
 function setTimer(seconds: number) {
   totalSeconds.value = seconds
 }
@@ -361,6 +374,9 @@ function playTimer() {
   timer.value = setInterval(() => {
     if (totalSeconds.value > 0) {
       totalSeconds.value--
+      if (totalSeconds.value === 5 && currentExercise.value.type !== ExerciseType.Rest) {
+        countDownAudio.play()
+      }
     } else {
       if (timer.value) {
         clearInterval(timer.value)
@@ -387,6 +403,10 @@ function nextExercise() {
   if (currentExerciseIndex.value < workout.value.exercises.length - 1) {
     currentExerciseIndex.value++
     const nextExercise = workout.value.exercises[currentExerciseIndex.value]
+    if (nextExercise.type !== ExerciseType.Rest) {
+      const randomIndex = Math.floor(Math.random() * startAudio.length)
+      startAudio[randomIndex].play()
+    }
     if (nextExercise.type === ExerciseType.Interval || nextExercise.type === ExerciseType.Rest) {
       setTimer(nextExercise.duration)
       playTimer()
