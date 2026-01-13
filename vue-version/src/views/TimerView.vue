@@ -250,9 +250,9 @@ const Kat2: Workout = {
     { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
     { name: 'Hanging from bar', type: ExerciseType.Interval, duration: 30 },
     { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
-    { name: 'dumbell halos', type: ExerciseType.Reps, reps: 10, weight: '15lbs' },
+    { name: 'dumbell curl to shoulder press', type: ExerciseType.Reps, reps: 10, weight: '15lbs' },
     { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
-    { name: 'dumbell halos', type: ExerciseType.Reps, reps: 10, weight: '15lbs' },
+    { name: 'dumbell curl to shoulder press', type: ExerciseType.Reps, reps: 10, weight: '15lbs' },
     { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
     { name: 'Forward body weight lunge hold, left', type: ExerciseType.Interval, duration: 40 },
     { name: 'Forward body weight lunge hold, right', type: ExerciseType.Interval, duration: 40 },
@@ -275,9 +275,13 @@ const Kat2: Workout = {
 const Kat3: Workout = {
   name: 'Kat 3',
   exercises: [
-    { name: 'Chair pushup (tricep)', type: ExerciseType.Reps, reps: 10 },
+    { name: 'dumbbell tricep kickback', type: ExerciseType.Reps, reps: 10 },
     { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
-    { name: 'Chair pushup (tricep)', type: ExerciseType.Reps, reps: 10 },
+    { name: 'dumbbell tricep kickback', type: ExerciseType.Reps, reps: 10 },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'dumbbell one arm row', type: ExerciseType.Reps, reps: 10, weight: '20lbs' },
+    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
+    { name: 'dumbbell one arm row', type: ExerciseType.Reps, reps: 10, weight: '20lbs' },
     { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
     { name: 'flutter kick', type: ExerciseType.Interval, duration: 30 },
     { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
@@ -286,8 +290,6 @@ const Kat3: Workout = {
     { name: 'Squats', type: ExerciseType.Reps, reps: 12 },
     { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
     { name: 'Squats', type: ExerciseType.Reps, reps: 12 },
-    { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
-    { name: 'Alternate Leg arm reach', type: ExerciseType.Reps, reps: 20 },
     { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
     { name: 'Alternate Leg arm reach', type: ExerciseType.Reps, reps: 20 },
     { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
@@ -296,24 +298,6 @@ const Kat3: Workout = {
     { name: 'Hamstring Stretch', type: ExerciseType.Interval, duration: 45 },
   ],
 }
-
-// const Kat4: Workout = {
-//   name: 'Kat 4',
-//   exercises: [
-//     { name: 'Arm Circles', type: ExerciseType.Interval, duration: 30 },
-//     { name: 'Torso Twists', type: ExerciseType.Interval, duration: 30 },
-//     { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
-//     { name: 'Mountain Climbers', type: ExerciseType.Interval, duration: 45 },
-//     { name: 'Rest', type: ExerciseType.Rest, duration: 60 },
-//     { name: 'Mountain Climbers', type: ExerciseType.Interval, duration: 45 },
-//     { name: 'Rest', type: ExerciseType.Rest, duration: 60 },
-//     { name: 'Lying Spinal Twist', type: ExerciseType.Interval, duration: 60 },
-//     { name: 'Hamstring Stretch left', type: ExerciseType.Interval, duration: 30 },
-//     { name: 'Hamstring Stretch right', type: ExerciseType.Interval, duration: 30 },
-//     { name: 'Rest', type: ExerciseType.Rest, duration: 30 },
-//     { name: 'Deep Squat Hold', type: ExerciseType.Interval, duration: 60 },
-//   ],
-// }
 
 const editing = ref(false)
 
