@@ -16,7 +16,7 @@ const lifeEvents: LifeEvent[] = [
     startDate: new Date('2025-08-01'),
     endDate: new Date('2027-05-01'),
     title: 'M.S. in Computer Science, University of Southern California',
-    description: [],
+    description: ['GPA: 4.00 (ongoing)'],
     type: 'education',
   },
   {
@@ -25,21 +25,30 @@ const lifeEvents: LifeEvent[] = [
     title: 'B.S. in Computer Science, Minor in Computational Finance, Carnegie Mellon University',
     description: [
       'GPA: 3.80/4.00',
-      'Courses: Distributed Systems, Artificial Intelligence & Problem Solving, Design and Analysis of Algorithms',
+      'Relevant coursework: Distributed Systems, Artificial Intelligence, Algorithms',
     ],
     type: 'education',
   },
   // Experience
   {
+    startDate: new Date('2026-05-17'),
+    endDate: new Date('2026-08-14'),
+    title: 'Software Engineer Intern at Google',
+    description: [
+      'Designed and built an LLM-powered autonomous agent skill in Python that automates debugging and incident triage from diagnostic logs, reducing investigation time from hours to under 20 minutes through parallelized agent workflows.',
+      'Designed and implemented a telemetry pipeline and monitoring dashboard tracking datacenter diagnostic coverage across thousands of machines, enabling fleet-wide visibility into agent execution and data quality.',
+    ],
+    type: 'experience',
+  },
+  {
     startDate: new Date('2022-07-01'),
     endDate: new Date('2025-07-01'),
     title: 'Software Engineer at Clockwork Systems, Inc',
     description: [
-      'Set up and managed 5 high-power-computing servers',
-      'Optimized networking fabric for AI/ML Training',
-      'Developed full-stack internal web platform with Flask and Vue/TypeScript',
-      'Built and maintained customer-facing UI platform in Vue/TypeScript',
-      'Created documentation and onboarded 5 new engineers',
+      'Designed and built internal monitoring platform using Flask + Vue/TypeScript, enabling real-time cluster diagnostics and reducing troubleshooting time by 80%.',
+      'Built high-performance GPU cluster from scratch: racked and configured 5 servers with Infiniband/RoCE networking.',
+      'Worked on a NCCL plugin to optimize AI/ML training performance, achieving 20% improvement in parallel allreduce traffic.',
+      'Created comprehensive documentation and onboarding materials for new engineers.',
     ],
     type: 'experience',
   },
@@ -48,33 +57,42 @@ const lifeEvents: LifeEvent[] = [
     endDate: new Date('2021-08-01'),
     title: 'Software Engineer Intern at Arista Networks',
     description: [
-      'Migrated service to Kubernetes, reducing CPU usage',
-      'Designed CI/CD pipeline for automated deployment',
-      'Reformatted logging to JSON, reducing database load',
+      'Migrated existing service to run on Kubernetes, reducing CPU usage of bare metal servers by up to 10%.',
+      'Designed and implemented CI/CD pipeline to automate deployment of new builds to Kubernetes clusters, saving ~20 minutes per deployment.',
+      'Reformatted excessive verbose logging into JSON strings, reducing database load by 70% and making parsing easier.',
     ],
     type: 'experience',
   },
   // Projects
   {
-    startDate: new Date('2023-01-01'),
-    title: 'Personal Website with Vue/Typescript',
+    startDate: new Date('2025-08-25'),
+    endDate: new Date('2026-05-23'),
+    title: 'Hamster Mapster — Multiplayer Party Game (Launching on Steam in 2026)',
     description: [
-      'Maintaining a personal website with bio, coursework, project showcase, and web games',
-      'Writing monthly blogs',
-      'Developing games with Typescript/Vue',
-      'Managing TODOs and issues with GitHub Project',
+      'Designing and implementing procedural map generation for a 4-player party game.',
+      'Built multi-biome tile-based generation algorithm producing balanced, playable maps with configurable difficulty.',
+      'Collaborated with a team of 20 to integrate generation with game mechanics and UI.',
+    ],
+    type: 'project',
+  },
+  {
+    startDate: new Date('2023-01-01'),
+    title: 'Personal Website with Vue/TypeScript',
+    description: [
+      'Maintaining personal website with bio, coursework, project showcase, and web games.',
+      'Writing monthly blogs and publishing technical posts.',
+      'Developing games and interactive demos with TypeScript/Vue.',
     ],
     type: 'project',
   },
   {
     startDate: new Date('2020-05-01'),
     endDate: new Date('2020-08-01'),
-    title:
-      'Evaluating the Validity of Automatic Speech Recognition Technologies for Online Medical Counseling',
+    title: 'Evaluating the Validity of Automatic Speech Recognition Technologies for Online Medical Counseling',
     description: [
-      'Transcribed medical videos using ASR APIs from Google, IBM, and Microsoft',
-      'Evaluated performance using word error rate and Levenshtein distance',
-      'Identified factors affecting ASR performance',
+      'Transcribed medical videos using ASR APIs from Google, IBM, and Microsoft.',
+      'Evaluated performance using word error rate and Levenshtein distance.',
+      'Identified factors affecting ASR performance.',
     ],
     type: 'project',
   },
@@ -106,8 +124,8 @@ function openResume() {
 
 <template>
   <div class="col px-3 py-2">
-    <h1>Ricky (Yunkun) Lu</h1>
-    <h5>USC 2027 May, SWE with 3 years experience</h5>
+    <h1>Yunkun (Ricky) Lu</h1>
+    <h5>Software Engineer | Distributed Systems | AI Infrastructure | LLM Agents</h5>
     <div>
       <span class="me-3">
         <span class="material-icons-outlined" style="vertical-align: middle">location_on</span>
@@ -120,17 +138,22 @@ function openResume() {
         <a href="https://github.com/PaperbagLife">GitHub</a>
       </span>
       <span class="url-link me-3">
-        <a :href="resumeUrl"> PDF resume </a>
+        <a href="#" @click.prevent="openResume"> PDF resume </a>
       </span>
+    </div>
+    <div class="my-2 skills">
+      <strong>Skills:</strong>
+      <div style="font-size:0.95em">
+        Languages: Python, C++, Golang, TypeScript, JavaScript, SQL —
+        AI & ML: LLMs, Agentic Workflows, Prompt Engineering —
+        Distributed Systems: Kubernetes, Docker, NCCL, RDMA, Infiniband/RoCE —
+        Data & Monitoring: Grafana, SQL, Telemetry Pipelines, CI/CD
+      </div>
     </div>
     <div>
       <div class="filter-tabs my-2 d-flex">
-        <div
-          v-for="option in filterOptions"
-          :key="option"
-          :class="['tab', option, { active: filter === option }]"
-          @click="filter = option"
-        >
+        <div v-for="option in filterOptions" :key="option" :class="['tab', option, { active: filter === option }]"
+          @click="filter = option">
           {{ option.charAt(0).toUpperCase() + option.slice(1) }}
         </div>
       </div>
@@ -157,7 +180,7 @@ function openResume() {
 $blue: #66ccff;
 $purple: #e566ff;
 $orange: #ff9966;
-$green: #80ff66;
+$red: #ff2a4d;
 
 .location-icon {
   vertical-align: text-bottom;
@@ -176,21 +199,27 @@ $green: #80ff66;
     cursor: pointer;
     user-select: none;
     border-bottom: 2px solid;
+    font-weight: bold;
+
     &.active {
       border-bottom: 4px solid;
     }
+
     &.all {
       color: $blue;
       border-color: $blue;
     }
+
     &.education {
       border-color: $purple;
       color: $purple;
     }
+
     &.experience {
-      border-color: $green;
-      color: $green;
+      border-color: $red;
+      color: $red;
     }
+
     &.project {
       border-color: $orange;
       color: $orange;
@@ -207,7 +236,7 @@ $green: #80ff66;
   }
 
   &.experience {
-    border-color: $green;
+    border-color: $red;
   }
 
   &.project {
