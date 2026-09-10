@@ -58,7 +58,7 @@ export class GameState {
 }
 ```
 
-Check out the full code on [my github!](https://github.com/PaperbagLife/PaperbagLife.github.io/tree/master/vue-version/src/util/starrail)
+Check out the full code on [my github!](https://github.com/PaperbagLife/PaperbagLife.github.io/tree/master/src/util/starrail)
 
 It took a lot of planning on paper to figure out how the classes should be managed, what the main turn resolution looks like, and what the transition from each state to another looks like in code.
 This is a very important lesson: If you fail to plan, you plan to fail.
