@@ -35,7 +35,7 @@ const lifeEvents: LifeEvent[] = [
     endDate: new Date('2026-08-14'),
     title: 'Software Engineer Intern at Google',
     description: [
-      'Designed and built an LLM-powered autonomous agent skill in Python that automates debugging and incident triage from diagnostic logs, reducing investigation time from hours to under 20 minutes through parallelized agent workflows.',
+      'Built an LLM agent in Python that automatically gathers diagnostic evidence from multiple data sources and assembles it into a structured triage report for failed machine tests, cutting initial investigation from hours to under 20 minutes via parallelized agent workflows.',
       'Designed and implemented a telemetry pipeline and monitoring dashboard tracking datacenter diagnostic coverage across thousands of machines, enabling fleet-wide visibility into agent execution and data quality.',
     ],
     type: 'experience',
@@ -45,10 +45,9 @@ const lifeEvents: LifeEvent[] = [
     endDate: new Date('2025-07-01'),
     title: 'Software Engineer at Clockwork Systems, Inc',
     description: [
-      'Designed and built internal monitoring platform using Flask + Vue/TypeScript, enabling real-time cluster diagnostics and reducing troubleshooting time by 80%.',
-      'Built high-performance GPU cluster from scratch: racked and configured 5 servers with Infiniband/RoCE networking.',
-      'Worked on a NCCL plugin to optimize AI/ML training performance, achieving 20% improvement in parallel allreduce traffic.',
-      'Created comprehensive documentation and onboarding materials for new engineers.',
+      'Built the GPU training cluster end-to-end with one other engineer: planned and stacked the switch, racked and cabled 5 servers, and configured + validated Infiniband/RoCE fabric performance.',
+      'Designed and built internal GPU-cluster monitoring platform from the ground up (Flask + Vue/TypeScript), replacing a manual pre-test health check with a single page load.',
+      'Built the telemetry subsystem for a NCCL plugin that mitigates ECMP hash-collision congestion on RoCE/Infiniband fabrics by rerouting collective traffic based on measured path load — 20% higher allreduce throughput vs. stock NCCL on default ECMP.',
     ],
     type: 'experience',
   },
@@ -66,12 +65,11 @@ const lifeEvents: LifeEvent[] = [
   // Projects
   {
     startDate: new Date('2025-08-25'),
-    endDate: new Date('2026-05-23'),
-    title: 'Hamster Mapster — Multiplayer Party Game (Launching on Steam in 2026)',
+    title: 'Hamster Mapster — Multiplayer Party Game (Launching on Steam in 2027)',
     description: [
-      'Designing and implementing procedural map generation for a 4-player party game.',
-      'Built multi-biome tile-based generation algorithm producing balanced, playable maps with configurable difficulty.',
-      'Collaborated with a team of 20 to integrate generation with game mechanics and UI.',
+      'Designing and implementing procedural map generation system for a 4-player party game.',
+      'Built multi-biome tile-based generation algorithm that creates balanced, playable maps with configurable difficulty.',
+      'Collaborated with a team of 20, including 3 other engineers, to integrate map generation with game mechanics and UI.',
     ],
     type: 'project',
   },
@@ -145,7 +143,7 @@ function openResume() {
       <strong>Skills:</strong>
       <div style="font-size:0.95em">
         Languages: Python, C++, Golang, TypeScript, JavaScript, SQL —
-        AI & ML: LLMs, Agentic Workflows, Prompt Engineering —
+        AI & ML: LLMs, Agentic Workflows, Prompt Engineering, Autonomous Agents —
         Distributed Systems: Kubernetes, Docker, NCCL, RDMA, Infiniband/RoCE —
         Data & Monitoring: Grafana, SQL, Telemetry Pipelines, CI/CD
       </div>
