@@ -36,7 +36,7 @@ const pinnedPosts = computed(() => {
 </script>
 
 <template>
-  <div class="col px-3 blog-entries">
+  <div class="page page-narrow">
     <div class="row align-items-center justify-content-between">
       <div class="blog-title col-auto">Blog posts</div>
       <!-- Tag filter select -->
@@ -84,10 +84,6 @@ const pinnedPosts = computed(() => {
 }
 .filter-wrapper {
   display: inline-block;
-}
-.blog-entries {
-  margin: 0 auto;
-  max-width: 640px;
 }
 .blog-entry {
   margin-bottom: 1rem;

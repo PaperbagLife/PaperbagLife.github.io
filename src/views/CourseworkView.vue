@@ -9,10 +9,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <main>
-    <div class="col mt-2">
-      <h1 class="mx-2">Coursework</h1>
-      <div class="row mx-0">
+  <main class="page">
+    <div class="col">
+      <h1 class="mb-3">Coursework</h1>
+      <div class="row">
         <template v-for="semester in semesters" :key="semester.name">
           <div class="border-top py-2" :class="type === 'xs' ? 'col-12' : 'col-6'">
             <p>

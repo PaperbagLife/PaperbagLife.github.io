@@ -26,3 +26,19 @@
 .material-icons-outlined {
   font-family: 'Material Icons Outlined' !important;
 }
+
+/* Shared page layout: one side gutter for every page and the fixed header,
+   capped content width on wide screens, and room at the bottom */
+:root {
+  --page-gutter: clamp(16px, 4vw, 40px);
+}
+
+.page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 1rem var(--page-gutter) 3rem;
+}
+
+.page-narrow {
+  max-width: 800px;
+}

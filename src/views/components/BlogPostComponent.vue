@@ -42,7 +42,7 @@ function backToBlogs() {
 </script>
 
 <template>
-  <div class="blog-post">
+  <div class="blog-post page page-narrow">
     <button @click="backToBlogs" class="btn btn-dark border py-1">Go back</button>
     <div v-if="error" class="error-message">{{ error }}</div>
     <component class="mt-2" v-else-if="PostComponent" :is="PostComponent" />
@@ -53,9 +53,6 @@ function backToBlogs() {
 
 <style lang="scss">
 .blog-post {
-  margin: 0 auto;
-  max-width: 640px;
-  padding: 1rem;
   img {
     max-width: 100%;
     height: auto;

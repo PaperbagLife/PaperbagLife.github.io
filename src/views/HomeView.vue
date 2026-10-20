@@ -5,9 +5,9 @@ const { type } = useBreakpoints()
 </script>
 
 <template>
-  <main>
+  <main class="page">
     <div class="col top">
-      <div class="profile-section row mx-5 py-5 d-flex align-items-center justify-content-center">
+      <div class="profile-section row g-4 pt-3 pb-5 align-items-center justify-content-center">
         <div class="col-auto d-flex justify-content-center">
           <img class="profile-pic" :src="dpUrl" />
         </div>
@@ -35,7 +35,7 @@ const { type } = useBreakpoints()
           </div>
         </div>
       </div>
-      <div class="row mx-0">
+      <div class="row gx-5 gy-4">
         <div :class="type === 'xs' ? 'col-12' : 'col-4'">
           <div class="section-title swe-title">Software Engineer {}</div>
           <div>

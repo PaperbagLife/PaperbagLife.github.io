@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import router from '@/router'
-import { COLUMN_FILL_RATIO, type Project } from '@/util/consts'
+import type { Project } from '@/util/consts'
 import { useBreakpoints } from '@/util/dimensions'
-const { width, type } = useBreakpoints()
+const { type } = useBreakpoints()
 
 const props = defineProps<{
   entries: Project[]
@@ -15,11 +15,11 @@ function onImgClick(route?: string) {
 }
 </script>
 <template>
-  <div class="row mx-0">
+  <div class="row gx-5">
     <div
       v-for="entry in props.entries"
       :key="entry.title"
-      class="border-top py-1"
+      class="border-top pt-3 pb-2"
       :class="type === 'xs' ? 'col-12' : 'col-6'"
     >
       <p>
@@ -31,22 +31,19 @@ function onImgClick(route?: string) {
           v-if="entry.img && !entry.youtube"
           :src="entry.img"
           @click="onImgClick(entry.route)"
-          :width="(type === 'xs' ? width : width / 2) * COLUMN_FILL_RATIO"
-          :height="((type === 'xs' ? width : width / 2) * COLUMN_FILL_RATIO) / 2"
+          class="media my-2"
           :class="entry.route ? 'img-link' : ''"
         />
         <iframe
           v-if="entry.youtube"
           :src="entry.youtube"
-          :width="(type === 'xs' ? width : width / 2) * COLUMN_FILL_RATIO"
-          :height="((type === 'xs' ? width : width / 2) * COLUMN_FILL_RATIO) / 2"
+          class="media my-2"
           title="YouTube video player"
           frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           referrerpolicy="strict-origin-when-cross-origin"
           allowfullscreen
         />
-        <br />
         {{ entry.description }} <br />
         <router-link v-if="entry.route" class="router-link" :to="entry.route">
           Click to play
@@ -57,6 +54,14 @@ function onImgClick(route?: string) {
 </template>
 
 <style scoped>
+.media {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 0.5rem;
+}
+
 .img-link {
   cursor: pointer;
 }

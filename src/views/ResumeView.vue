@@ -121,7 +121,7 @@ function openResume() {
 </script>
 
 <template>
-  <div class="col px-3 py-2">
+  <div class="page page-narrow">
     <h1>Yunkun (Ricky) Lu</h1>
     <h5>Software Engineer | Distributed Systems | AI Infrastructure | LLM Agents</h5>
     <div>

@@ -5,8 +5,6 @@ import starrailImg from '../assets/img/starrail.png'
 import youtubeImg from '../assets/img/youtube_channel.png'
 import mathGameImg from '../assets/img/mathgame.png'
 
-export const COLUMN_FILL_RATIO = 0.84
-
 export type Project = {
   title: string
   timeline?: string

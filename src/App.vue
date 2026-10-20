@@ -90,7 +90,7 @@ onMounted(() => {
     </div>
     <div v-else>
       <button
-        class="more-pages-btn mobile-more-btn btn btn-dark mt-2 mx-2 py-0 btn-sm d-flex"
+        class="more-pages-btn mobile-more-btn btn btn-dark mt-2 py-0 btn-sm d-flex"
         @click="onMoreMenuClick"
       >
         <label class="d-flex my-1">
@@ -121,7 +121,7 @@ onMounted(() => {
     </div>
     <router-link
       @click="onRouterLinkClick"
-      class="mt-2 home-route btn btn-dark router-link btn-sm py-0 mx-2"
+      class="mt-2 home-route btn btn-dark router-link btn-sm py-0"
       :to="homePage.route"
     >
       <label class="d-flex my-1">
@@ -137,15 +137,18 @@ onMounted(() => {
 </template>
 
 <style scoped>
+/* Header pills line up with the page gutter (each desktop pill carries mx-2) */
 .nav-bar {
   position: fixed;
   width: 100%;
   z-index: 2;
+  padding-right: calc(var(--page-gutter) - 0.5rem);
 }
 
 .home-route {
   position: fixed;
   z-index: 2;
+  left: var(--page-gutter);
 }
 
 /* Accent pills: #66ccff fill with dark ink text in both themes */
@@ -169,7 +172,7 @@ onMounted(() => {
 
 .mobile-more-btn {
   z-index: 2;
-  right: 1rem;
+  right: var(--page-gutter);
   position: fixed;
 }
 
@@ -187,7 +190,7 @@ onMounted(() => {
 
 .expanded-menu {
   position: fixed;
-  right: 0.5rem;
+  right: var(--page-gutter);
   top: 5rem;
   opacity: 0;
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.1, 1), opacity 0.4s;

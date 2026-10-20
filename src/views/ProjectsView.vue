@@ -8,9 +8,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <main>
-    <div class="col mt-2">
-      <h1 class="mx-2">Projects</h1>
+  <main class="page">
+    <div class="col">
+      <h1 class="mb-3">Projects</h1>
       <ProjectsComponent :entries="projectEntries" />
     </div>
   </main>
