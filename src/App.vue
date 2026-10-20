@@ -39,9 +39,12 @@ function onRouterLinkClick() {
 }
 
 onMounted(() => {
-  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+  const darkQuery = window.matchMedia('(prefers-color-scheme: dark)')
+  const applyTheme = () =>
+    document.body.setAttribute('data-bs-theme', darkQuery.matches ? 'dark' : 'light')
 
-  document.body.setAttribute('data-bs-theme', isDark ? 'dark' : 'light')
+  applyTheme()
+  darkQuery.addEventListener('change', applyTheme)
 })
 </script>
 
@@ -145,20 +148,23 @@ onMounted(() => {
   z-index: 2;
 }
 
-.more-pages-btn {
+/* Accent pills: #66ccff fill with dark ink text in both themes */
+.more-pages-btn.btn,
+.router-link.btn {
+  --bs-btn-bg: var(--color-accent);
+  --bs-btn-color: var(--color-accent-ink);
+  --bs-btn-hover-bg: var(--color-accent-hover);
+  --bs-btn-hover-color: var(--color-accent-ink);
+  --bs-btn-active-bg: var(--color-accent-hover);
+  --bs-btn-active-color: var(--color-accent-ink);
+  --bs-btn-focus-box-shadow: 0 0 0 0.2rem rgba(102, 204, 255, 0.5);
   border: none;
-  background-color: aliceblue;
-  color: #66ccff;
+}
+
+.more-pages-btn {
   width: 80px;
   border-radius: 1rem;
   box-shadow: none;
-}
-
-.more-pages-btn:hover,
-.more-pages-btn.btn:active {
-  color: #66ccff;
-  background-color: aliceblue;
-  filter: brightness(80%);
 }
 
 .mobile-more-btn {
@@ -186,7 +192,9 @@ onMounted(() => {
   opacity: 0;
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.1, 1), opacity 0.4s;
   z-index: 1;
-  background-color: aliceblue;
+  background-color: var(--color-background-soft);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   border-radius: 1rem;
   pointer-events: none;
 }
@@ -213,7 +221,7 @@ onMounted(() => {
 
 .nav-menu {
   min-width: 60vw;
-  background: #66ccff;
+  background: var(--color-accent);
   position: fixed;
   z-index: 1;
   opacity: 0;
@@ -228,28 +236,16 @@ onMounted(() => {
 
 .xs-nav {
   font-size: large;
-  color: white;
+  color: var(--color-accent-ink);
 }
 
 span.material-icons-outlined {
-  color: #66ccff;
+  color: inherit;
 }
 
 .router-link {
-  color: #66ccff;
-  background-color: aliceblue;
   border-radius: 1rem;
   align-items: center;
-}
-
-.router-link.btn {
-  border: none;
-}
-
-.router-link.btn:hover {
-  color: #66ccff;
-  background: aliceblue;
-  filter: brightness(80%);
 }
 
 .router-link label {
@@ -262,12 +258,12 @@ span.material-icons-outlined {
 
 .xs-nav span.material-icons-outlined {
   align-self: center;
-  color: white;
+  color: var(--color-accent-ink);
 }
 
 .xs-nav .btn.dropdown-toggle {
   font-size: larger;
-  color: white;
+  color: var(--color-accent-ink);
   background: transparent;
 }
 </style>

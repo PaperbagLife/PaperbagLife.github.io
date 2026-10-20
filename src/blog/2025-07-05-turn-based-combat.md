@@ -17,7 +17,7 @@ Some more recent ones are Fate Grand Order, the Persona series, Honkai Starrail,
 
 When I didn't know how to code, I came across a framework called RPG Maker.
 This framework has built-in assets for ground, building, and characters.
-It renders the world in a 2d side view (Research this part?) (like pokemon)
+It renders the world in a top-down, tile-based 2D view (often called a three-quarter or oblique view, since you see the tops and fronts of objects), like the classic Pokémon games.
 You can interact with a graphical UI to create a game world by selecting what asset tile to place for a specific square.
 ![Image of RPG maker VXACE](./img/rpgmaker.png)
 
@@ -34,7 +34,7 @@ Why did I not make a turn based game, if I've already made one using RPG Maker?
 Well, I brainstormed about the turn based combat states, and found it really difficult to manage, especially because I was thinking in terms of Unity's paradigm: do something in each `Update()` call every second.
 I found it hard to reason about the game state back then.
 
-So finally, I made a turn based combat proof of concept on [my personal website](http://localhost:5173/#/games/starrail).
+So finally, I made a turn based combat proof of concept on [my personal website](http://paperbaglife.github.io/#/games/starrail).
 I followed the popular game Honkai Starrail, where there is a timeline on the left hand side, showing the turn order.
 After a unit takes their turn, they are placed into a 10000m runway and run towards the finish line. The unit that crosses the finish line first get to take the turn.
 

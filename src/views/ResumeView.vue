@@ -159,11 +159,11 @@ function openResume() {
         <div class="my-3 event-container" :class="event.type">
           <h5 class="mb-1">{{ event.title }}</h5>
           <div class="text-muted" style="font-size: 0.9em">
-            {{ event.startDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short' }) }}
+            {{ event.startDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', timeZone: 'UTC' }) }}
             -
             {{
               event.endDate
-                ? event.endDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short' })
+                ? event.endDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', timeZone: 'UTC' })
                 : 'Present'
             }}
           </div>
@@ -175,10 +175,10 @@ function openResume() {
 </template>
 
 <style scoped lang="scss">
-$blue: #66ccff;
-$purple: #e566ff;
-$orange: #ff9966;
-$red: #ff2a4d;
+$blue: var(--color-link);
+$purple: var(--color-magenta);
+$orange: var(--color-orange);
+$red: var(--color-red);
 
 .location-icon {
   vertical-align: text-bottom;

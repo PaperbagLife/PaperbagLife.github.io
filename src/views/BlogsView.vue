@@ -26,7 +26,6 @@ const allTags = computed(() => {
 
 // Filtered posts by tag (or all if no tag selected)
 const filteredPosts = computed(() => {
-  console.log('Filtering posts with tag:', filterTag.value)
   if (!filterTag.value) return posts.value
   return posts.value.filter((post) => post.tags.includes(filterTag.value!))
 })
@@ -97,10 +96,10 @@ const pinnedPosts = computed(() => {
 
 .link {
   text-decoration: none;
-  color: #6cf;
+  color: var(--color-link);
 }
 
 .date {
-  color: #777;
+  color: var(--color-text-muted);
 }
 </style>

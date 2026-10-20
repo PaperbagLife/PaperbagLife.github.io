@@ -51,13 +51,15 @@ function openYoutube() {
         <div :class="type === 'xs' ? 'col-12' : 'col-4'">
           <div class="section-title swe-title">Software Engineer {}</div>
           <div>
-            After graduating from Carnegie Mellon University, I started working at Clockwork
-            Systems, Inc. My work spans frontend development with Vue/TypeScript, backend
-            engineering with Golang and Python, and creating tools and managing systems with Python
-            and Shell scripting. find value in my work when my fellow engineers become more
-            productive due to the automation and helper scripts I create. This drives my passion for
-            building efficient, scalable software solutions that streamline workflows and solve
-            complex challenges.
+            After graduating from Carnegie Mellon University, I spent three years as a software
+            engineer at Clockwork Systems, Inc., building GPU training clusters, internal monitoring
+            tools with Flask and Vue/TypeScript, and network telemetry for distributed training. I am
+            now pursuing an M.S. in Computer Science at the University of Southern California, and
+            spent summer 2026 as a Software Engineer Intern at Google building LLM agents for
+            datacenter diagnostics. I find value in my work when my fellow engineers become more
+            productive due to the automation and tools I create. This drives my passion for building
+            efficient, scalable software solutions that streamline workflows and solve complex
+            challenges.
           </div>
         </div>
         <div :class="type === 'xs' ? 'col-12' : 'col-4'">
@@ -74,7 +76,7 @@ function openYoutube() {
           <div class="section-title gamer-title">Gamer ↓↘→</div>
           <div>
             As a player, I enjoy a diverse range of games, including visual novels with rich,
-            tought-provoking stories and action RPGs that challenge me to practice and hone my
+            thought-provoking stories and action RPGs that challenge me to practice and hone my
             skills. Gaming has always been more than just a hobby for me. Sometimes, I channel my
             creativity into crafting playable experiences, from Unity-powered adventures to quirky
             Pygame projects. I am constantly exploring new frameworks and tools to make games,
@@ -110,7 +112,7 @@ function openYoutube() {
 
 <style scoped lang="scss">
 .youtube-img {
-  border: 2px solid #66ccff;
+  border: 2px solid var(--color-accent);
   border-radius: 1rem;
   cursor: pointer;
 }
@@ -121,16 +123,17 @@ function openYoutube() {
 }
 
 .resume-button {
+  --bs-btn-bg: var(--color-accent);
+  --bs-btn-color: var(--color-accent-ink);
+  --bs-btn-border-color: var(--color-accent);
+  --bs-btn-hover-bg: var(--color-accent-hover);
+  --bs-btn-hover-color: var(--color-accent-ink);
+  --bs-btn-hover-border-color: var(--color-accent-hover);
+  --bs-btn-active-bg: var(--color-accent-hover);
+  --bs-btn-active-color: var(--color-accent-ink);
+  --bs-btn-active-border-color: var(--color-accent-hover);
   padding: 0.25rem 1rem;
-  border: 2px solid #66ccff;
-  background: aliceblue;
-  color: #66ccff;
-  &:hover {
-    background: aliceblue;
-    color: #66ccff;
-    border-color: #66ccff;
-    filter: brightness(0.8);
-  }
+  border-width: 2px;
 }
 
 .icon-link {
@@ -140,15 +143,15 @@ function openYoutube() {
 }
 
 .swe-title {
-  color: #31c300;
+  color: var(--color-green);
 }
 
 .violin-title {
-  color: #a4830a;
+  color: var(--color-gold);
 }
 
 .gamer-title {
-  color: #9166ff;
+  color: var(--color-purple);
 }
 
 .info-container {
@@ -164,7 +167,7 @@ function openYoutube() {
   margin-right: auto;
 }
 .fa-icon {
-  color: #66ccff;
+  color: var(--color-link);
 }
 .profile-pic {
   user-select: none;

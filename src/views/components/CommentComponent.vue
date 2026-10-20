@@ -14,7 +14,7 @@ function loadUtterances() {
   script.src = 'https://utteranc.es/client.js'
   script.setAttribute('repo', 'paperbaglife/paperbaglife.github.io')
   script.setAttribute('issue-term', issueName) // or 'title', 'url', etc.
-  script.setAttribute('theme', 'github-light')
+  script.setAttribute('theme', 'preferred-color-scheme')
   script.crossOrigin = 'anonymous'
   script.async = true
   commentsContainer.value.appendChild(script)

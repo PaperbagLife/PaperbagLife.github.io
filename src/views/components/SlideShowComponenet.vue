@@ -38,7 +38,7 @@ function routeToPage() {
 
 <style scoped>
 swiper-container {
-  --swiper-theme-color: #66ccff;
+  --swiper-theme-color: var(--color-link);
   --swiper-pagination-bottom: 0;
 }
 .slide-wrapper {
