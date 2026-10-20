@@ -1,4 +1,4 @@
-import { createRouter, createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import CourseWorkView from '../views/CourseworkView.vue'
 import ProjectsView from '../views/ProjectsView.vue'
@@ -13,8 +13,14 @@ import ResumeView from '@/views/ResumeView.vue'
 const StarRailView = () => import('../views/StarRailView.vue')
 const ThreeView = () => import('../views/ThreeView.vue')
 
+// Links shared before the switch from hash routing look like /#/resume; rewrite them to /resume
+// before the router reads the URL.
+if (window.location.hash.startsWith('#/')) {
+  window.history.replaceState(null, '', window.location.hash.slice(1))
+}
+
 const router = createRouter({
-  history: createWebHashHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',

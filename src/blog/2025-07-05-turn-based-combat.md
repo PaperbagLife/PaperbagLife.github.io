@@ -10,8 +10,8 @@ tags: [Game Dev]
 
 Turn based RPGs used to be one of my favorite genres.
 If you have not played one, you've definitely heard about games with turn based combat.
-Older titles include pokemon, any RPG Maker game, Final Fantasy series and The Legend of Heros Trails series.
-Some more recent ones are Fate Grand Order, the Persona series, Honkai Starrail, and Claire Obscura Expedition 33.
+Older titles include Pokémon, any RPG Maker game, the Final Fantasy series, and The Legend of Heroes: Trails series.
+Some more recent ones are Fate/Grand Order, the Persona series, Honkai: Star Rail, and Clair Obscur: Expedition 33.
 
 ## RPG Maker brief intro
 
@@ -19,26 +19,26 @@ When I didn't know how to code, I came across a framework called RPG Maker.
 This framework has built-in assets for ground, building, and characters.
 It renders the world in a top-down, tile-based 2D view (often called a three-quarter or oblique view, since you see the tops and fronts of objects), like the classic Pokémon games.
 You can interact with a graphical UI to create a game world by selecting what asset tile to place for a specific square.
-![Image of RPG maker VXACE](./img/rpgmaker.png)
+![Image of RPG Maker VX Ace](./img/rpgmaker.png)
 
 It comes with a simple turn based engine by default, with a wide range of pre-defined abilities and classes for the characters.
-It was really easy to define new abilities and adjust the numbers/ratios, just like editing an excel spreadsheet.
+It was really easy to define new abilities and adjust the numbers/ratios, just like editing an Excel spreadsheet.
 RPG Maker made it possible to make a simple turn based game within minutes.
 I fell in love with this tool and made several games.
-They were all really simple, linear games with about 5min of play time.
+They were all really simple, linear games with about 5 minutes of play time.
 
 ## Turn based combat turns out to be non-trivial!
 
 As I mentioned in the previous blog, my first game was a top down shooter in Unity.
 Why did I not make a turn based game, if I've already made one using RPG Maker?
-Well, I brainstormed about the turn based combat states, and found it really difficult to manage, especially because I was thinking in terms of Unity's paradigm: do something in each `Update()` call every second.
+Well, I brainstormed about the turn based combat states, and found it really difficult to manage, especially because I was thinking in terms of Unity's paradigm: do something in each `Update()` call every frame.
 I found it hard to reason about the game state back then.
 
-So finally, I made a turn based combat proof of concept on [my personal website](http://paperbaglife.github.io/#/games/starrail).
-I followed the popular game Honkai Starrail, where there is a timeline on the left hand side, showing the turn order.
-After a unit takes their turn, they are placed into a 10000m runway and run towards the finish line. The unit that crosses the finish line first get to take the turn.
+So finally, I made a turn based combat proof of concept on [my personal website](https://paperbaglife.github.io/games/starrail).
+I followed the popular game Honkai: Star Rail, where there is a timeline on the left hand side, showing the turn order.
+After a unit takes their turn, they are placed into a 10000m runway and run towards the finish line. The unit that crosses the finish line first gets to take the turn.
 
-The interesting piece is turn state. This tracks the ongoing gamestate to inform the renderer what to display on screen, and also tells the turn manager how to proceed with the next piece of action (a turn).
+The interesting piece is turn state. This tracks the ongoing game state to inform the renderer what to display on screen, and also tells the turn manager how to proceed with the next piece of action (a turn).
 
 ```typescript
 export enum TurnStateEnum {
@@ -58,15 +58,15 @@ export class GameState {
 }
 ```
 
-Check out the full code on [my github!](https://github.com/PaperbagLife/PaperbagLife.github.io/tree/master/src/util/starrail)
+Check out the full code on [my GitHub!](https://github.com/PaperbagLife/PaperbagLife.github.io/tree/master/src/util/starrail)
 
 It took a lot of planning on paper to figure out how the classes should be managed, what the main turn resolution looks like, and what the transition from each state to another looks like in code.
 This is a very important lesson: If you fail to plan, you plan to fail.
 
-Previously, I built my games bit by bit, wrote out exact details for a few functions and see what the game looked like.
-Then, I implement features like applying bandages or tape on top of a falling tower.
+Previously, I built my games bit by bit, wrote out exact details for a few functions and saw what the game looked like.
+Then, I implemented features like applying bandages or tape on top of a falling tower.
 
-If you read the code above, you would notice that the `resolveTurn` function is one big abomination.
+If you read the code linked above, you would notice that the `resolveTurn` function is one big abomination.
 It's the result of not fully planning out every detail between state transitions, and having to add lines to fix some weird behaviors as I tested.
 
 From now on, I think I should focus on making the big idea functions, place them together to see if they make sense, then work out the details for each function. Top-down design seems easier for game design.

@@ -1,19 +1,7 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
 import { useBreakpoints } from '../util/dimensions'
 import dpUrl from '../assets/img/dp.jpg'
-import youtubeImg from '../assets/img/youtube_channel.png'
-import { projectEntries } from '@/util/consts'
-import SlideShowComponenet from './components/SlideShowComponenet.vue'
-const { width, type } = useBreakpoints()
-
-const projectsWithImage = projectEntries.filter((project) => project.img)
-
-onMounted(() => {})
-
-function openYoutube() {
-  window.open('https://www.youtube.com/c/paperbaglife')
-}
+const { type } = useBreakpoints()
 </script>
 
 <template>
@@ -53,9 +41,9 @@ function openYoutube() {
           <div>
             After graduating from Carnegie Mellon University, I spent three years as a software
             engineer at Clockwork Systems, Inc., building GPU training clusters, internal monitoring
-            tools with Flask and Vue/TypeScript, and network telemetry for distributed training. I am
-            now pursuing an M.S. in Computer Science at the University of Southern California, and
-            spent summer 2026 as a Software Engineer Intern at Google building LLM agents for
+            tools with Flask and Vue/TypeScript, and network telemetry for distributed training. I
+            am now pursuing an M.S. in Computer Science at the University of Southern California,
+            and spent summer 2026 as a Software Engineer Intern at Google building LLM agents for
             datacenter diagnostics. I find value in my work when my fellow engineers become more
             productive due to the automation and tools I create. This drives my passion for building
             efficient, scalable software solutions that streamline workflows and solve complex
@@ -84,39 +72,11 @@ function openYoutube() {
           </div>
         </div>
       </div>
-      <div class="row mx-0 py-4 d-flex">
-        <div class="section-title col-auto">Fun Stuff</div>
-        <div class="col-12">
-          <SlideShowComponenet
-            route="projects"
-            :projects="projectsWithImage"
-            :project-width="type === 'xs' ? width * 0.6 : width * 0.5"
-          />
-        </div>
-      </div>
-      <div class="row mx-0 py-4 d-flex">
-        <div class="section-title col-auto">More than Code</div>
-        <div class="col-12">
-          <a href="#/interests">Read more </a>or check me out on YouTube! <br />
-          <img
-            @click="openYoutube"
-            class="youtube-img"
-            :src="youtubeImg"
-            :width="type === 'xs' ? width * 0.5 : width * 0.6"
-          />
-        </div>
-      </div>
     </div>
   </main>
 </template>
 
 <style scoped lang="scss">
-.youtube-img {
-  border: 2px solid var(--color-accent);
-  border-radius: 1rem;
-  cursor: pointer;
-}
-
 .section-title {
   font-size: 2rem;
   font-weight: bold;

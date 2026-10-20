@@ -25,7 +25,8 @@ function onImgClick(route?: string) {
       <p>
         <b>{{ entry.title }}</b> <br />
         <i v-if="entry.timeline">{{ entry.timeline }}</i> <br />
-        <a v-if="entry.link" :href="entry.link">Link <br /></a>
+        <router-link v-if="entry.link?.startsWith('/')" :to="entry.link">Link <br /></router-link>
+        <a v-else-if="entry.link" :href="entry.link">Link <br /></a>
         <img
           v-if="entry.img && !entry.youtube"
           :src="entry.img"

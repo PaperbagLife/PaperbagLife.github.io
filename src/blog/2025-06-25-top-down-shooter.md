@@ -9,9 +9,9 @@ tags: [Game Dev]
 ## My Journey and Approaches for Top Down Shooters
 
 From Flash games on random websites to triple-A titles, I’ve played all kinds of video games.
-I've always wanted to make a game myself, however, I had no programming experience and I don't know where to start.
-So I looked around and found RPG Maker. This framework allowed me to make games by drag and drop with a simple turn based combat engine.
-That exploration is for another day in [the next blogpost](https://paperbaglife.github.io/#/blogs/2025-07-05-turn-based-combat)
+I've always wanted to make a game myself, however, I had no programming experience and didn't know where to start.
+So I looked around and found RPG Maker. This framework allowed me to make games by drag and drop with a simple turn-based combat engine.
+That exploration is for another day in [the next blog post](https://paperbaglife.github.io/blogs/2025-07-05-turn-based-combat)
 
 Ever since writing my first line of code in college, I’ve been thinking about making a game myself.
 My very first game from scratch (with code) was a top-down shooter developed in Unity.
@@ -64,7 +64,7 @@ while not gameOver:
     bullet.update()
 ```
 
-The Unity structure translated nicely into Pygame. You can try this game in [the projects section](https://paperbaglife.github.io/#/projects).
+The Unity structure translated nicely into Pygame. You can try this game in [the projects section](https://paperbaglife.github.io/projects).
 
 ---
 
@@ -92,7 +92,7 @@ Example of rendering enemies:
 </g>
 ```
 
-You can try playing this version [on my website](https://paperbaglife.github.io/#/games/shooter).
+You can try playing this version [on my website](https://paperbaglife.github.io/games/shooter).
 
 However, I hit a bottleneck.
 
@@ -136,7 +136,7 @@ export type MovePattern = {
 }
 ```
 
-You can try this game [here](https://paperbaglife.github.io/#/games/danmaku).
+You can try this game [here](https://paperbaglife.github.io/games/danmaku).
 
 ---
 

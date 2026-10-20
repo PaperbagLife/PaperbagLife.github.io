@@ -8,7 +8,7 @@ tags: [Vue, Flask, UX]
 
 ## UX Design to Make Engineers Happy
 
-In my [previous blog post](https://paperbaglife.github.io/#/blogs/2025-06-06-UX-learnings), I discussed adding a Cookbook<sup>TM</sup> to Clockwork's internal utility website.
+In my [previous blog post](https://paperbaglife.github.io/blogs/2025-06-06-UX-learnings), I discussed adding a Cookbook<sup>TM</sup> to Clockwork's internal utility website.
 
 I created this feature because I physically set up the rack, wired the cables, and installed software on the HPC servers. Coworkers frequently asked me recurring questions, and finding answers in lengthy documents was time-consuming.
 

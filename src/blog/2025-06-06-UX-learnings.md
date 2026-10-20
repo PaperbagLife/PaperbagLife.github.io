@@ -8,7 +8,7 @@ tags: [Vue, Flask, UX]
 
 ### Delivering a Smooth Experience
 
-In my [previous blog post](https://paperbaglife.github.io/#/blogs/2025-06-05-blog-on-github-pages), I talked about how I created a utilities website to track the status of High-Power-Computing (HPC) servers. This was a fun little side project that I could work on intermittently, depending on my workload.
+In my [previous blog post](https://paperbaglife.github.io/blogs/2025-06-05-blog-on-github-pages), I talked about how I created a utilities website to track the status of High-Performance Computing (HPC) servers. This was a fun little side project that I could work on intermittently, depending on my workload.
 
 As a complete beginner in user experience, my goal was to get the website into a "working" state as quickly as possible.
 

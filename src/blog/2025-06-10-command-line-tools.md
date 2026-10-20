@@ -36,12 +36,12 @@ or be used as a pipe like
 cat large_file.txt | grep 'pattern'
 ```
 
-The most common usecase I have found is to search for lines that begin with `Error` or `Warning` or any sort of prefix/pattern you are looking for in a log file. Combine it with `tail -f` to see filtered streaming output.
+The most common use case I have found is to search for lines that begin with `Error` or `Warning` or any sort of prefix/pattern you are looking for in a log file. Combine it with `tail -f` to see filtered streaming output.
 
 Common flags:
 
 - `-i: case insensitive`
-- `-v: reverse match`
+- `-v: invert match`
 - `-A<x>: x lines after match`
 - `-B<x>: x lines before match`
 - `-C<x>: x lines before and after match`
@@ -51,9 +51,9 @@ Common flags:
 `sed` can be used to replace a pattern/literal with another pattern/literal
 
 ```bash
-# Same as `cat textfile` but replaces PATTERN WITH REPLACEMENT (first occurance on each line)
+# Same as `cat textfile` but replaces PATTERN WITH REPLACEMENT (first occurrence on each line)
 sed 's/PATTERN/REPLACEMENT/' textfile
-# replace all occurances
+# replace all occurrences
 sed 's/PATTERN/REPLACEMENT/g' textfile
 # also:
 cat textfile | sed 's/PATTERN/REPLACEMENT/g'
@@ -63,7 +63,7 @@ sed -i 's/PATTERN/REPLACEMENT/g' textfile
 sed -i 's/filepath: .*/filepath: \/path\/to\/file/g' config_file
 ```
 
-The most common use case I have found is to replace a set of config files on mutiple machines at once, using `pdsh` along with `sed`.
+The most common use case I have found is to replace a set of config files on multiple machines at once, using `pdsh` along with `sed`.
 
 ### awk
 
@@ -92,13 +92,13 @@ PID
 
 ### pdsh
 
-`pdsh` can help you run the same command on multiple machines to parallize work.
+`pdsh` can help you run the same command on multiple machines to parallelize work.
 This can save you a lot of time running commands manually on each machine, but you need to set up passwordless ssh into the machines.
 
-Example: replace `output.json` with `output2.json` in config file at /etc/configs/config.yaml, on all 50 machines, named machine\<i\> for i in 0, 49:
+Example: replace `output.json` with `output2.json` in config file at /etc/configs/config.yaml, on all 50 machines, named machine\<i\> for i in 0..49:
 
 ```bash
-pdsh -w machine[0,49] "sed -i 's/output.json/output2.json/g' /etc/configs/config.yaml"
+pdsh -w machine[0-49] "sed -i 's/output.json/output2.json/g' /etc/configs/config.yaml"
 ```
 
 ### ctrl+r
@@ -119,9 +119,9 @@ You can leave your command running in a screen or nohup.
 Use the keyboard combination of ctrl+a => d to quit the screen, and your command will be running in the screen.
 
 `screen -r` to resume back to your screen session, even after logging out of the ssh session.
-Mutiple screen sessions can be viewed through `screen -ls`
+Multiple screen sessions can be viewed through `screen -ls`
 
-Similarly, `nohup \<long command\> &` will run a command in the background and have it keep running, even if the ssh connection is cut off (ie due to spotty internet).
+Similarly, `nohup \<long command\> &` will run a command in the background and have it keep running, even if the ssh connection is cut off (i.e. due to spotty internet).
 
 ### git related commands (updated 2025-06-12)
 

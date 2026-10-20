@@ -34,7 +34,7 @@ The following section describes my journey of debugging and getting it to work. 
 
 - `unplugin-vue-markdown` is an ESM-only package, so I had to add `"type": "module"` to my `package.json` to tell Node to treat `.ts` files as ESM.
 - If you want to use a Markdown file as a component directly, you need to update `env.d.ts` (or another environment file) to declare `*.md` as a component.
-- I was wondering what the best way to route the individual blogs, and I came across Vue router's Dynamic Route Matching. I used `path: /blogs/:slug` to dynamically render different Markdown files while using the same component for the top-level page.
+- I was wondering what the best way to route individual blogs was, and I came across Vue Router's Dynamic Route Matching. I used `path: /blogs/:slug` to dynamically render different Markdown files while using the same component for the top-level page.
 - The frontmatter metadata works differently than expected with `unplugin-vue-markdown`. The data is spread directly on the module instead of being bundled under a `.frontmatter` attribute.
 
 ### Conclusion

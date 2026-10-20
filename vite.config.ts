@@ -7,12 +7,6 @@ import Markdown from 'unplugin-vue-markdown/vite'
 export default defineConfig({
   plugins: [
     vue({
-      template: {
-        compilerOptions: {
-          // treat all tags with a dash as custom elements
-          isCustomElement: (tag) => tag.startsWith('swiper'),
-        },
-      },
       include: [/\.vue$/, /\.md$/],
     }),
     Markdown({}),

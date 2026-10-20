@@ -31,6 +31,10 @@ jobs:
 
       - run: npm run build
 
+      # GitHub Pages has no SPA fallback; serving the app as 404.html lets deep links like
+      # /blogs/<slug> load the router instead of a Pages 404.
+      - run: cp dist/index.html dist/404.html
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
