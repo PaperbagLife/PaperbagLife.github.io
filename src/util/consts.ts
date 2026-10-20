@@ -3,7 +3,6 @@ import danmakuImg from '../assets/img/danmaku.png'
 import shooterImg from '../assets/img/shooter.png'
 import starrailImg from '../assets/img/starrail.png'
 import youtubeImg from '../assets/img/youtube_channel.png'
-import bruhImg from '../assets/img/bruh.png'
 import mathGameImg from '../assets/img/mathgame.png'
 
 export const COLUMN_FILL_RATIO = 0.84
@@ -205,11 +204,5 @@ export const games: WebGameProject[] = [
     img: mathGameImg,
     description: 'Deck building game',
     route: '/games/deckbuilding',
-  },
-  {
-    title: 'Latency Planner',
-    img: bruhImg,
-    description: 'Learn networking topology and plan latency',
-    route: '/games/latency-planner',
   },
 ]
